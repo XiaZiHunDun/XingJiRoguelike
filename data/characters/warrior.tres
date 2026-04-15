@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/characters/character_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+character_type = 0
+display_name = "星际战士"
+base_attributes = {
+	"体质": 40,
+	"精神": 30,
+	"敏捷": 30
+}
+skill_ids = [&"横斩", &"疾跑", &"铁壁", &"流星"]
+weapon_type = "巨剑"
+damage_type = "物理"

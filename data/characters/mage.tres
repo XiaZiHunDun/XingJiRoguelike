@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/characters/character_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+character_type = 1
+display_name = "奥术师"
+base_attributes = {
+	"体质": 30,
+	"精神": 40,
+	"敏捷": 30
+}
+skill_ids = [&"奥术弹", &"闪现", &"法术护盾", &"奥术风暴"]
+weapon_type = "法杖"
+damage_type = "奥术"
