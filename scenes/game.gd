@@ -168,8 +168,11 @@ func _process_victory(rewards: Dictionary):
 	# Check for realm breakthrough
 	var breakthrough_available: bool = RunState.is_at_max_level() and not RunState.is_max_realm()
 
+	# Get faction rewards (Task 4)
+	var faction_rewards: Dictionary = rewards.get("faction_rewards", {})
+
 	# Show victory panel
-	_show_victory(xp_gained, stardust_gained, fragments_gained, leveled_up, breakthrough_available)
+	_show_victory(xp_gained, stardust_gained, fragments_gained, leveled_up, breakthrough_available, faction_rewards)
 
 	current_state = GameState.VICTORY
 
@@ -220,11 +223,11 @@ func _attempt_breakthrough():
 
 	_show_hub()
 
-func _show_victory(xp: int, stardust: int, fragments: int, leveled_up: bool, breakthrough_available: bool):
+func _show_victory(xp: int, stardust: int, fragments: int, leveled_up: bool, breakthrough_available: bool, faction_rewards: Dictionary = {}):
 	# Create victory panel
 	victory_panel = Panel.new()
 	victory_panel.set_anchors_preset(Control.PRESET_CENTER)
-	victory_panel.custom_minimum_size = Vector2(400, 300)
+	victory_panel.custom_minimum_size = Vector2(400, 350)
 	victory_panel.z_index = 50
 
 	var vbox = VBoxContainer.new()
@@ -238,6 +241,17 @@ func _show_victory(xp: int, stardust: int, fragments: int, leveled_up: bool, bre
 	vbox.add_child(title)
 
 	var rewards_text = "XP: +%d\n星尘: +%d\n记忆碎片: +%d" % [xp, stardust, fragments]
+
+	# 添加势力奖励显示（Task 4）
+	if not faction_rewards.is_empty():
+		rewards_text += "\n--- 势力奖励 ---"
+		for item_name in faction_rewards.keys():
+			var quantity = faction_rewards[item_name]
+			if item_name == "赏金":
+				rewards_text += "\n赏金: +%d" % quantity
+			else:
+				rewards_text += "\n%s: +%d" % [item_name, quantity]
+
 	var rewards_label = Label.new()
 	rewards_label.text = rewards_text
 	rewards_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

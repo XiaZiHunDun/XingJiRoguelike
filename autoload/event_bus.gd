@@ -70,6 +70,12 @@ class ZoneEvents:
 	signal boss_unlocked()  # Boss解锁
 	signal all_zones_completed()  # 所有区域完成
 
+# ==================== 势力域（中频） ====================
+class FactionEvents:
+	signal faction_enemy_spawned(faction_name: String)  # 势力敌人生成
+	signal faction_reward_earned(faction_name: String, item_name: String, quantity: int)  # 势力奖励获得
+	signal faction_item_used(item_name: String)  # 势力物品使用
+
 # ==================== 系统域（低频） ====================
 class SystemEvents:
 	signal game_saved()  # 游戏保存
@@ -91,3 +97,4 @@ var system := SystemEvents.new()
 var collection := CollectionEvents.new()
 var crafting := CraftingEvents.new()
 var permanent := PermanentEvents.new()
+var faction := FactionEvents.new()

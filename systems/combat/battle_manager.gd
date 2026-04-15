@@ -13,9 +13,12 @@ var element_reaction_system: ElementReactionSystem
 
 var player: Player
 var enemies: Array[Enemy] = []
+var active_enemies: Array[Enemy] = []  # 存活敌人列表
+var selected_target: Enemy = null  # 当前选择的目标
 
 signal state_changed(from_state: State, to_state: State)
 signal battle_ended(victory: bool)
+signal target_selected(enemy: Enemy)  # 目标切换信号
 
 func _ready():
 	battle_clock = BattleClock.new()
@@ -33,6 +36,7 @@ func _ready():
 func start_battle(player_node: Player, enemy_nodes: Array):
 	player = player_node
 	enemies = enemy_nodes
+	active_enemies = enemy_nodes.duplicate()  # 初始化存活敌人列表
 	current_state = State.RUNNING
 	battle_clock.reset()
 	state_changed.emit(State.INIT, State.RUNNING)
@@ -41,6 +45,52 @@ func start_battle(player_node: Player, enemy_nodes: Array):
 	for enemy in enemies:
 		if enemy.has_signal("died"):
 			enemy.died.connect(_on_enemy_died.bind(enemy))
+
+	# 选择第一个存活的敌人作为目标
+	_select_first_valid_target()
+
+func _select_first_valid_target():
+	"""选择第一个存活的敌人作为目标"""
+	for enemy in active_enemies:
+		if is_instance_valid(enemy) and enemy.current_hp > 0:
+			selected_target = enemy
+			target_selected.emit(enemy)
+			return
+	selected_target = null
+
+func _select_next_target():
+	"""当当前目标死亡时，选择下一个目标"""
+	if active_enemies.is_empty():
+		selected_target = null
+		return
+
+	# 找到当前目标在列表中的位置
+	var current_idx = active_enemies.find(selected_target) if selected_target else -1
+
+	# 尝试选择下一个存活的敌人
+	for i in range(active_enemies.size()):
+		var idx = (current_idx + 1 + i) % active_enemies.size()
+		var enemy = active_enemies[idx]
+		if is_instance_valid(enemy) and enemy.current_hp > 0:
+			selected_target = enemy
+			target_selected.emit(enemy)
+			return
+
+	# 没有存活敌人
+	selected_target = null
+
+func select_target(enemy: Enemy) -> bool:
+	"""手动选择一个目标"""
+	if not is_instance_valid(enemy):
+		return false
+	if enemy.current_hp <= 0:
+		return false
+	if not active_enemies.has(enemy):
+		return false
+
+	selected_target = enemy
+	target_selected.emit(enemy)
+	return true
 
 func _on_entity_atb_full(entity):
 	if entity == player:
@@ -85,6 +135,15 @@ func check_battle_end():
 
 func _on_enemy_died(enemy: Enemy):
 	"""敌人死亡时生成装备掉落"""
+	# 从存活敌人列表移除
+	var idx = active_enemies.find(enemy)
+	if idx >= 0:
+		active_enemies.remove_at(idx)
+
+	# 如果死亡的正好是当前目标，选择下一个
+	if selected_target == enemy:
+		_select_next_target()
+
 	# 获取敌人等级（如果敌人有 level 属性）
 	var enemy_level = 1
 	if enemy.has_method("get_level"):
@@ -100,10 +159,20 @@ func _on_enemy_died(enemy: Enemy):
 	if equipment:
 		EventBus.equipment.equipment_dropped.emit(equipment, enemy.position)
 
-func player_use_skill(skill: SkillInstance, target: Enemy) -> bool:
+func player_use_skill(skill: SkillInstance, target: Enemy = null) -> bool:
 	"""玩家使用技能"""
 	if current_state != State.PLAYER_TURN:
 		return false
+
+	# 如果没有指定目标，使用选中的目标
+	var actual_target = target if target and is_instance_valid(target) else selected_target
+
+	# 如果仍然没有有效目标，随机选择一个
+	if not actual_target or not is_instance_valid(actual_target):
+		if not active_enemies.is_empty():
+			actual_target = active_enemies[randi() % active_enemies.size()]
+		else:
+			return false  # 没有可攻击的目标
 
 	# 消耗能量
 	if not energy_system.try_consume(skill.get_actual_cost()):
@@ -118,13 +187,13 @@ func player_use_skill(skill: SkillInstance, target: Enemy) -> bool:
 	var total_damage = int(base_damage * atb_bonus * (1.0 + kinetic))
 
 	# 应用伤害
-	if target and is_instance_valid(target):
-		target.take_damage(total_damage)
-		EventBus.combat.damage_dealt.emit(player, target, total_damage, false)
+	if actual_target and is_instance_valid(actual_target):
+		actual_target.take_damage(total_damage)
+		EventBus.combat.damage_dealt.emit(player, actual_target, total_damage, false)
 
 		# 应用元素
 		if skill.definition.element != Enums.Element.PHYSICAL:
-			target.element_status.apply_element(skill.definition.element)
+			actual_target.element_status.apply_element(skill.definition.element)
 
 	# 触发技能连携
 	if skill.definition.chain_skill_id != &"" and energy_system.try_consume_kinetic(0.1):

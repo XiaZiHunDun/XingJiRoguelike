@@ -18,6 +18,7 @@ var locked_affix_index: int = -1  # 锻造时锁定的词缀索引
 var level: int = 1  # 装备等级
 var wear_requirements: Dictionary = {}  # 穿戴需求 {属性名: 数值}
 var skill_ids: Array[StringName] = []  # 技能ID列表（随机生成）
+var set_id: StringName = &""  # 套装ID（实例私有）
 
 func _init():
 	pass
@@ -50,7 +51,8 @@ func get_slot() -> Enums.EquipmentSlot:
 	return definition.slot if definition else Enums.EquipmentSlot.WEAPON
 
 func get_set_id() -> StringName:
-	return definition.set_id if definition else &""
+	# 优先使用实例自己的set_id，否则回退到定义
+	return set_id if set_id != &"" else (definition.set_id if definition else &"")
 
 func get_attack() -> int:
 	return definition.base_attack if definition else 0

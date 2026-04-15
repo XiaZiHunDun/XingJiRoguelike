@@ -42,6 +42,11 @@ static func generate_equipment(zone_level: int, equipment_type: EquipmentType) -
 	# 生成词缀
 	instance._generate_affixes()
 
+	# 随机分配套装ID（30%概率）
+	if randf() < 0.30:
+		var set_id = EquipmentSetData.get_random_set_id()
+		instance.set_id = set_id
+
 	return instance
 
 static func generate_random_equipment(zone_level: int) -> EquipmentInstance:

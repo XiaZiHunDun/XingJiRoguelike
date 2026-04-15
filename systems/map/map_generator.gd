@@ -1,5 +1,5 @@
 # systems/map/map_generator.gd
-# Map node generation for zones - Task 8
+# Map node generation for zones - Task 8, Faction enemies - Task 4
 
 class_name MapNode
 extends Resource
@@ -22,6 +22,7 @@ enum NodeType {
 @export var is_cleared: bool = false
 @export var is_unlocked: bool = false
 @export var icon: String  # Icon name for display
+@export var faction: String = ""  # 势力名称（如果敌人是势力敌人）
 
 func _to_string() -> String:
 	return "MapNode(%s: %s Lv.%d)" % [node_id, display_name, level]
@@ -107,6 +108,8 @@ static func generate_zone_map(zone: ZoneDefinition, current_level: int) -> Array
 		else:
 			node.node_type = _get_random_node_type(pos, rng)
 			node.display_name = NODE_TYPE_NAMES[node.node_type]
+			# 势力敌人生成（Task 4）：在战斗节点有15%概率成为势力敌人
+			_try_assign_faction(node, rng)
 
 		node.icon = NODE_ICONS[node.node_type]
 		node.is_unlocked = (pos == 1)  # Only first node is unlocked initially
@@ -114,6 +117,24 @@ static func generate_zone_map(zone: ZoneDefinition, current_level: int) -> Array
 		nodes.append(node)
 
 	return nodes
+
+static func _try_assign_faction(node: MapNode, rng: RandomNumberGenerator):
+	"""尝试为战斗节点分配势力敌人"""
+	if node.node_type != MapNode.NodeType.NORMAL_BATTLE and node.node_type != MapNode.NodeType.ELITE_BATTLE:
+		return
+
+	# 15%基础概率
+	if not rng.randf() < 0.15:
+		return
+
+	# 随机选择一个可用的势力
+	var faction_system = FactionSystem.get_instance()
+	if faction_system:
+		var faction_name = faction_system.roll_for_faction_enemy(rng)
+		if faction_name != "":
+			node.faction = faction_name
+			# 更新显示名称
+			node.display_name = "%s [%s]" % [NODE_TYPE_NAMES[node.node_type], faction_name]
 
 static func _calculate_node_level(zone: ZoneDefinition, position: int, player_level: int) -> int:
 	# Boss node (position 5) uses map_5_level_range
@@ -153,6 +174,14 @@ static func get_node_type_display_name(node_type: MapNode.NodeType) -> String:
 
 static func is_boss_node(node: MapNode) -> bool:
 	return node.node_type == MapNode.NodeType.BOSS
+
+static func is_faction_node(node: MapNode) -> bool:
+	"""检查节点是否为势力敌人节点"""
+	return node.faction != ""
+
+static func get_node_faction(node: MapNode) -> String:
+	"""获取节点的势力名称"""
+	return node.faction
 
 static func can_access_node(nodes: Array[MapNode], target_position: int) -> bool:
 	if target_position <= 1:

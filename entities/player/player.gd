@@ -34,6 +34,15 @@ var physical_skill_range_bonus: float = 0.0
 var skill_cooldown_reduction: float = 0.0
 var energy_cost_reduction: float = 0.0
 
+# 套装系统加成
+var set_bonuses: Dictionary = {}  # 当前激活的套装效果
+var desert_damage_bonus: float = 0.0  # 沙漠伤害加成
+var slow_trigger_chance: float = 0.0  # 减速触发概率
+var desert_hp_regen: float = 0.0  # 沙漠生命恢复
+var damage_reduction: float = 0.0  # 受伤减免
+var dodge_rate_bonus: float = 0.0  # 闪避率
+var crit_damage_bonus: float = 0.0  # 暴击伤害
+
 var atb_component: ATBComponent
 var element_status: ElementStatusComponent
 var equipped_weapon: EquipmentInstance = null
@@ -219,6 +228,9 @@ func apply_affixes() -> void:
 	# 更新共鸣效果
 	update_resonance()
 
+	# 更新套装效果（在共鸣之后计算）
+	update_set_effects()
+
 	# 刷新属性计算
 	_refresh_attributes()
 
@@ -277,6 +289,42 @@ func update_resonance() -> void:
 
 	# 通知共鸣效果已更新
 	resonance_bonuses_changed.emit()
+
+func update_set_effects() -> void:
+	"""更新套装效果"""
+	# 重置套装加成
+	set_bonuses = {}
+	desert_damage_bonus = 0.0
+	slow_trigger_chance = 0.0
+	desert_hp_regen = 0.0
+	damage_reduction = 0.0
+	dodge_rate_bonus = 0.0
+	crit_damage_bonus = 0.0
+
+	# 收集已装备物品
+	var equipped_items: Array = []
+	if equipped_weapon:
+		equipped_items.append(equipped_weapon)
+
+	# 计算套装效果
+	set_bonuses = EquipmentSetData.calculate_set_bonuses(equipped_items)
+
+	# 应用套装加成
+	for effect_name in set_bonuses:
+		var value = set_bonuses[effect_name]
+		match effect_name:
+			"沙漠伤害":
+				desert_damage_bonus += value
+			"减速触发":
+				slow_trigger_chance += value
+			"沙漠生命恢复":
+				desert_hp_regen += value
+			"受伤减免":
+				damage_reduction += value
+			"闪避率":
+				dodge_rate_bonus += value
+			"暴击伤害":
+				crit_damage_bonus += value
 
 func _refresh_attributes() -> void:
 	"""刷新玩家属性计算"""

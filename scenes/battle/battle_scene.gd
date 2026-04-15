@@ -5,7 +5,7 @@ extends Node2D
 
 var battle_manager: BattleManager
 var player: Player
-var enemy: Enemy
+var enemies: Array[Enemy] = []  # 所有敌人
 var selected_character_id: String = "warrior"  # 默认选择星际战士
 
 # External character selection (for main game flow)
@@ -108,7 +108,8 @@ func configure_for_node(node_data: MapNode) -> void:
 	battle_node_config = {
 		"level": node_data.level,
 		"node_type": node_data.node_type,
-		"node_id": node_data.node_id
+		"node_id": node_data.node_id,
+		"faction": node_data.faction if node_data.faction else ""
 	}
 
 func _start_battle():
@@ -149,6 +150,7 @@ func _start_battle():
 	var enemy_hp: int = 50
 	var enemy_attack: int = 8
 	var enemy_type: Enums.EnemyType = Enums.EnemyType.NORMAL
+	var faction_name: String = battle_node_config.get("faction", "")
 
 	if battle_node_config.has("level"):
 		enemy_level = battle_node_config.get("level", 1)
@@ -169,25 +171,46 @@ func _start_battle():
 			enemy_hp = int(enemy_hp * 3)
 			enemy_attack = int(enemy_attack * 2)
 
-	enemy = Enemy.new()
-	enemy.name = "Enemy"
-	enemy.position = Vector2(800, 400)
-	enemy.max_hp = enemy_hp
-	enemy.current_hp = enemy_hp
-	enemy.attack = enemy_attack
-	enemy.enemy_type = enemy_type
-	add_child(enemy)
+	# 势力敌人加成（Task 4）：守墓人和赏金猎人敌人属性略高
+	if faction_name != "":
+		enemy_hp = int(enemy_hp * 1.1)
+		enemy_attack = int(enemy_attack * 1.1)
 
-	# 连接信号
+	# 根据敌人类型决定数量: 普通2个, 精英3个, BOSS1个
+	var num_enemies = 2
+	if battle_node_config.has("node_type"):
+		var node_type = battle_node_config.get("node_type", MapNode.NodeType.NORMAL_BATTLE)
+		if node_type == MapNode.NodeType.ELITE_BATTLE:
+			num_enemies = 3
+		elif node_type == MapNode.NodeType.BOSS:
+			num_enemies = 1  # BOSS单独一个
+
+	# 创建多个敌人
+	enemies.clear()
+	var enemy_positions = [Vector2(800, 400), Vector2(900, 350), Vector2(900, 450), Vector2(1000, 400)]
+	for i in range(num_enemies):
+		var e = Enemy.new()
+		e.name = "Enemy%d" % i
+		e.position = enemy_positions[i]
+		e.max_hp = enemy_hp
+		e.current_hp = enemy_hp
+		e.attack = enemy_attack
+		e.enemy_type = enemy_type
+		add_child(e)
+		enemies.append(e)
+
+		# 连接敌人信号
+		e.hp_changed.connect(_on_enemy_hp_changed.bind(e))
+		e.atb_component.atb_changed.connect(_on_enemy_atb_changed.bind(e))
+
+	# 连接玩家信号
 	player.hp_changed.connect(_on_player_hp_changed)
 	player.atb_component.atb_changed.connect(_on_player_atb_changed)
 	player.atb_component.atb_full.connect(_on_player_atb_full)
 
-	enemy.hp_changed.connect(_on_enemy_hp_changed)
-	enemy.atb_component.atb_changed.connect(_on_enemy_atb_changed)
-
 	battle_manager.battle_ended.connect(_on_battle_ended)
 	battle_manager.state_changed.connect(_on_battle_state_changed)
+	battle_manager.target_selected.connect(_on_target_selected)
 
 	EventBus.skill.energy_changed.connect(_on_energy_changed)
 	EventBus.system.time_sand_changed.connect(_on_time_sand_changed)
@@ -199,7 +222,7 @@ func _start_battle():
 	$UILayer/EndTurnButton.pressed.connect(_on_end_turn)
 
 	# 开始战斗
-	battle_manager.start_battle(player, [enemy])
+	battle_manager.start_battle(player, enemies)
 
 	_update_ui()
 
@@ -228,6 +251,25 @@ func _input(event: InputEvent):
 		_use_time_sand()
 	elif event.is_action_pressed("end_turn"):
 		_on_end_turn()
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_handle_enemy_click(event.position)
+
+func _handle_enemy_click(mouse_pos: Vector2):
+	"""处理点击敌人以选择目标"""
+	if not battle_started:
+		return
+	if battle_manager.current_state != battle_manager.State.PLAYER_TURN:
+		return
+
+	# 检测点击了哪个敌人
+	for enemy in enemies:
+		if not is_instance_valid(enemy):
+			continue
+		var dist = mouse_pos.distance_to(enemy.position)
+		if dist < 60:  # 点击半径60像素内
+			if battle_manager.select_target(enemy):
+				print("选择了敌人: %s" % enemy.name)
+				return
 
 func _use_skill(index: int):
 	if battle_manager.current_state != battle_manager.State.PLAYER_TURN:
@@ -236,7 +278,7 @@ func _use_skill(index: int):
 		return
 
 	var skill = player.available_skills[index]
-	battle_manager.player_use_skill(skill, enemy)
+	battle_manager.player_use_skill(skill)  # 使用selected_target
 
 func _use_time_sand():
 	if battle_manager.battle_clock:
@@ -276,6 +318,7 @@ func _on_battle_ended(victory: bool):
 		# Calculate rewards based on node configuration
 		var enemy_level: int = battle_node_config.get("level", 1)
 		var node_type = battle_node_config.get("node_type", MapNode.NodeType.NORMAL_BATTLE)
+		var faction_name: String = battle_node_config.get("faction", "")
 
 		# XP calculation
 		var xp_reward: int = enemy_level * 10
@@ -294,6 +337,29 @@ func _on_battle_ended(victory: bool):
 			"memory_fragments": fragments_reward,
 			"victory": true
 		}
+
+		# 势力奖励（Task 4）
+		var faction_rewards: Dictionary = {}
+		if faction_name != "":
+			var faction_system = FactionSystem.get_instance()
+			if faction_system:
+				# 授予势力掉落物品
+				var drops = faction_system.grant_faction_drops(faction_name)
+				for item_name in drops.keys():
+					faction_rewards[item_name] = drops[item_name]
+					print("获得势力物品: %s x%d" % [item_name, drops[item_name]])
+
+				# 授予赏金奖励
+				if FactionData.has_bounty(faction_name):
+					var bounty = faction_system.grant_bounty_reward(faction_name, enemy_level)
+					if bounty > 0:
+						faction_rewards["赏金"] = bounty
+						print("获得赏金: %d" % bounty)
+
+		# 如果有势力奖励，添加到rewards中
+		if not faction_rewards.is_empty():
+			rewards["faction_rewards"] = faction_rewards
+
 		battle_complete.emit(true, rewards)
 	else:
 		print("失败...")
@@ -308,9 +374,27 @@ func _update_ui():
 	_update_skill_buttons()
 
 func _update_enemy_label():
-	if enemy:
-		var atb_percent = int(enemy.get_atb_percent() * 100)
-		enemy_label.text = "敌人 HP: %d/%d\nATB: %d%%" % [enemy.current_hp, enemy.max_hp, atb_percent]
+	if enemies.is_empty():
+		enemy_label.text = "没有敌人"
+		return
+
+	var selected = battle_manager.selected_target
+	var text = ""
+	for e in enemies:
+		if not is_instance_valid(e):
+			continue
+		var atb_percent = int(e.get_atb_percent() * 100)
+		var marker = ">" if e == selected else " "
+		var hp_bar = _make_hp_bar(e.current_hp, e.max_hp, 10)
+		text += "%s 敌人%d HP:%s %d/%d ATB:%d%%\n" % [marker, enemies.find(e) + 1, hp_bar, e.current_hp, e.max_hp, atb_percent]
+	enemy_label.text = text
+
+func _make_hp_bar(current: int, max_val: int, length: int) -> String:
+	var filled = int(float(current) / max_val * length)
+	return "[" + "=".repeat(filled) + "-" .repeat(length - filled) + "]"
+
+func _on_target_selected(enemy: Enemy):
+	_update_enemy_label()
 
 func _update_skill_buttons():
 	if not player or player.available_skills.is_empty():
