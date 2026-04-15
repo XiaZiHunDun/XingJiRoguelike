@@ -14,6 +14,7 @@ signal exit_game_requested()
 
 @onready var player_info_label: Label = $PlayerInfo/InfoLabel
 @onready var menu_panel: VBoxContainer = $MenuPanel
+@onready var save_hint_label: Label = $SaveHintLabel
 
 @onready var shop_button: Button = $MenuPanel/ShopButton
 @onready var equipment_button: Button = $MenuPanel/EquipmentButton

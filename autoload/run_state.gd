@@ -37,6 +37,9 @@ func _ready():
 	rng.seed = Time.get_unix_time_from_system()
 	permanent_inventory = PermanentInventory.new()
 
+	# 连接存档相关事件
+	EventBus.system.breakthrough_succeeded.connect(_on_breakthrough_succeeded)
+
 # 获取带星尘加成的属性
 func get_attack_with_bonus() -> int:
 	return int(float(base_attack) * (1.0 + stardust * 0.01 * max_stardust_bonus))
@@ -118,8 +121,14 @@ func advance_zone() -> bool:
 	var current_index = zones.find(current_zone)
 	if current_index >= 0 and current_index < zones.size() - 1:
 		set_zone(zones[current_index + 1])
+		SaveManager.save_game(0)  # 自动存档
 		return true
 	return false
+
+
+func _on_breakthrough_succeeded(new_realm, was_automatic: bool):
+	# 境界突破成功时自动存档
+	SaveManager.save_game(0)
 
 func complete_current_node() -> bool:
 	# Mark the first uncleared node as completed

@@ -37,6 +37,12 @@ func _ready():
 	# Start with character selection
 	_show_character_select()
 
+
+func _input(event: InputEvent):
+	# S key quick save (slot 0)
+	if event is InputEventKey and event.pressed and event.keycode == KEY_S:
+		_quick_save()
+
 func _create_loading_screen():
 	loading_label = Label.new()
 	loading_label.text = "加载中..."
@@ -362,3 +368,18 @@ func _refresh_map():
 		# Rebuild map
 		RunState.generate_zone_map()
 		_show_map()
+
+
+func _quick_save():
+	# Only allow save in hub or map state
+	if current_state != GameState.HUB and current_state != GameState.MAP:
+		return
+	SaveManager.save_game(0)
+	# Show save notification
+	var notification = Label.new()
+	notification.text = "已保存到槽位 0"
+	notification.set_anchors_preset(Control.PRESET_CENTER)
+	notification.z_index = 100
+	add_child(notification)
+	await get_tree().create_timer(1.5).timeout
+	notification.queue_free()
