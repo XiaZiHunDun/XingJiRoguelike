@@ -15,8 +15,8 @@ const SPEED_SOFT_CAP: float = 200.0  # 速度软上限
 const SPEED_BONUS_TO_KINETIC: float = 0.01  # 超速转化为动能的比例
 
 # ==================== 属性相关 ====================
-const ATB_SOFT_CAP: float = 250.0  # ATB速度软上限
-const ATB_OVERFLOW_MULTIPLIER: float = 0.01  # 超ATB软上限转化为伤害的比例(1% per point over cap)
+const ATB_SOFT_CAP: float = 300.0  # ATB速度软上限 (专家建议: 250→300)
+const ATB_OVERFLOW_MULTIPLIER: float = 0.005  # 超ATB软上限转化为伤害的比例(0.5% per point over cap) (专家建议: 1%→0.5%)
 
 # 共鸣系统
 const ATB_ULTIMATE_THRESHOLD: float = 300.0  # 速度共鸣高级效果激活所需的ATB速度

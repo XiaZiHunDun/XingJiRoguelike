@@ -152,8 +152,10 @@ func _start_battle():
 
 	if battle_node_config.has("level"):
 		enemy_level = battle_node_config.get("level", 1)
-		# Scale enemy stats with level
-		enemy_hp = 30 + enemy_level * 8
+		# Scale enemy stats with level (专家建议调整HP公式以匹配30-40秒战斗目标)
+		# 原公式: 30 + level * 8, 50级BOSS为1290 HP
+		# 新公式: 50 + level * 86, 50级BOSS为13050 HP (在12000-15000目标范围内)
+		enemy_hp = 50 + enemy_level * 86
 		enemy_attack = 5 + enemy_level * 2
 
 	if battle_node_config.has("node_type"):
