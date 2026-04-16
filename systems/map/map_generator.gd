@@ -123,18 +123,18 @@ static func _try_assign_faction(node: MapNode, rng: RandomNumberGenerator):
 	if node.node_type != MapNode.NodeType.NORMAL_BATTLE and node.node_type != MapNode.NodeType.ELITE_BATTLE:
 		return
 
-	# 15%基础概率
+	# 15%基础概率生成势力敌人
 	if not rng.randf() < 0.15:
 		return
 
-	# 随机选择一个可用的势力
-	var faction_system = FactionSystem.get_instance()
-	if faction_system:
-		var faction_name = faction_system.roll_for_faction_enemy(rng)
-		if faction_name != "":
-			node.faction = faction_name
-			# 更新显示名称
-			node.display_name = "%s [%s]" % [NODE_TYPE_NAMES[node.node_type], faction_name]
+	# 敌对势力只有守墓人
+	var hostile_factions = FactionData.get_hostile_factions()
+	if hostile_factions.is_empty():
+		return
+
+	# 随机选择守墓人
+	node.faction = hostile_factions[0]  # 守墓人
+	node.display_name = "%s [%s]" % [NODE_TYPE_NAMES[node.node_type], node.faction]
 
 static func _calculate_node_level(zone: ZoneDefinition, position: int, player_level: int) -> int:
 	# Boss node (position 5) uses map_5_level_range

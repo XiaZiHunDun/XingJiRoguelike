@@ -354,18 +354,11 @@ func _on_battle_ended(victory: bool):
 		if faction_name != "":
 			var faction_system = FactionSystem.get_instance()
 			if faction_system:
-				# 授予势力掉落物品
+				# 授予势力掉落物品（击败守墓人等敌对势力）
 				var drops = faction_system.grant_faction_drops(faction_name)
 				for item_name in drops.keys():
 					faction_rewards[item_name] = drops[item_name]
 					print("获得势力物品: %s x%d" % [item_name, drops[item_name]])
-
-				# 授予赏金奖励
-				if FactionData.has_bounty(faction_name):
-					var bounty = faction_system.grant_bounty_reward(faction_name, enemy_level)
-					if bounty > 0:
-						faction_rewards["赏金"] = bounty
-						print("获得赏金: %d" % bounty)
 
 		# 如果有势力奖励，添加到rewards中
 		if not faction_rewards.is_empty():

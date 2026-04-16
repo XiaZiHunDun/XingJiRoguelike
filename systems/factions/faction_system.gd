@@ -1,6 +1,6 @@
 # systems/factions/faction_system.gd
-# 势力系统管理 - Task 4
-# 管理势力敌人的生成、奖励和商店折扣
+# 势力系统管理
+# 管理势力敌人生成、贡献奖励和阵营兑换
 
 class_name FactionSystem
 extends Node
@@ -9,14 +9,11 @@ extends Node
 static var _instance: FactionSystem = null
 static var _is_initialized: bool = false
 
-# 当前可用的势力敌人列表
-var available_faction_enemies: Array = []
-
-# 势力物品背包
+# 势力物品背包（贡献物品）
 var faction_inventory: Dictionary = {}
 
-# 商店折扣
-var shop_discount: float = 0.0
+# 当前加入的阵营（玩家只能加入一个）
+var joined_faction: String = ""
 
 static func get_instance() -> FactionSystem:
 	if _instance == null:
@@ -29,65 +26,20 @@ func _init_faction_system():
 	if _is_initialized:
 		return
 	_is_initialized = true
-	_initialize_faction_enemies()
-	update_shop_discount()
 
 func _ready():
 	pass  # 使用 get_instance() 进行初始化
 
-func _initialize_faction_enemies():
-	"""初始化势力敌人列表"""
-	available_faction_enemies.clear()
-	for faction_name in FactionData.get_hostile_factions():
-		var spawn_rate = FactionData.get_faction_spawn_rate(faction_name)
-		if spawn_rate > 0:
-			available_faction_enemies.append({
-				"faction": faction_name,
-				"spawn_rate": spawn_rate
-			})
-
-	# 添加中立势力赏金猎人
-	for faction_name in FactionData.get_all_factions():
-		if FactionData.has_bounty(faction_name):
-			var spawn_rate = FactionData.get_faction_spawn_rate(faction_name)
-			if spawn_rate > 0:
-				available_faction_enemies.append({
-					"faction": faction_name,
-					"spawn_rate": spawn_rate
-				})
-
 # ==================== 势力敌人生成 ====================
-
-func roll_for_faction_enemy(rng: RandomNumberGenerator) -> String:
-	"""掷骰决定是否生成势力敌人"""
-	if available_faction_enemies.is_empty():
-		return ""
-
-	# 计算总权重
-	var total_weight = 0.0
-	for faction_enemy in available_faction_enemies:
-		total_weight += faction_enemy["spawn_rate"]
-
-	# 掷骰
-	var roll = rng.randf()
-	var cumulative = 0.0
-
-	for faction_enemy in available_faction_enemies:
-		cumulative += faction_enemy["spawn_rate"] / total_weight
-		if roll <= cumulative:
-			return faction_enemy["faction"]
-
-	return ""
 
 func should_spawn_faction_enemy(rng: RandomNumberGenerator, base_spawn_rate: float = 0.15) -> bool:
 	"""判断是否应该生成势力敌人"""
-	# 基础15%概率
 	return rng.randf() < base_spawn_rate
 
 # ==================== 势力奖励 ====================
 
 func grant_faction_drops(faction_name: String) -> Dictionary:
-	"""授予势力掉落物品"""
+	"""授予势力掉落物品（击败敌对势力守墓人）"""
 	var drops: Array = FactionData.get_faction_drops(faction_name)
 	var granted: Dictionary = {}
 
@@ -104,18 +56,6 @@ func grant_faction_drops(faction_name: String) -> Dictionary:
 			EventBus.faction.faction_reward_earned.emit(faction_name, drop_name, quantity)
 
 	return granted
-
-func grant_bounty_reward(faction_name: String, enemy_level: int) -> int:
-	"""授予赏金奖励"""
-	if not FactionData.has_bounty(faction_name):
-		return 0
-
-	# 赏金根据敌人等级计算
-	var bounty_amount = enemy_level * 5 + 10
-	add_stardust(bounty_amount)
-	EventBus.faction.faction_reward_earned.emit(faction_name, "赏金", bounty_amount)
-
-	return bounty_amount
 
 func add_faction_item(item_name: String, quantity: int = 1):
 	"""添加势力物品到背包"""
@@ -142,30 +82,42 @@ func get_all_faction_items() -> Dictionary:
 	"""获取所有势力物品"""
 	return faction_inventory.duplicate()
 
-func add_stardust(amount: int):
-	"""添加星尘（赏金奖励）"""
-	RunState.stardust += amount
-	EventBus.system.time_sand_changed.emit(RunState.memory_fragments, 9999)  # 复用时砂信号
+# ==================== 阵营加入 ====================
 
-# ==================== 商店折扣 ====================
+func join_faction(faction_name: String) -> bool:
+	"""玩家加入阵营"""
+	var data = FactionData.get_faction_data(faction_name)
+	if data.is_empty():
+		return false
+	if FactionData.get_faction_relation(faction_name) != FactionData.FactionRelation.FRIENDLY:
+		return false  # 只能加入友好阵营
+	joined_faction = faction_name
+	return true
 
-func update_shop_discount():
-	"""更新商店折扣（基于友好势力）"""
-	shop_discount = 0.0
-	for faction_name in FactionData.get_friendly_factions():
-		shop_discount += FactionData.get_faction_discount(faction_name)
-	# 折扣上限50%
-	shop_discount = mini(shop_discount, 0.50)
+func leave_faction() -> bool:
+	"""离开当前阵营"""
+	if joined_faction == "":
+		return false
+	joined_faction = ""
+	return true
 
-func get_shop_discount() -> float:
-	"""获取当前商店折扣"""
-	return shop_discount
+func get_joined_faction() -> String:
+	"""获取当前加入的阵营"""
+	return joined_faction
 
-func apply_shop_discount(base_price: int) -> int:
-	"""应用商店折扣"""
-	if shop_discount <= 0:
-		return base_price
-	return int(base_price * (1.0 - shop_discount))
+func get_joinable_factions() -> Array:
+	"""获取可加入的阵营列表"""
+	return FactionData.get_joinable_factions()
+
+# ==================== 兑换系统 ====================
+
+func can_exchange(faction_name: String, exchange_key: String) -> bool:
+	"""检查是否可以兑换"""
+	var exchange_table = FactionData.get_exchange_items(faction_name)
+	if not exchange_table.has(exchange_key):
+		return false
+	# 检查需要的物品和数量
+	return true
 
 # ==================== 势力状态 ====================
 
@@ -174,23 +126,23 @@ func get_faction_status_summary() -> String:
 	var summary = "势力状态:\n"
 	for faction_name in FactionData.get_all_factions():
 		var relation = FactionData.get_relation_name(FactionData.get_faction_relation(faction_name))
-		summary += "- %s: %s\n" % [faction_name, relation]
-	summary += "商店折扣: %d%%\n" % int(shop_discount * 100)
+		var marker = " [已加入]" if faction_name == joined_faction else ""
+		summary += "- %s: %s%s\n" % [faction_name, relation, marker]
 	return summary
 
 func reset():
 	"""重置势力系统状态"""
 	faction_inventory.clear()
-	shop_discount = 0.0
-	_initialize_faction_enemies()
+	joined_faction = ""
 
 # ==================== 存档 ====================
 
 func get_save_data() -> Dictionary:
 	return {
-		"faction_inventory": faction_inventory
+		"faction_inventory": faction_inventory,
+		"joined_faction": joined_faction
 	}
 
 func load_save_data(data: Dictionary):
 	faction_inventory = data.get("faction_inventory", {})
-	update_shop_discount()
+	joined_faction = data.get("joined_faction", "")
