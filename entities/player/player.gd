@@ -63,8 +63,18 @@ func _ready():
 	element_status = ElementStatusComponent.new()
 	add_child(element_status)
 
-	# 根据角色类型装备默认武器
-	equip_default_weapon()
+	if RunState.has_saved_weapon():
+		var inst := EquipmentInstance.from_save_dict(RunState.get_saved_weapon_dict())
+		if inst:
+			equipped_weapon = inst
+			_refresh_skills()
+		else:
+			equip_default_weapon()
+	else:
+		equip_default_weapon()
+	apply_affixes()
+	if equipped_weapon:
+		RunState.capture_weapon_from_player(self)
 
 func _load_character_data():
 	"""加载角色定义数据"""
@@ -83,6 +93,16 @@ func _load_character_data():
 		current_hp = max_hp
 		attack = int(get_effective_attribute("精神"))
 
+func equip(instance: EquipmentInstance) -> void:
+	if not instance or not instance.definition:
+		return
+	if instance.get_slot() == Enums.EquipmentSlot.WEAPON:
+		equipped_weapon = instance
+		_refresh_skills()
+		apply_affixes()
+		RunState.capture_weapon_from_player(self)
+
+
 func equip_default_weapon():
 	# 根据角色类型装备默认武器
 	var weapon_id := &"weapon_phys_sword"  # 默认战士武器
@@ -95,15 +115,19 @@ func equip_default_weapon():
 		_refresh_skills()
 
 func _refresh_skills():
-	"""刷新可用技能"""
+	"""刷新可用技能（随机生成武器的技能在实例 skill_ids 上）"""
 	available_skills.clear()
-	if equipped_weapon and equipped_weapon.definition:
-		for skill_id in equipped_weapon.definition.skill_ids:
-			var skill_def = DataManager.get_skill(skill_id)
-			if skill_def:
-				var inst = SkillInstance.new()
-				inst.setup(skill_def, equipped_weapon.definition.id)
-				available_skills.append(inst)
+	if not equipped_weapon or not equipped_weapon.definition:
+		return
+	var skill_source: Array[StringName] = equipped_weapon.skill_ids
+	if skill_source.is_empty():
+		skill_source = equipped_weapon.definition.skill_ids
+	for skill_id in skill_source:
+		var skill_def = DataManager.get_skill(skill_id)
+		if skill_def:
+			var inst = SkillInstance.new()
+			inst.setup(skill_def, equipped_weapon.definition.id)
+			available_skills.append(inst)
 
 func _on_atb_full(entity):
 	"""ATB满了，可以行动"""

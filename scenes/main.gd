@@ -24,8 +24,6 @@ func _ready():
 	await get_tree().create_timer(0.3).timeout
 	loading_progress = 0.6
 
-	# Initialize RunState
-	RunState.start_new_run()
 	loading_progress = 1.0
 
 	await get_tree().create_timer(0.3).timeout
@@ -48,9 +46,7 @@ func _is_loading_complete():
 	title_label.visible = true
 	start_button.visible = true
 
-	# Check if there's a save file to continue
-	# For now, just show start button
-	continue_button.visible = false
+	continue_button.visible = SaveManager.has_save(0)
 
 	# Connect buttons
 	start_button.pressed.connect(_on_start_pressed)
@@ -61,8 +57,9 @@ func _on_start_pressed():
 	_start_game()
 
 func _on_continue_pressed():
-	# Load save and continue
-	# TODO: Implement save/load
+	if not SaveManager.load_game(0, true):
+		push_warning("继续游戏：读档失败（槽位 0 无有效存档或文件损坏）")
+		return
 	_start_game()
 
 func _start_game():

@@ -69,7 +69,7 @@ static func _get_template_type(equipment_type: EquipmentType) -> String:
 	return "巨剑"
 
 static func _generate_wear_requirements(template: EquipmentDefinition, level: int) -> Dictionary:
-	"""生成穿戴需求（属性0-3个 + 境界等级 + 技能等级）"""
+	"""生成穿戴需求（属性0-3个 + 境界 + 技能等级）；境界键与 can_wear 一致，取值为 1–5（RealmType）"""
 	var requirements: Dictionary = {}
 	var num_requirements = randi() % 4  # 0-3 个属性需求
 
@@ -82,13 +82,16 @@ static func _generate_wear_requirements(template: EquipmentDefinition, level: in
 		var base_value = 10.0 + float(level) * template.level_requirement_base * (0.8 + randf() * 0.4)
 		requirements[attr] = ceili(base_value)
 
-	# 随机添加境界等级需求（50%概率）
+	# 随机添加境界需求（50%概率）：按装备等级映射到境界阶位 1–5
 	if randf() < 0.5:
-		requirements["境界等级"] = mini((level + 1) / 2, 10)
+		requirements["境界"] = clampi((level + 9) / 10, 1, 5)
 
-	# 随机添加技能等级需求（50%概率）
-	if randf() < 0.5:
-		requirements["技能等级"] = mini((level + 2) / 3, 20)
+	# 随机添加技能等级需求（50%概率）：须为 {技能显示名: 等级}，与 can_wear 一致
+	if randf() < 0.5 and template.skill_pool.size() > 0 and DataManager:
+		var sid: StringName = template.skill_pool[randi() % template.skill_pool.size()]
+		var sk := DataManager.get_skill(sid)
+		if sk and sk.name != "":
+			requirements["技能等级"] = {str(sk.name): mini((level + 2) / 3, 20)}
 
 	return requirements
 

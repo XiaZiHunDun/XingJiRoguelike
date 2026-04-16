@@ -26,11 +26,18 @@ var total_xp: int = 0
 var current_zone: ZoneDefinition.ZoneType = ZoneDefinition.ZoneType.DESERT
 var current_map_nodes: Array = []
 
+# 装备持久化：武器字典由 EquipmentInstance.to_save_dict 生成；背包为同类字典数组
+var equipped_weapon_save: Dictionary = {}
+var equipment_inventory_saves: Array[Dictionary] = []
+
 # 全局随机数生成器
 var rng: RandomNumberGenerator
 
 # 战斗状态
 var in_combat: bool = false
+
+# 从主菜单读档进入 game 场景时置位，由 game.gd 消费后进入枢纽
+var pending_resume_from_save: bool = false
 
 func _ready():
 	rng = RandomNumberGenerator.new()
@@ -74,6 +81,7 @@ func is_max_realm() -> bool:
 
 # 开始新局
 func start_new_run():
+	pending_resume_from_save = false
 	max_hp = Consts.BASE_PLAYER_HP
 	base_attack = Consts.BASE_PLAYER_ATTACK
 	base_speed = Consts.BASE_PLAYER_SPEED
@@ -85,6 +93,25 @@ func start_new_run():
 	in_combat = false
 	current_zone = ZoneDefinition.ZoneType.DESERT
 	current_map_nodes = []
+	equipped_weapon_save = {}
+	equipment_inventory_saves = []
+
+
+func mark_resume_from_save() -> void:
+	pending_resume_from_save = true
+
+
+func consume_resume_from_save() -> bool:
+	var resume := pending_resume_from_save
+	pending_resume_from_save = false
+	return resume
+
+
+## 读档后根据等级等恢复战斗用基础属性（不清空货币与地图）
+func initialize_stats_for_current_progress() -> void:
+	base_attack = Consts.BASE_PLAYER_ATTACK
+	base_speed = Consts.BASE_PLAYER_SPEED
+	max_hp = Consts.BASE_PLAYER_HP + current_level * 10
 
 # ==================== 区域系统 (Task 8) ====================
 
@@ -163,7 +190,7 @@ func get_enhancement_remaining(enhancement_id: String) -> int:
 func add_memory_fragments(amount: int):
 	"""添加记忆碎片"""
 	memory_fragments += amount
-	EventBus.system.time_sand_changed.emit(memory_fragments, 9999)  # TODO: proper max
+	EventBus.system.time_sand_changed.emit(memory_fragments, Consts.MEMORY_FRAGMENTS_REFERENCE_MAX)
 
 func spend_memory_fragments(amount: int) -> bool:
 	"""消耗记忆碎片"""
@@ -195,9 +222,54 @@ func get_save_data() -> Dictionary:
 		"permanent_inventory": permanent_inventory.get_save_data() if permanent_inventory else {}
 	}
 
+
+func has_saved_weapon() -> bool:
+	return not equipped_weapon_save.is_empty()
+
+
+func get_saved_weapon_dict() -> Dictionary:
+	return equipped_weapon_save.duplicate(true)
+
+
+func capture_weapon_from_player(player: Player) -> void:
+	if player and player.equipped_weapon:
+		equipped_weapon_save = player.equipped_weapon.to_save_dict()
+	else:
+		equipped_weapon_save = {}
+
+
+func add_equipment_to_inventory(data: Dictionary) -> void:
+	if data.is_empty():
+		return
+	equipment_inventory_saves.append(data.duplicate(true))
+
+
+func get_equipment_save_payload() -> Dictionary:
+	return {
+		"weapon": equipped_weapon_save.duplicate(true),
+		"inventory": equipment_inventory_saves.duplicate(true)
+	}
+
+
+func load_equipment_save_payload(payload: Dictionary) -> void:
+	var w = payload.get("weapon", {})
+	equipped_weapon_save = w.duplicate(true) if w is Dictionary else {}
+	equipment_inventory_saves.clear()
+	var inv = payload.get("inventory", [])
+	if inv is Array:
+		for item in inv:
+			if item is Dictionary:
+				equipment_inventory_saves.append((item as Dictionary).duplicate(true))
+
+
+func clear_run_equipment_on_defeat() -> void:
+	equipped_weapon_save = {}
+	equipment_inventory_saves.clear()
+
 func load_save_data(data: Dictionary):
 	"""加载存档数据"""
-	memory_fragments = data.get("memory_fragments", 0)
+	if data.has("memory_fragments"):
+		memory_fragments = int(data["memory_fragments"])
 	if permanent_inventory:
 		permanent_inventory.load_save_data(data.get("permanent_inventory", {}))
 

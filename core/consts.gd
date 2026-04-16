@@ -66,3 +66,6 @@ const MAX_HAND_SIZE: int = 8  # 最大手牌数量
 
 # ==================== 局外成长 ====================
 const STARDUST_MAX_BONUS: float = 0.15  # 星尘最大加成（15%）
+
+# 记忆碎片：与 UI/事件总线同步时的参考上限（经济系统定稿后可替换为真实上限）
+const MEMORY_FRAGMENTS_REFERENCE_MAX: int = 9999

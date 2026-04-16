@@ -34,8 +34,12 @@ func _ready():
 	# Create loading label first
 	_create_loading_screen()
 
-	# Start with character selection
-	_show_character_select()
+	if RunState.consume_resume_from_save():
+		loading_label.visible = false
+		EventBus.system.run_started.emit()
+		_show_hub()
+	else:
+		_show_character_select()
 
 
 func _input(event: InputEvent):
@@ -86,6 +90,7 @@ func _show_hub():
 	hub_instance.equipment_requested.connect(_on_equipment_requested)
 	hub_instance.inventory_requested.connect(_on_inventory_requested)
 	hub_instance.character_requested.connect(_on_character_requested)
+	hub_instance.quest_requested.connect(_on_quest_requested)
 	add_child(hub_instance)
 	current_scene = hub_instance
 	current_state = GameState.HUB
@@ -112,18 +117,12 @@ func _on_node_selected(node_data: MapNode):
 		MapNode.NodeType.NORMAL_BATTLE, MapNode.NodeType.ELITE_BATTLE, MapNode.NodeType.BOSS:
 			_start_battle(node_data)
 		MapNode.NodeType.TREASURE:
-			# TODO: Implement treasure
-			print("宝箱: %s" % node_data.display_name)
 			_collect_treasure(node_data)
-		MapNode.NodeType.SHOP:
-			# TODO: Implement shop
-			print("商店: %s" % node_data.display_name)
-		MapNode.NodeType.COLLECTION:
-			# TODO: Implement material collection
-			print("采集: %s" % node_data.display_name)
-		MapNode.NodeType.EVENT:
-			# TODO: Implement random events
-			print("事件: %s" % node_data.display_name)
+		MapNode.NodeType.SHOP, MapNode.NodeType.COLLECTION, MapNode.NodeType.EVENT:
+			_show_stub_message(
+				node_data.display_name,
+				"该节点类型仍在开发中。\n关闭对话框后可继续选择其他节点。"
+			)
 
 func _start_battle(node_data: MapNode):
 	_clear_current_scene()
@@ -336,20 +335,32 @@ func _on_exit_game():
 	get_tree().quit()
 
 func _on_shop_requested():
-	# TODO: Implement shop
-	print("Shop requested")
+	_show_stub_message("商店", "商店界面尚未接入，后续版本将支持购买消耗品与材料。")
 
 func _on_equipment_requested():
-	# TODO: Implement equipment management
-	print("Equipment requested")
+	_show_stub_message("装备", "装备管理面板尚未接入（当前战斗内仍可使用已有装备逻辑）。")
 
 func _on_inventory_requested():
-	# TODO: Implement inventory
-	print("Inventory requested")
+	_show_stub_message("背包", "背包与材料列表界面尚未接入。")
 
 func _on_character_requested():
-	# TODO: Implement character panel
-	print("Character requested")
+	_show_stub_message("角色", "角色详情与属性面板尚未接入。")
+
+func _on_quest_requested():
+	_show_stub_message("任务", "任务与势力剧情系统尚未接入。")
+
+
+func _show_stub_message(title: String, body: String) -> void:
+	var dlg := AcceptDialog.new()
+	dlg.title = title
+	dlg.dialog_text = body
+	dlg.ok_button_text = "确定"
+	add_child(dlg)
+	dlg.popup_centered()
+	var close := func():
+		dlg.queue_free()
+	dlg.confirmed.connect(close)
+	dlg.canceled.connect(close)
 
 func _collect_treasure(node_data: MapNode):
 	# Simple treasure: grant some stardust and fragments

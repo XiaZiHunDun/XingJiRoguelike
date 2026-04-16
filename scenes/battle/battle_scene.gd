@@ -30,6 +30,8 @@ var battle_started: bool = false
 
 func _ready():
 	battle_manager = $BattleManager
+	if not EventBus.equipment.equipment_dropped.is_connected(_on_equipment_dropped):
+		EventBus.equipment.equipment_dropped.connect(_on_equipment_dropped)
 
 	# 收集技能按钮
 	skill_buttons = [
@@ -144,6 +146,8 @@ func _start_battle():
 		"精神": 30 + RunState.get_permanent_bonus("精神"),
 		"敏捷": 30 + RunState.get_permanent_bonus("敏捷")
 	}
+	player.realm = RunState.current_realm
+	player.level = RunState.current_level
 
 	# 创建敌人（使用node_level配置）
 	var enemy_level: int = 1
@@ -312,8 +316,15 @@ func _on_energy_changed(current: int, max_value: int):
 func _on_time_sand_changed(current: int, max_value: int):
 	time_sand_label.text = "时砂: %d" % current
 
+func _on_equipment_dropped(equipment: EquipmentInstance, _position: Vector2) -> void:
+	if equipment:
+		RunState.add_equipment_to_inventory(equipment.to_save_dict())
+
+
 func _on_battle_ended(victory: bool):
 	if victory:
+		if is_instance_valid(player):
+			RunState.capture_weapon_from_player(player)
 		print("胜利！")
 		# Calculate rewards based on node configuration
 		var enemy_level: int = battle_node_config.get("level", 1)
@@ -362,6 +373,7 @@ func _on_battle_ended(victory: bool):
 
 		battle_complete.emit(true, rewards)
 	else:
+		RunState.clear_run_equipment_on_defeat()
 		print("失败...")
 		var rewards: Dictionary = {"victory": false}
 		battle_complete.emit(false, rewards)

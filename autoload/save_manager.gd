@@ -49,7 +49,8 @@ func save_game(slot_id: int) -> bool:
 
 
 # 从指定槽位加载游戏
-func load_game(slot_id: int) -> bool:
+# resume_to_hub: 仅主菜单「继续游戏」等需要跳过选角进枢纽时为 true；枢纽内静默读档应为 false
+func load_game(slot_id: int, resume_to_hub: bool = false) -> bool:
 	if slot_id < 0 or slot_id >= MAX_SLOTS:
 		push_error("SaveManager: Invalid slot_id %d" % slot_id)
 		return false
@@ -67,8 +68,9 @@ func load_game(slot_id: int) -> bool:
 		push_error("SaveManager: Failed to load player data from slot %d" % slot_id)
 		return false
 
-	# 将数据加载到 RunState
 	_load_game_data(save_data)
+	if resume_to_hub:
+		RunState.mark_resume_from_save()
 
 	EventBus.system.game_loaded.emit()
 	return true
@@ -137,6 +139,20 @@ func _create_player_save_data() -> PlayerSaveData:
 	var rs_save_data := RunState.get_save_data()
 	save_data.permanent_inventory_data = rs_save_data.get("permanent_inventory", {})
 
+	save_data.total_xp = RunState.total_xp
+	save_data.map_nodes.clear()
+	for n in RunState.current_map_nodes:
+		if n is MapNode:
+			save_data.map_nodes.append((n as MapNode).duplicate(true))
+
+	var eq_payload := RunState.get_equipment_save_payload()
+	save_data.equipment_weapon_save = eq_payload.get("weapon", {})
+	var inv: Array = eq_payload.get("inventory", [])
+	save_data.equipment_inventory_save.clear()
+	for row in inv:
+		if row is Dictionary:
+			save_data.equipment_inventory_save.append((row as Dictionary).duplicate(true))
+
 	# 时间戳
 	save_data.update_last_played()
 
@@ -150,7 +166,7 @@ func _load_game_data(save_data: PlayerSaveData) -> void:
 	RunState.current_realm = save_data.realm_level as RealmDefinition.RealmType
 	RunState.current_level = save_data.current_level
 	RunState.stardust = save_data.stardust
-	RunState.memory_fragments = save_data.memory_fragments
+	RunState.total_xp = save_data.total_xp
 
 	# 解锁区域 - 从ID反查ZoneType
 	if not save_data.unlocked_zones.is_empty():
@@ -159,9 +175,22 @@ func _load_game_data(save_data: PlayerSaveData) -> void:
 	else:
 		RunState.current_zone = ZoneDefinition.ZoneType.DESERT
 
-	# 永久强化数据
+	RunState.current_map_nodes.clear()
+	for n in save_data.map_nodes:
+		if n is MapNode:
+			RunState.current_map_nodes.append((n as MapNode).duplicate(true))
+
+	# 记忆碎片 + 永久强化（避免 load_save_data 覆盖未提供的字段）
 	RunState.load_save_data({
+		"memory_fragments": save_data.memory_fragments,
 		"permanent_inventory": save_data.permanent_inventory_data
+	})
+
+	RunState.initialize_stats_for_current_progress()
+	RunState.in_combat = false
+	RunState.load_equipment_save_payload({
+		"weapon": save_data.equipment_weapon_save,
+		"inventory": save_data.equipment_inventory_save
 	})
 
 
@@ -177,10 +206,12 @@ func _get_zone_type_by_id(zone_id: String) -> ZoneDefinition.ZoneType:
 func _load_slots_cache() -> void:
 	_slots_cache = []
 
-	# 先尝试加载已保存的槽位列表
+	# 先尝试加载已保存的槽位列表（须为 Resource 包装）
 	var slots_data: Array[SaveSlot] = []
 	if FileAccess.file_exists(SLOTS_FILE):
-		slots_data = ResourceLoader.load(SLOTS_FILE, "", ResourceLoader.CacheMode.IGNORE)
+		var loaded_slots = ResourceLoader.load(SLOTS_FILE, "", ResourceLoader.CacheMode.IGNORE)
+		if loaded_slots is SaveSlotsList:
+			slots_data = (loaded_slots as SaveSlotsList).slots
 
 	# 初始化槽位列表
 	for i in range(MAX_SLOTS):
@@ -208,6 +239,8 @@ func _load_slots_cache() -> void:
 
 # 保存槽位列表
 func _save_slots_list() -> void:
-	var err := ResourceSaver.save(_slots_cache, SLOTS_FILE)
+	var bundle := SaveSlotsList.new()
+	bundle.slots = _slots_cache.duplicate()
+	var err := ResourceSaver.save(bundle, SLOTS_FILE)
 	if err != OK:
 		push_error("SaveManager: Failed to save slots list: %s" % error_string(err))
