@@ -167,7 +167,7 @@ func _on_enemy_died(enemy: Enemy):
 	EventBus.combat.enemy_killed.emit(enemy, enemy.position)
 
 	# 恢复时砂（每击杀5个敌人恢复1次）
-	battle_clock.add_time_sand(1)
+	battle_clock.on_enemy_killed()
 
 	# 根据敌人类型决定掉落率
 	var drop_rate = 0.2

@@ -14,6 +14,7 @@ var bullet_time_scale: float = Consts.BULLET_TIME_SCALE
 # 时砂资源
 var time_sand: int = Consts.TIME_SAND_MAX
 var time_sand_max: int = Consts.TIME_SAND_MAX
+var kill_counter: int = 0  # 击杀计数器，用于每5敌恢复时砂
 
 signal state_changed(new_state: State)
 signal time_sand_changed(current: int, max_value: int)
@@ -110,5 +111,13 @@ func reset():
 	state = State.RUNNING
 	time_scale = 1.0
 	time_sand = time_sand_max
+	kill_counter = 0
 	state_changed.emit(state)
 	time_sand_changed.emit(time_sand, time_sand_max)
+
+# 记录击杀，每5个敌人恢复1次时砂
+func on_enemy_killed() -> void:
+	kill_counter += 1
+	if kill_counter >= 5:
+		kill_counter = 0
+		add_time_sand(1)
