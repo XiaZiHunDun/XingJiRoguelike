@@ -18,12 +18,13 @@ signal character_selected(character_id: String)
 signal battle_complete(victory: bool, rewards: Dictionary)
 
 @onready var atb_bar: ProgressBar = $UILayer/ATBBar
-@onready var atb_label: Label = $UILayer/ATBBar/Label
+@onready var atb_label: Label = $UILayer/ATBBar/ATBLabel
 @onready var energy_label: Label = $UILayer/EnergyDisplay
 @onready var time_sand_label: Label = $UILayer/TimeSandDisplay
 @onready var enemy_label: Label = $UILayer/EnemyInfo
 @onready var character_select: Control = $UILayer/CharacterSelect
-@onready var character_name_label: Label = $UILayer/CharacterSelect/CharacterName
+@onready var warrior_card: Panel = $UILayer/CharacterSelect/CenterPanel/WarriorCard
+@onready var mage_card: Panel = $UILayer/CharacterSelect/CenterPanel/MageCard
 
 var skill_buttons: Array[Button] = []
 var battle_started: bool = false
@@ -58,8 +59,8 @@ func _ready():
 	]
 
 	# 连接角色选择按钮
-	$UILayer/CharacterSelect/WarriorButton.pressed.connect(_on_warrior_selected)
-	$UILayer/CharacterSelect/MageButton.pressed.connect(_on_mage_selected)
+	$UILayer/CharacterSelect/CenterPanel/WarriorCard/WarriorButton.pressed.connect(_on_warrior_selected)
+	$UILayer/CharacterSelect/CenterPanel/MageCard/MageButton.pressed.connect(_on_mage_selected)
 
 	# 初始化快捷物品槽
 	_init_quick_item_slots()
@@ -76,18 +77,18 @@ func _ready():
 func _show_character_select():
 	"""显示角色选择界面"""
 	character_select.visible = true
+	# 显示角色卡片
+	warrior_card.visible = true
+	mage_card.visible = true
 	# 隐藏战斗UI直到选择完成
 	$UILayer/ATBBar.visible = false
-	$UILayer/ATBBar/Label.visible = false
+	$UILayer/ATBBar/ATBLabel.visible = false
 	$UILayer/EnergyDisplay.visible = false
 	$UILayer/TimeSandDisplay.visible = false
 	$UILayer/SkillButtons.visible = false
 	$UILayer/EndTurnButton.visible = false
 	$UILayer/EnemyInfo.visible = false
 	$UILayer/Instructions.visible = false
-	# 隐藏可能存在的开始游戏按钮
-	if has_node("UILayer/CharacterSelect/StartGameButton"):
-		$UILayer/CharacterSelect/StartGameButton.visible = false
 	# 显示默认角色信息
 	_update_character_display()
 
@@ -111,31 +112,39 @@ func _on_mage_selected():
 
 func _update_character_display():
 	"""更新角色选择界面的显示"""
-	var char_name = "星际战士"
-	var char_info = "体质:40 精神:30 敏捷:30\n武器:巨剑 | 伤害:物理"
-	if selected_character_id == "mage":
-		char_name = "奥术师"
-		char_info = "体质:30 精神:40 敏捷:30\n武器:法杖 | 伤害:奥术"
-	$UILayer/CharacterSelect/CharacterName.text = char_name
-	$UILayer/CharacterSelect/CharacterInfo.text = char_info
+	# 重置所有卡片颜色
+	warrior_card.modulate = Color(1, 1, 1, 1)
+	mage_card.modulate = Color(1, 1, 1, 1)
+	# 重置按钮文本
+	warrior_card.get_node("WarriorButton").text = "选择战士"
+	mage_card.get_node("MageButton").text = "选择法师"
+
+	# 高亮选中的卡片
+	if selected_character_id == "warrior":
+		warrior_card.modulate = Color(1, 1, 0.7, 1)
+		warrior_card.get_node("WarriorButton").text = "已选择 ✓"
+	else:
+		mage_card.modulate = Color(1, 1, 0.7, 1)
+		mage_card.get_node("MageButton").text = "已选择 ✓"
 
 func _show_start_button():
 	# 只显示"开始游戏"按钮，不隐藏角色选择按钮
 	# 这样用户可以继续切换角色
-	if not has_node("UILayer/CharacterSelect/StartGameButton"):
+	var center_panel = $UILayer/CharacterSelect/CenterPanel
+	if not center_panel.has_node("StartGameButton"):
 		var start_btn = Button.new()
 		start_btn.name = "StartGameButton"
 		start_btn.text = "开始游戏"
 		start_btn.pressed.connect(_on_start_game_pressed)
-		$UILayer/CharacterSelect.add_child(start_btn)
+		center_panel.add_child(start_btn)
 		# Position it at the bottom of the panel
 		start_btn.set_anchors_preset(Control.PRESET_CENTER)
 		start_btn.offset_left = -80.0
-		start_btn.offset_top = 180.0
+		start_btn.offset_top = 290.0
 		start_btn.offset_right = 80.0
-		start_btn.offset_bottom = 220.0
+		start_btn.offset_bottom = 330.0
 	else:
-		$UILayer/CharacterSelect/StartGameButton.visible = true
+		center_panel.get_node("StartGameButton").visible = true
 
 func _on_start_game_pressed():
 	# Emit character selected and let game.gd handle the flow

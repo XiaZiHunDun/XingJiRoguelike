@@ -11,22 +11,8 @@ script = ExtResource("2")
 
 [node name="UILayer" type="CanvasLayer" parent="."]
 
+# ==================== 角色选择界面 ====================
 [node name="CharacterSelect" type="Control" parent="UILayer"]
-layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -200.0
-offset_right = 300.0
-offset_bottom = 200.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 0
-
-[node name="Panel" type="Panel" parent="UILayer/CharacterSelect"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -34,86 +20,149 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
-color = Color(0.2, 0.2, 0.2, 0.9)
 
-[node name="Title" type="Label" parent="UILayer/CharacterSelect"]
+[node name="Background" type="ColorRect" parent="UILayer/CharacterSelect"]
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = 15
 anchor_right = 1.0
-offset_top = 20.0
-offset_bottom = 60.0
+anchor_bottom = 1.0
+color = Color(0.05, 0.05, 0.15, 1)
+
+[node name="CenterPanel" type="Panel" parent="UILayer/CharacterSelect"]
+layout_mode = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -280.0
+offset_right = 250.0
+offset_bottom = 280.0
 grow_horizontal = 2
-text = "选择角色"
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Title" type="Label" parent="UILayer/CharacterSelect/CenterPanel"]
+layout_mode = 2
+text = "选择你的角色"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CharacterName" type="Label" parent="UILayer/CharacterSelect"]
+[node name="Separator" type="HSeparator" parent="UILayer/CharacterSelect/CenterPanel"]
+layout_mode = 2
+offset_top = 50.0
+offset_bottom = 55.0
+
+# 战士选择卡片
+[node name="WarriorCard" type="Panel" parent="UILayer/CharacterSelect/CenterPanel"]
+layout_mode = 2
+offset_left = 20.0
+offset_top = 70.0
+offset_right = 235.0
+offset_bottom = 260.0
+mouse_filter = 0
+
+[node name="WarriorName" type="Label" parent="UILayer/CharacterSelect/CenterPanel/WarriorCard"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 70.0
-offset_bottom = 100.0
+offset_top = 10.0
+offset_bottom = 40.0
 grow_horizontal = 2
 text = "星际战士"
 horizontal_alignment = 1
-vertical_alignment = 1
 
-[node name="CharacterInfo" type="Label" parent="UILayer/CharacterSelect"]
+[node name="WarriorPortrait" type="ColorRect" parent="UILayer/CharacterSelect/CenterPanel/WarriorCard"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 50.0
-offset_top = 100.0
-offset_right = -50.0
-offset_bottom = 140.0
+offset_top = 45.0
+offset_right = 0.0
+offset_bottom = 145.0
 grow_horizontal = 2
-text = "体质:40 精神:30 敏捷:30
+color = Color(0.3, 0.3, 0.5, 1)
+
+[node name="WarriorStats" type="Label" parent="UILayer/CharacterSelect/CenterPanel/WarriorCard"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 150.0
+offset_bottom = 190.0
+grow_horizontal = 2
+text = "体质:40  精神:30  敏捷:30
 武器:巨剑 | 伤害:物理"
 horizontal_alignment = 1
-vertical_alignment = 1
 
-[node name="WarriorButton" type="Button" parent="UILayer/CharacterSelect"]
+[node name="WarriorButton" type="Button" parent="UILayer/CharacterSelect/CenterPanel/WarriorCard"]
 layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -100.0
-offset_top = 180.0
-offset_right = 100.0
-offset_bottom = 220.0
-grow_horizontal = 2
-grow_vertical = 0
-text = "星际战士 (1)"
+anchors_preset = 10
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 170.0
+text = "选择战士"
 
-[node name="MageButton" type="Button" parent="UILayer/CharacterSelect"]
+# 法师选择卡片
+[node name="MageCard" type="Panel" parent="UILayer/CharacterSelect/CenterPanel"]
+layout_mode = 2
+offset_left = 265.0
+offset_top = 70.0
+offset_right = 480.0
+offset_bottom = 260.0
+mouse_filter = 0
+
+[node name="MageName" type="Label" parent="UILayer/CharacterSelect/CenterPanel/MageCard"]
 layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -100.0
-offset_top = 225.0
-offset_right = 100.0
-offset_bottom = 265.0
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 10.0
+offset_bottom = 40.0
 grow_horizontal = 2
-grow_vertical = 0
-text = "奥术师 (2)"
+text = "奥术师"
+horizontal_alignment = 1
 
+[node name="MagePortrait" type="ColorRect" parent="UILayer/CharacterSelect/CenterPanel/MageCard"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 45.0
+offset_right = 0.0
+offset_bottom = 145.0
+grow_horizontal = 2
+color = Color(0.5, 0.3, 0.3, 1)
+
+[node name="MageStats" type="Label" parent="UILayer/CharacterSelect/CenterPanel/MageCard"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 150.0
+offset_bottom = 190.0
+grow_horizontal = 2
+text = "体质:30  精神:40  敏捷:30
+武器:法杖 | 伤害:奥术"
+horizontal_alignment = 1
+
+[node name="MageButton" type="Button" parent="UILayer/CharacterSelect/CenterPanel/MageCard"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 170.0
+text = "选择法师"
+
+# ==================== 战斗UI（默认隐藏）====================
 [node name="ATBBar" type="ProgressBar" parent="UILayer"]
+visible = false
 layout_mode = 1
 anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
 offset_left = 50.0
 offset_top = 50.0
 offset_right = 400.0
 offset_bottom = 80.0
 max_value = 1000.0
-value = 500.0
 show_percentage = false
 
-[node name="Label" type="Label" parent="UILayer/ATBBar"]
+[node name="ATBLabel" type="Label" parent="UILayer/ATBBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -127,12 +176,9 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="EnergyDisplay" type="Label" parent="UILayer"]
+visible = false
 layout_mode = 1
 anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
 offset_left = 50.0
 offset_top = 90.0
 offset_right = 200.0
@@ -140,50 +186,19 @@ offset_bottom = 120.0
 text = "能量: 3/5"
 
 [node name="TimeSandDisplay" type="Label" parent="UILayer"]
+visible = false
 layout_mode = 1
 anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
 offset_left = 50.0
 offset_top = 120.0
 offset_right = 200.0
 offset_bottom = 150.0
-text = "时砂: 3"
-
-[node name="QuickItemSlots" type="HBoxContainer" parent="UILayer"]
-layout_mode = 1
-anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
-offset_left = 50.0
-offset_top = 160.0
-offset_right = 200.0
-offset_bottom = 200.0
-theme_override_constants/separation = 10
-
-[node name="QuickSlot1" type="Panel" parent="UILayer/QuickItemSlots"]
-visible = false
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="QuickSlot2" type="Panel" parent="UILayer/QuickItemSlots"]
-visible = false
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-size_flags_horizontal = 3
+text = "时砂: 2"
 
 [node name="SkillButtons" type="VBoxContainer" parent="UILayer"]
+visible = false
 layout_mode = 1
 anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
 offset_left = 50.0
 offset_top = 200.0
 offset_right = 250.0
@@ -206,12 +221,9 @@ layout_mode = 2
 text = "灼烧之刃 (3费)"
 
 [node name="EndTurnButton" type="Button" parent="UILayer"]
+visible = false
 layout_mode = 1
 anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
 offset_left = 50.0
 offset_top = 450.0
 offset_right = 200.0
@@ -219,12 +231,9 @@ offset_bottom = 480.0
 text = "结束回合 (Space)"
 
 [node name="EnemyInfo" type="Label" parent="UILayer"]
+visible = false
 layout_mode = 1
 anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
 offset_left = 800.0
 offset_top = 50.0
 offset_right = 1100.0
@@ -233,12 +242,9 @@ text = "敌人 HP: 50/50
 ATB: 0%"
 
 [node name="Instructions" type="Label" parent="UILayer"]
+visible = false
 layout_mode = 1
 anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
 offset_left = 300.0
 offset_top = 600.0
 offset_right = 900.0
