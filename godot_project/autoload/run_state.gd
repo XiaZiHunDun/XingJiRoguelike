@@ -300,14 +300,16 @@ func advance_zone() -> bool:
 	var current_index = zones.find(current_zone)
 	if current_index >= 0 and current_index < zones.size() - 1:
 		set_zone(zones[current_index + 1])
-		SaveManager.save_game(0)  # 自动存档
+		if not SaveManager.save_game(0):
+			GameLogger.error("RunState: 区域推进后自动存档失败")
 		return true
 	return false
 
 
 func _on_breakthrough_succeeded(new_realm, was_automatic: bool):
 	# 境界突破成功时自动存档
-	SaveManager.save_game(0)
+	if not SaveManager.save_game(0):
+		GameLogger.error("RunState: 突破后自动存档失败")
 
 func complete_current_node() -> bool:
 	# Mark the first uncleared node as completed

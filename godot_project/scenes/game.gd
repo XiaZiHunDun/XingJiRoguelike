@@ -384,6 +384,7 @@ func _on_zone_advance():
 	if victory_panel:
 		victory_panel.queue_free()
 		victory_panel = null
+	current_scene = null
 
 	if RunState.advance_zone():
 		_show_hub()
@@ -391,6 +392,9 @@ func _on_zone_advance():
 		_show_stub_message("区域探索", "已到达最后一个区域!")
 
 func _show_victory(xp: int, stardust: int, fragments: int, leveled_up: bool, breakthrough_available: bool, zone_complete: bool = false, faction_rewards: Dictionary = {}):
+	# 先清理战斗场景
+	_clear_current_scene()
+
 	# Create victory panel
 	victory_panel = Panel.new()
 	victory_panel.set_anchors_preset(Control.PRESET_CENTER)
@@ -454,9 +458,13 @@ func _on_victory_continue():
 	if victory_panel:
 		victory_panel.queue_free()
 		victory_panel = null
+	current_scene = null
 	_show_hub()
 
 func _show_defeat():
+	# 先清理战斗场景
+	_clear_current_scene()
+
 	# Create defeat panel
 	defeat_panel = Panel.new()
 	defeat_panel.set_anchors_preset(Control.PRESET_CENTER)
@@ -504,6 +512,7 @@ func _on_defeat_retry():
 	if defeat_panel:
 		defeat_panel.queue_free()
 		defeat_panel = null
+	current_scene = null
 	EventBus.system.run_ended.emit()
 	_show_main_menu()
 
@@ -1029,8 +1038,10 @@ func _show_save_overwrite_confirmation():
 	dlg.popup_centered()
 
 func _do_save():
-	SaveManager.save_game(0)
-	_show_save_notification()
+	if SaveManager.save_game(0):
+		_show_save_notification()
+	else:
+		_show_error_notification("保存失败，请检查磁盘空间")
 
 func _show_save_notification():
 	var notification = Label.new()
@@ -1039,6 +1050,16 @@ func _show_save_notification():
 	notification.z_index = 100
 	add_child(notification)
 	await get_tree().create_timer(1.5).timeout
+	notification.queue_free()
+
+func _show_error_notification(message: String):
+	var notification = Label.new()
+	notification.text = message
+	notification.set_anchors_preset(Control.PRESET_CENTER)
+	notification.z_index = 100
+	notification.modulate = Color(1, 0.3, 0.3)  # 红色提示
+	add_child(notification)
+	await get_tree().create_timer(2.0).timeout
 	notification.queue_free()
 
 func _handle_gamepad_confirm():
