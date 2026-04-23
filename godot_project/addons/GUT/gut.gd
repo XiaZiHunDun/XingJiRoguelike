@@ -1,27 +1,21 @@
 # addons/GUT/gut.gd
-# GUT (Godot Unit Test) v9 - Editor Plugin
-# 将此插件添加到Tools菜单
+# GUT (Godot Unit Test) - Editor Plugin
+# Phase 0
 
 @tool
 extends EditorPlugin
 
-var gut_panel: Control = null
-
 func _enter_tree():
-	# 添加GUT面板到编辑器
 	add_tool_menu_item("GUT - Run All Tests", _run_all_tests)
 
 func _exit_tree():
 	remove_tool_menu_item("GUT - Run All Tests")
-	if gut_panel:
-		gut_panel.queue_free()
 
 func _run_all_tests():
 	print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 	print("  Running GUT Tests...")
 	print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
-	# 查找所有测试脚本
 	var tests = _find_test_scripts()
 
 	if tests.size() == 0:
@@ -35,9 +29,8 @@ func _run_all_tests():
 
 	for test_path in tests:
 		var result = _run_test_file(test_path)
-		if result:
-			passed += result[0]
-			failed += result[1]
+		passed += result[0]
+		failed += result[1]
 
 	print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 	print("  Results: %d passed, %d failed" % [passed, failed])
@@ -76,26 +69,17 @@ func _run_test_file(test_path: String) -> Array:
 	var passed = 0
 	var failed = 0
 
-	# 获取所有测试方法
 	var methods = test_script.get_script_method_list()
 	for method_data in methods:
 		var method_name = method_data["name"]
 		if method_name.begins_with("test_"):
-			# 运行before_each
-			if instance.has_method("__before_each"):
-				instance.__before_each()
-
-			# 运行测试
 			var success = _run_single_test(instance, method_name)
-
-			# 运行after_each
-			if instance.has_method("__after_each"):
-				instance.__after_each()
-
 			if success:
 				passed += 1
 			else:
 				failed += 1
+
+	print("    ✓ %d passed, ✗ %d failed" % [passed, failed])
 
 	instance.free()
 	return [passed, failed]

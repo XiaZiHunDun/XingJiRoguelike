@@ -4,36 +4,91 @@
 
 extends SceneTree
 
-var _gut: Gut = null
+var _tests_passed: int = 0
+var _tests_failed: int = 0
 
 func _init():
-	# 创建GUT实例
-	_gut = Gut.new()
-	root.add_child(_gut)
+	print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+	print("  GUT Test Runner - Godot 4.x")
+	print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+	print("")
 
-	# 配置输出
-	_gut.connect("test_started", _on_test_started)
-	_gut.connect("test_ended", _on_test_ended)
-	_gut.connect("suite_started", _on_suite_started)
-	_gut.connect("suite_ended", _on_suite_ended)
-	_gut.connect("run_ended", _on_run_ended)
+	run_tests()
 
-	print("Starting GUT tests...")
-	_gut.run_tests()
+func run_tests():
+	var tests = _find_test_scripts()
 
-func _on_test_started(test_name: String):
-	print("  ↳ " + test_name)
+	if tests.size() == 0:
+		print("  No tests found in res://tests/")
+		quit()
+		return
 
-func _on_test_ended(test_name: String, was_passing: bool):
-	if not was_passing:
-		print("    ✗ FAILED")
+	print("  Found %d test files\n" % tests.size())
 
-func _on_suite_started(suite_name: String):
-	print("\n📁 " + suite_name)
+	for test_path in tests:
+		_run_test_file(test_path)
 
-func _on_suite_ended(suite_name: String):
-	pass
+	print("")
+	print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+	print("  Results: %d passed, %d failed" % [_tests_passed, _tests_failed])
+	print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
-func _on_run_ended():
-	print("\nTests complete.")
+	if _tests_failed == 0:
+		print("  ✓ All tests passed!")
+	else:
+		print("  ✗ Some tests failed.")
+
 	quit()
+
+func _find_test_scripts() -> Array:
+	var tests: Array = []
+	var dir = DirAccess.open("res://tests/")
+	if dir:
+		dir.list_dir_begin()
+		var file_name = dir.get_next()
+		while file_name != "":
+			if file_name.ends_with(".gd") and file_name.begins_with("test_"):
+				tests.append("res://tests/" + file_name)
+			file_name = dir.get_next()
+	return tests
+
+func _run_test_file(test_path: String):
+	print("  ↳ " + test_path.get_file())
+
+	var test_script: GDScript = load(test_path)
+	if not test_script:
+		print("    ✗ Failed to load script")
+		_tests_failed += 1
+		return
+
+	var instance = test_script.new()
+	if not instance:
+		print("    ✗ Failed to instantiate script")
+		_tests_failed += 1
+		return
+
+	var passed = 0
+	var failed = 0
+
+	# 获取所有测试方法
+	var methods = test_script.get_script_method_list()
+	for method_data in methods:
+		var method_name = method_data["name"]
+		if method_name.begins_with("test_"):
+			var success = _run_single_test(instance, method_name)
+			if success:
+				passed += 1
+				_tests_passed += 1
+			else:
+				failed += 1
+				_tests_failed += 1
+
+	print("    ✓ %d passed, ✗ %d failed" % [passed, failed])
+
+	instance.free()
+
+func _run_single_test(instance: Object, method_name: String) -> bool:
+	if instance.has_method(method_name):
+		instance.call(method_name)
+		return true
+	return false
