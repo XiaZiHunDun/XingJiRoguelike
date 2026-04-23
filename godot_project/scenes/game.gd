@@ -80,11 +80,11 @@ func _ready():
 
 func _input(event: InputEvent):
 	# S key quick save (slot 0)
-	if event is InputEventKey and event.pressed and event.keycode == KEY_S:
+	if event is InputEventKey and event.pressed and event.physical_keycode == KEY_S:
 		_quick_save()
 
 	# ESC key handling for panel/menu
-	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+	if event is InputEventKey and event.pressed and event.physical_keycode == KEY_ESCAPE:
 		_handle_escape()
 
 	# Gamepad input handling

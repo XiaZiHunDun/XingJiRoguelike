@@ -125,7 +125,7 @@ func _on_skill_config_pressed() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
-		match event.keycode:
+		match event.physical_keycode:
 			KEY_C:
 				character_detail_requested.emit()
 			KEY_K:

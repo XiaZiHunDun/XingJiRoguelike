@@ -356,7 +356,7 @@ func _input(event: InputEvent):
 		return
 
 	# 战斗阶段
-	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+	if event is InputEventKey and event.pressed and event.physical_keycode == KEY_ESCAPE:
 		_toggle_pause()
 		return
 
