@@ -11,7 +11,6 @@ script = ExtResource("2")
 
 [node name="UILayer" type="CanvasLayer" parent="."]
 
-# ==================== 角色选择界面 ====================
 [node name="CharacterSelect" type="Control" parent="UILayer"]
 layout_mode = 1
 anchors_preset = 15
@@ -45,16 +44,17 @@ mouse_filter = 0
 
 [node name="Title" type="Label" parent="UILayer/CharacterSelect/CenterPanel"]
 layout_mode = 2
+offset_top = 10.0
+offset_bottom = 50.0
 text = "选择你的角色"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Separator" type="HSeparator" parent="UILayer/CharacterSelect/CenterPanel"]
 layout_mode = 2
-offset_top = 50.0
-offset_bottom = 55.0
+offset_top = 55.0
+offset_bottom = 60.0
 
-# 战士选择卡片
 [node name="WarriorCard" type="Panel" parent="UILayer/CharacterSelect/CenterPanel"]
 layout_mode = 2
 offset_left = 20.0
@@ -78,7 +78,6 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_top = 45.0
-offset_right = 0.0
 offset_bottom = 145.0
 grow_horizontal = 2
 color = Color(0.3, 0.3, 0.5, 1)
@@ -99,10 +98,9 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 170.0
+offset_top = 200.0
 text = "选择战士"
 
-# 法师选择卡片
 [node name="MageCard" type="Panel" parent="UILayer/CharacterSelect/CenterPanel"]
 layout_mode = 2
 offset_left = 265.0
@@ -126,7 +124,6 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_top = 45.0
-offset_right = 0.0
 offset_bottom = 145.0
 grow_horizontal = 2
 color = Color(0.5, 0.3, 0.3, 1)
@@ -147,10 +144,9 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 170.0
+offset_top = 200.0
 text = "选择法师"
 
-# ==================== 战斗UI（默认隐藏）====================
 [node name="ATBBar" type="ProgressBar" parent="UILayer"]
 visible = false
 layout_mode = 1
