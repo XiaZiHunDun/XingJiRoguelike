@@ -1,0 +1,25 @@
+name: Godot Tests
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run GUT Tests
+        run: |
+          godot --headless -s addons/GUT/gut_cmdln.gd
+
+      - name: Upload test results
+        if: always()
+        run: |
+          echo "Test run completed"
