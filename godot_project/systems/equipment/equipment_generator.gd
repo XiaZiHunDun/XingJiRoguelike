@@ -1,0 +1,161 @@
+# systems/equipment/equipment_generator.gd
+# 装备生成器 - 根据区域等级随机生成装备
+
+class_name EquipmentGenerator
+extends Node
+
+# 可生成的装备类型列表
+enum EquipmentType {
+	GREATSWORD,    # 巨剑
+	STAFF,         # 法杖
+	DUALBLADE,     # 双刃
+	PLATE_ARMOR,   # 钢甲
+	ROBE,          # 法袍
+	LEATHER_ARMOR, # 皮甲
+	CULTIVATION_ROBE,  # 修真袍
+	ACCESSORY_1,   # 饰品1
+	ACCESSORY_2,   # 饰品2
+}
+
+# 唯一装备掉落率（普通怪）
+const UNIQUE_DROP_RATE_NORMAL: float = 0.02
+# 唯一装备掉落率（精英怪）
+const UNIQUE_DROP_RATE_ELITE: float = 0.08
+# 唯一装备掉落率（BOSS）
+const UNIQUE_DROP_RATE_BOSS: float = 0.20
+
+static func generate_equipment(zone_level: int, equipment_type: EquipmentType) -> EquipmentInstance:
+	var template_type = _get_template_type(equipment_type)
+	var template = EquipmentTemplates.get_template(template_type)
+
+	var instance = EquipmentInstance.new()
+	instance.definition = template
+	instance.rarity = Enums.Rarity.WHITE
+
+	# 生成技能槽（均匀分布 0 到 skill_slots_range.y）
+	var skill_count = randi() % (template.skill_slots_range.y + 1)
+	instance.skill_ids = []
+	for i in range(skill_count):
+		if template.skill_pool.size() > 0:
+			var skill_id = template.skill_pool[randi() % template.skill_pool.size()]
+			instance.skill_ids.append(skill_id)
+
+	# 生成随机等级（在区域等级附近波动）
+	instance.level = clamp(zone_level + randi_range(-3, 3), 1, 70)
+
+	# 生成穿戴需求
+	instance.wear_requirements = _generate_wear_requirements(template, instance.level)
+
+	# 生成词缀
+	instance._generate_affixes()
+
+	# 随机分配套装ID（30%概率）
+	if randf() < 0.30:
+		var set_id = EquipmentSetData.get_random_set_id()
+		instance.set_id = set_id
+
+	return instance
+
+static func generate_random_equipment(zone_level: int) -> EquipmentInstance:
+	"""根据区域等级生成随机类型的装备"""
+	var equipment_types = EquipmentType.values()
+	var random_type = equipment_types[randi() % equipment_types.size()]
+	return generate_equipment(zone_level, random_type)
+
+static func _get_template_type(equipment_type: EquipmentType) -> String:
+	match equipment_type:
+		EquipmentType.GREATSWORD: return "巨剑"
+		EquipmentType.STAFF: return "法杖"
+		EquipmentType.DUALBLADE: return "双刃"
+		EquipmentType.PLATE_ARMOR: return "钢甲"
+		EquipmentType.ROBE: return "法袍"
+		EquipmentType.LEATHER_ARMOR: return "皮甲"
+		EquipmentType.CULTIVATION_ROBE: return "修真袍"
+		EquipmentType.ACCESSORY_1: return "饰品1"
+		EquipmentType.ACCESSORY_2: return "饰品2"
+	return "巨剑"
+
+static func _generate_wear_requirements(template: EquipmentDefinition, level: int) -> Dictionary:
+	"""生成穿戴需求（属性0-3个 + 境界 + 技能等级）；境界键与 can_wear 一致，取值为 1–5（RealmType）"""
+	var requirements: Dictionary = {}
+	var num_requirements = randi() % 4  # 0-3 个属性需求
+
+	var options = ["体质", "精神", "敏捷"]
+	options.shuffle()
+
+	for i in range(num_requirements):
+		var attr = options[i]
+		# 基础值 10 + 等级 * 系数 * 随机因子
+		var base_value = 10.0 + float(level) * template.level_requirement_base * (0.8 + randf() * 0.4)
+		requirements[attr] = ceili(base_value)
+
+	# 随机添加境界需求（50%概率）：按装备等级映射到境界阶位 1–5
+	if randf() < 0.5:
+		requirements["境界"] = clampi((level + 9) / 10, 1, 5)
+
+	# 随机添加技能等级需求（50%概率）：须为 {技能显示名: 等级}，与 can_wear 一致
+	if randf() < 0.5 and template.skill_pool.size() > 0 and DataManager:
+		var sid: StringName = template.skill_pool[randi() % template.skill_pool.size()]
+		var sk := DataManager.get_skill(sid)
+		if sk and sk.name != "":
+			requirements["技能等级"] = {str(sk.name): mini((level + 2) / 3, 20)}
+
+	return requirements
+
+# ===== 敌人掉落集成 =====
+
+static func try_generate_equipment_drop(enemy_level: int, drop_chance: float = 0.2, enemy_type: int = 0) -> EquipmentInstance:
+	"""尝试为敌人掉落生成装备
+
+	Args:
+		enemy_level: 敌人等级
+		drop_chance: 基础掉落概率
+		enemy_type: 0=普通, 1=精英, 2=BOSS
+	"""
+	if randf() > drop_chance:
+		return null
+
+	# 判断是否掉落唯一装备
+	var unique_rate = UNIQUE_DROP_RATE_NORMAL
+	if enemy_type == 1:
+		unique_rate = UNIQUE_DROP_RATE_ELITE
+	elif enemy_type == 2:
+		unique_rate = UNIQUE_DROP_RATE_BOSS
+
+	if randf() < unique_rate:
+		var unique = try_generate_unique_equipment(enemy_level, enemy_type)
+		if unique:
+			return unique
+
+	return generate_random_equipment(enemy_level)
+
+
+static func try_generate_unique_equipment(zone_level: int, enemy_type: int) -> EquipmentInstance:
+	"""尝试生成唯一装备
+
+	Args:
+		zone_level: 区域等级
+		enemy_type: 0=普通, 1=精英, 2=BOSS
+
+	Returns:
+		唯一装备实例，或null
+	"""
+	# BOSS掉落更高级别的唯一装备
+	var min_rarity = Enums.Rarity.ORANGE
+	if enemy_type == 2:
+		min_rarity = Enums.Rarity.ORANGE  # BOSS必出橙色传说
+	elif enemy_type == 1:
+		min_rarity = Enums.Rarity.BLUE  # 精英可能出蓝色
+
+	var unique_data = UniqueEquipmentData.get_appropriate_unique(zone_level)
+	if unique_data.is_empty():
+		return null
+
+	# 检查稀有度是否符合要求
+	var rarity = unique_data.get("rarity", Enums.Rarity.WHITE)
+	if rarity < min_rarity:
+		return null
+
+	var inst = EquipmentInstance.new()
+	inst.setup_unique(unique_data)
+	return inst

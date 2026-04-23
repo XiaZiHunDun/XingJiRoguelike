@@ -1,0 +1,19 @@
+# Godot
+.godot/
+.import/
+*.import
+*.tps
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cursor
+.cursor/
+
+# Temporary
+*.tmp
+*.bak

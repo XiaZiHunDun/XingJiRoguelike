@@ -1,0 +1,110 @@
+[gd_scene load_steps=2 format=3 uid="uid://settings_panel"]
+
+[ext_resource type="Script" path="res://scenes/ui/settings_panel.gd" id="1"]
+
+[node name="SettingsPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -240.0
+offset_top = -280.0
+offset_right = 240.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Header" type="VBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBox/Header"]
+layout_mode = 2
+text = "设置"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="TabContainer" type="TabContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Auxiliary" type="MarginContainer" parent="VBox/TabContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="VBox/TabContainer/Auxiliary"]
+layout_mode = 2
+
+[node name="ColorblindLabel" type="Label" parent="VBox/TabContainer/Auxiliary/VBox"]
+layout_mode = 2
+text = "色盲模式"
+
+[node name="ColorblindToggle" type="CheckButton" parent="VBox/TabContainer/Auxiliary/VBox"]
+layout_mode = 2
+button_pressed = false
+text = "启用色盲友好配色"
+
+[node name="HSeparator1" type="HSeparator" parent="VBox/TabContainer/Auxiliary/VBox"]
+layout_mode = 2
+
+[node name="AnimationLabel" type="Label" parent="VBox/TabContainer/Auxiliary/VBox"]
+layout_mode = 2
+text = "动画效果"
+
+[node name="AnimationDropdown" type="OptionButton" parent="VBox/TabContainer/Auxiliary/VBox"]
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "完整"
+popup/item_0/id = 0
+popup/item_1/text = "简约"
+popup/item_1/id = 1
+popup/item_2/text = "关闭"
+popup/item_2/id = 2
+selected = 0
+
+[node name="HSeparator2" type="HSeparator" parent="VBox/TabContainer/Auxiliary/VBox"]
+layout_mode = 2
+
+[node name="InfoDensityLabel" type="Label" parent="VBox/TabContainer/Auxiliary/VBox"]
+layout_mode = 2
+text = "信息密度"
+
+[node name="InfoDensityDropdown" type="OptionButton" parent="VBox/TabContainer/Auxiliary/VBox"]
+layout_mode = 2
+item_count = 2
+popup/item_0/text = "标准"
+popup/item_0/id = 0
+popup/item_1/text = "简洁"
+popup/item_1/id = 1
+selected = 0
+
+[node name="BottomBox" type="VBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="VBox/BottomBox"]
+layout_mode = 2
+
+[node name="CloseButton" type="Button" parent="VBox/BottomBox"]
+layout_mode = 2
+text = "关闭"
