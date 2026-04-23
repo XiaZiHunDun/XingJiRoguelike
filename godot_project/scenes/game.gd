@@ -699,6 +699,9 @@ func _on_shop_node_selected(node_data: MapNode):
 	RunState.complete_current_node()
 
 func _on_shop_node_closed():
+	if current_scene:
+		current_scene.queue_free()
+		current_scene = null
 	_refresh_map()
 
 func _on_collection_node_selected(node_data: MapNode):

@@ -276,7 +276,8 @@ func _start_battle():
 
 		# 连接敌人信号
 		e.hp_changed.connect(_on_enemy_hp_changed.bind(e))
-		e.atb_component.atb_changed.connect(_on_enemy_atb_changed.bind(e))
+		if e.atb_component:
+			e.atb_component.atb_changed.connect(_on_enemy_atb_changed.bind(e))
 		# 连接精英召唤信号
 		if e.elite_behavior:
 			e.elite_behavior.summon_requested.connect(_on_elite_summon_requested.bind(e))
@@ -286,8 +287,9 @@ func _start_battle():
 
 	# 连接玩家信号
 	player.hp_changed.connect(_on_player_hp_changed)
-	player.atb_component.atb_changed.connect(_on_player_atb_changed)
-	player.atb_component.atb_full.connect(_on_player_atb_full)
+	if player.atb_component:
+		player.atb_component.atb_changed.connect(_on_player_atb_changed)
+		player.atb_component.atb_full.connect(_on_player_atb_full)
 
 	# 尝试生成势力敌人
 	_try_spawn_faction_enemy()
@@ -572,7 +574,8 @@ func _try_spawn_faction_enemy():
 
 	# 连接信号
 	e.hp_changed.connect(_on_enemy_hp_changed.bind(e))
-	e.atb_component.atb_changed.connect(_on_enemy_atb_changed.bind(e))
+	if e.atb_component:
+		e.atb_component.atb_changed.connect(_on_enemy_atb_changed.bind(e))
 
 	EventBus.faction.faction_enemy_spawned.emit(faction_type)
 	return true
@@ -648,7 +651,8 @@ func _on_elite_summon_requested(elite: Enemy, count: int):
 		enemies.append(e)
 		battle_manager.active_enemies.append(e)
 		e.hp_changed.connect(_on_enemy_hp_changed.bind(e))
-		e.atb_component.atb_changed.connect(_on_enemy_atb_changed.bind(e))
+		if e.atb_component:
+			e.atb_component.atb_changed.connect(_on_enemy_atb_changed.bind(e))
 		# 连接召唤小怪死亡信号
 		if e.has_signal("died"):
 			e.died.connect(battle_manager._on_enemy_died.bind(e))
@@ -692,7 +696,8 @@ func apply_elemental_damage(element: Enums.Element, damage: float, source):
 	for enemy in battle_manager.active_enemies:
 		if is_instance_valid(enemy):
 			enemy.take_damage(damage)
-			enemy.element_status.apply_element(element)
+			if enemy.element_status:
+				enemy.element_status.apply_element(element)
 
 func spawn_meteor(damage: float, source):
 	"""生成陨石对所有敌人造成伤害"""
@@ -701,7 +706,8 @@ func spawn_meteor(damage: float, source):
 	for enemy in battle_manager.active_enemies:
 		if is_instance_valid(enemy):
 			enemy.take_damage(damage)
-			enemy.element_status.apply_element(Enums.Element.FIRE)
+			if enemy.element_status:
+				enemy.element_status.apply_element(Enums.Element.FIRE)
 
 func has_enemies() -> bool:
 	return not battle_manager.active_enemies.is_empty()
