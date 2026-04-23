@@ -68,10 +68,6 @@ end_turn={
 ]
 }
 
-[plugins]
-
-GUT="res://addons/GUT/gut.gd"
-
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
