@@ -5,7 +5,8 @@ extends Control
 
 signal close_requested()
 
-@onready var quests_container: VBoxContainer = $VBox/QuestsScroll/QuestsContainer
+@onready var main_quest_container: VBoxContainer = $VBox/MainQuestScroll/MainQuestContainer
+@onready var side_quest_container: VBoxContainer = $VBox/SideQuestScroll/SideQuestContainer
 @onready var message_label: Label = $VBox/BottomBox/MessageLabel
 @onready var close_button: Button = $VBox/BottomBox/CloseButton
 
@@ -23,26 +24,38 @@ func _ready():
 
 func _refresh_display():
 	# 清空现有列表
-	for child in quests_container.get_children():
+	for child in main_quest_container.get_children():
+		child.queue_free()
+	for child in side_quest_container.get_children():
 		child.queue_free()
 
 	# 根据筛选获取任务
-	var quests = []
+	var main_quests = []
+	var side_quests = []
 	match current_filter:
 		1:
-			quests = QuestData.get_main_story_quests()
+			main_quests = QuestData.get_main_story_quests()
+			side_quests = []
 		2:
-			quests = QuestData.get_side_quests()
+			main_quests = []
+			side_quests = QuestData.get_side_quests()
 		_:
-			quests = QuestData.get_all_quests()
+			main_quests = QuestData.get_main_story_quests()
+			side_quests = QuestData.get_side_quests()
 
-	# 添加任务行
-	for quest in quests:
+	# 添加主线任务行
+	for quest in main_quests:
 		var quest_id = quest.get("id", "")
 		var progress_info = QuestSystem.get_quest_progress(quest_id)
-		_add_quest_row(quest, progress_info)
+		_add_quest_row(quest, progress_info, main_quest_container)
 
-func _add_quest_row(quest: Dictionary, progress_info: Dictionary):
+	# 添加支线任务行
+	for quest in side_quests:
+		var quest_id = quest.get("id", "")
+		var progress_info = QuestSystem.get_quest_progress(quest_id)
+		_add_quest_row(quest, progress_info, side_quest_container)
+
+func _add_quest_row(quest: Dictionary, progress_info: Dictionary, container: VBoxContainer):
 	var vbox = VBoxContainer.new()
 	vbox.custom_minimum_size = Vector2(0, 100)
 
@@ -154,7 +167,7 @@ func _add_quest_row(quest: Dictionary, progress_info: Dictionary):
 	var hsep = HSeparator.new()
 	vbox.add_child(hsep)
 
-	quests_container.add_child(vbox)
+	container.add_child(vbox)
 
 func _on_start_quest(quest_id: String):
 	if QuestSystem.start_quest(quest_id):
@@ -196,3 +209,12 @@ func _show_message(msg: String):
 
 func _on_close_pressed():
 	close_requested.emit()
+
+func _exit_tree():
+	# 断开 EventBus 连接，防止重复连接
+	if EventBus.quest.quest_updated.is_connected(_on_quest_updated):
+		EventBus.quest.quest_updated.disconnect(_on_quest_updated)
+	if EventBus.quest.quest_completed.is_connected(_on_quest_completed):
+		EventBus.quest.quest_completed.disconnect(_on_quest_completed)
+	if EventBus.quest.quest_reward_claimed.is_connected(_on_reward_claimed):
+		EventBus.quest.quest_reward_claimed.disconnect(_on_reward_claimed)

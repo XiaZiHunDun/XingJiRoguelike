@@ -20,7 +20,7 @@ const REALMS: Dictionary = {
 		"display_name": "凡人身",
 		"level_range": Vector2i(1, 10),
 		"amplifier_slots": 1,
-		"breakthrough_requirements": {"体质": 25, "精神": 20, "敏捷": 20},
+		"breakthrough_requirements": {"体质": 50, "精神": 40, "敏捷": 40},
 		"breakthrough_cost": 50,
 		"special_ability": "基础修炼"
 	},
@@ -29,7 +29,7 @@ const REALMS: Dictionary = {
 		"display_name": "感应境",
 		"level_range": Vector2i(11, 20),
 		"amplifier_slots": 1,
-		"breakthrough_requirements": {"体质": 45, "精神": 35, "敏捷": 35},
+		"breakthrough_requirements": {"体质": 90, "精神": 70, "敏捷": 70},
 		"breakthrough_cost": 100,
 		"special_ability": "星尘感应"
 	},
@@ -38,7 +38,7 @@ const REALMS: Dictionary = {
 		"display_name": "聚尘境",
 		"level_range": Vector2i(21, 30),
 		"amplifier_slots": 2,
-		"breakthrough_requirements": {"体质": 70, "精神": 55, "敏捷": 55},
+		"breakthrough_requirements": {"体质": 140, "精神": 110, "敏捷": 110},
 		"breakthrough_cost": 150,
 		"special_ability": "能量凝聚"
 	},
@@ -47,7 +47,7 @@ const REALMS: Dictionary = {
 		"display_name": "凝核境",
 		"level_range": Vector2i(31, 40),
 		"amplifier_slots": 3,
-		"breakthrough_requirements": {"体质": 100, "精神": 80, "敏捷": 80},
+		"breakthrough_requirements": {"体质": 200, "精神": 160, "敏捷": 160},
 		"breakthrough_cost": 200,
 		"special_ability": "核爆之力"
 	},
@@ -56,8 +56,8 @@ const REALMS: Dictionary = {
 		"display_name": "星尘境",
 		"level_range": Vector2i(41, 50),
 		"amplifier_slots": 3,
-		"breakthrough_requirements": {"体质": 140, "精神": 110, "敏捷": 110},
-		"breakthrough_cost": 200,
+		"breakthrough_requirements": {"体质": 280, "精神": 220, "敏捷": 220},
+		"breakthrough_cost": 300,
 		"special_ability": "星尘之躯"
 	},
 	RealmDefinition.RealmType.PARTICLE: {
@@ -65,7 +65,7 @@ const REALMS: Dictionary = {
 		"display_name": "粒子境",
 		"level_range": Vector2i(51, 60),
 		"amplifier_slots": 3,
-		"breakthrough_requirements": {"体质": 200, "精神": 160, "敏捷": 160},
+		"breakthrough_requirements": {"体质": 380, "精神": 300, "敏捷": 300},
 		"breakthrough_cost": 300,
 		"special_ability": "粒子化"
 	},
@@ -74,8 +74,8 @@ const REALMS: Dictionary = {
 		"display_name": "星火境",
 		"level_range": Vector2i(61, 70),
 		"amplifier_slots": 3,
-		"breakthrough_requirements": {"体质": 0, "精神": 0, "敏捷": 0},
-		"breakthrough_cost": 0,
+		"breakthrough_requirements": {"体质": 380, "精神": 300, "敏捷": 300},
+		"breakthrough_cost": 200,
 		"special_ability": "终极形态"
 	}
 }

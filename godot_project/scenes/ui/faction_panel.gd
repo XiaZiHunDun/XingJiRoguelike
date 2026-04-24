@@ -7,24 +7,23 @@ signal close_requested()
 
 enum Tab { INFO, QUESTS, LORE }
 
-@onready var info_tab: Button = $VBox/TabsContainer/InfoTab
-@onready var quests_tab: Button = $VBox/TabsContainer/QuestsTab
-@onready var lore_tab: Button = $VBox/TabsContainer/LoreTab
-@onready var info_container: VBoxContainer = $VBox/InfoContainer
-@onready var quests_container: VBoxContainer = $VBox/QuestsContainer
-@onready var lore_container: VBoxContainer = $VBox/LoreContainer
-@onready var factions_container: VBoxContainer = $VBox/InfoContainer/FactionsScroll/FactionsContainer
-@onready var reputation_label: Label = $VBox/InfoContainer/ReputationLabel
-@onready var inventory_container: VBoxContainer = $VBox/InfoContainer/InventoryScroll/InventoryContainer
-@onready var exchange_container: VBoxContainer = $VBox/InfoContainer/ExchangeScroll/ExchangeContainer
-@onready var quests_list: VBoxContainer = $VBox/QuestsContainer/QuestsScroll/QuestsList
-@onready var lore_scroll: ScrollContainer = $VBox/LoreContainer/LoreScroll
-@onready var lore_content: VBoxContainer = $VBox/LoreContainer/LoreScroll/LoreContent
-@onready var status_label: Label = $VBox/BottomBox/StatusLabel
-@onready var close_button: Button = $VBox/BottomBox/CloseButton
+@onready var info_tab: Button = $MainVBox/TabsContainer/InfoTab
+@onready var quests_tab: Button = $MainVBox/TabsContainer/QuestsTab
+@onready var lore_tab: Button = $MainVBox/TabsContainer/LoreTab
+@onready var info_container: VBoxContainer = $MainVBox/ContentPanel/ContentVBox/InfoContainer
+@onready var quests_container: VBoxContainer = $MainVBox/ContentPanel/ContentVBox/QuestsContainer
+@onready var lore_container: VBoxContainer = $MainVBox/ContentPanel/ContentVBox/LoreContainer
+@onready var factions_container: VBoxContainer = $MainVBox/ContentPanel/ContentVBox/InfoContainer/FactionsScroll/FactionsContainer
+@onready var reputation_label: Label = $MainVBox/ContentPanel/ContentVBox/InfoContainer/ReputationSection/ReputationVBox/ReputationLabel
+@onready var inventory_container: VBoxContainer = $MainVBox/ContentPanel/ContentVBox/InfoContainer/InventorySection/InventoryVBox/InventoryScroll/InventoryContainer
+@onready var exchange_container: VBoxContainer = $MainVBox/ContentPanel/ContentVBox/InfoContainer/ExchangeSection/ExchangeVBox/ExchangeScroll/ExchangeContainer
+@onready var quests_list: VBoxContainer = $MainVBox/ContentPanel/ContentVBox/QuestsContainer/QuestsScroll/QuestsList
+@onready var lore_scroll: ScrollContainer = $MainVBox/ContentPanel/ContentVBox/LoreContainer/LoreScroll
+@onready var lore_content: VBoxContainer = $MainVBox/ContentPanel/ContentVBox/LoreContainer/LoreScroll/LoreContent
+@onready var status_label: Label = $MainVBox/BottomBox/StatusLabel
+@onready var close_button: Button = $MainVBox/BottomBox/CloseButton
 
 var current_tab: Tab = Tab.INFO
-var selected_faction: String = ""
 var faction_items: Dictionary = {}
 var narrative_popup_scene = preload("res://scenes/ui/narrative_popup.tscn")
 
@@ -37,6 +36,15 @@ func _ready():
 	# 连接叙事事件
 	EventBus.faction.narrative_triggered.connect(_on_narrative_triggered)
 
+	_refresh_display()
+
+
+func _on_tab_changed(tab_name: String) -> void:
+	"""子组件标签页切换回调"""
+	match tab_name:
+		"INFO": current_tab = Tab.INFO
+		"QUESTS": current_tab = Tab.QUESTS
+		"LORE": current_tab = Tab.LORE
 	_refresh_display()
 
 func _refresh_display():
@@ -66,7 +74,6 @@ func _show_factions():
 	for child in factions_container.get_children():
 		child.queue_free()
 
-	var joinable = FactionData.get_joinable_factions()
 	var joined = FactionSystem.get_instance().get_joined_faction() if FactionSystem.get_instance() else ""
 
 	for faction_name in FactionData.get_all_factions():
@@ -460,3 +467,8 @@ func _on_narrative_finished():
 
 func _on_close_pressed():
 	close_requested.emit()
+
+func _exit_tree():
+	# 断开 EventBus 连接，防止重复连接
+	if EventBus.faction.narrative_triggered.is_connected(_on_narrative_triggered):
+		EventBus.faction.narrative_triggered.disconnect(_on_narrative_triggered)

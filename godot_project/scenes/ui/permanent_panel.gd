@@ -29,7 +29,7 @@ func _refresh_display():
 
 func _add_enhancement_row(def: EnhancementDefinition):
 	var hbox = HBoxContainer.new()
-	hbox.custom_minimum_size = Vector2(0, 40)
+	hbox.custom_minimum_size = Vector2(0, 44)
 
 	# 名称和属性
 	var info_label = Label.new()
@@ -37,11 +37,39 @@ func _add_enhancement_row(def: EnhancementDefinition):
 	info_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hbox.add_child(info_label)
 
-	# 剩余次数
+	# 剩余次数进度条
 	var remaining = RunState.get_enhancement_remaining(def.id)
+	var progress_bar = ProgressBar.new()
+	progress_bar.custom_minimum_size = Vector2(120, 16)
+	progress_bar.max_value = def.max_uses
+	progress_bar.value = remaining
+	progress_bar.show_percentage = false
+	# 设置进度条样式
+	var bg_style = StyleBoxFlat.new()
+	bg_style.bg_color = Color(0.08, 0.1, 0.15, 0.8)
+	bg_style.border_color = Color(0.2, 0.35, 0.5, 0.5)
+	bg_style.corner_radius_top_left = 3
+	bg_style.corner_radius_top_right = 3
+	bg_style.corner_radius_bottom_left = 3
+	bg_style.corner_radius_bottom_right = 3
+	progress_bar.add_theme_stylebox_override("background", bg_style)
+
+	var fill_style = StyleBoxFlat.new()
+	fill_style.bg_color = Color(0.3, 0.85, 1.0, 0.85)
+	fill_style.border_color = Color(0.4, 0.9, 1.0, 0.7)
+	fill_style.corner_radius_top_left = 3
+	fill_style.corner_radius_top_right = 3
+	fill_style.corner_radius_bottom_left = 3
+	fill_style.corner_radius_bottom_right = 3
+	progress_bar.add_theme_stylebox_override("fill", fill_style)
+
+	hbox.add_child(progress_bar)
+
+	# 次数文本
 	var count_label = Label.new()
-	count_label.text = "剩余: %d/%d" % [remaining, def.max_uses]
-	count_label.custom_minimum_size = Vector2(100, 0)
+	count_label.text = "%d/%d" % [remaining, def.max_uses]
+	count_label.custom_minimum_size = Vector2(70, 0)
+	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	hbox.add_child(count_label)
 
 	# 使用按钮

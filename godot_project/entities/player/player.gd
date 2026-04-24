@@ -17,12 +17,6 @@ var base_attributes: Dictionary = {"体质": 40, "精神": 30, "敏捷": 30}
 var equipment_bonuses: Dictionary = {"体质": 0, "精神": 0, "敏捷": 0}
 var amplifier_multipliers: Dictionary = {"体质": 1.0, "精神": 1.0, "敏捷": 1.0}
 
-# 境界系统
-var realm: RealmDefinition.RealmType = RealmDefinition.RealmType.MORTAL
-var level: int = 1
-var xp: int = 0
-var amplifier_slots: Array = []  # Array of equipped amplifiers
-
 # 共鸣系统加成
 var resonance_bonuses: Dictionary = {}  # 当前激活的共鸣效果
 var physical_damage_bonus: float = 0.0
@@ -42,26 +36,7 @@ var desert_hp_regen: float = 0.0  # 沙漠生命恢复
 var damage_reduction: float = 0.0  # 受伤减免
 var dodge_rate_bonus: float = 0.0  # 闪避率
 var crit_damage_bonus: float = 0.0  # 暴击伤害
-
-# 境界系统加成
-var realm_ability_bonuses: Dictionary = {}  # 境界特权加成
-var realm_energy_bonus: int = 0  # 能量上限加成
-var realm_skill_power_bonus: float = 0.0  # 技能效果加成
-var realm_atb_speed_bonus: float = 0.0  # ATB速度加成
-var realm_attribute_multiplier: float = 1.0  # 属性乘数
-var realm_immune_to_stun: bool = false  # 免疫眩晕
-var realm_immune_to_slow: bool = false  # 免疫减速
-var realm_atb_cap_override: int = 0  # ATB上限覆盖值（0表示使用默认值）
-
-static func _get_next_realm(current_realm: RealmDefinition.RealmType) -> RealmDefinition.RealmType:
-	match current_realm:
-		RealmDefinition.RealmType.MORTAL: return RealmDefinition.RealmType.SENSING
-		RealmDefinition.RealmType.SENSING: return RealmDefinition.RealmType.GATHERING
-		RealmDefinition.RealmType.GATHERING: return RealmDefinition.RealmType.CORE
-		RealmDefinition.RealmType.CORE: return RealmDefinition.RealmType.STARDUST
-		RealmDefinition.RealmType.STARDUST: return RealmDefinition.RealmType.PARTICLE
-		RealmDefinition.RealmType.PARTICLE: return RealmDefinition.RealmType.STARFIRE
-		_: return RealmDefinition.RealmType.STARFIRE
+var armor_bonus: int = 0  # 护甲加成
 
 # 唯一装备效果加成（运行时计算）
 var unique_lifesteal: float = 0.0       # 生命汲取
@@ -129,6 +104,7 @@ func equip(instance: EquipmentInstance) -> void:
 		_refresh_skills()
 		apply_affixes()
 		RunState.capture_weapon_from_player(self)
+		EventBus.equipment.equipment_equipped.emit(instance, instance.get_slot())
 
 
 func equip_default_weapon():
@@ -162,7 +138,7 @@ func _on_atb_full(entity):
 	# 这里会触发UI显示可以使用的技能
 	pass
 
-func take_damage(amount: float):
+func take_damage(amount: float, attacker: Node = null):
 	# 应用防御减伤：防御 / (防御 + 100)
 	var defense = get_defense()
 	var damage_reduction = float(defense) / (defense + 100.0)
@@ -174,18 +150,46 @@ func take_damage(amount: float):
 
 	current_hp = max(0, current_hp - int(reduced_amount))
 	hp_changed.emit(current_hp, max_hp)
+
+	# 应用以牙还牙词缀效果（受到伤害时20%几率对敌人造成同等伤害）
+	if reduced_amount > 0 and attacker and attacker is Enemy:
+		_apply_retaliate(reduced_amount, attacker)
+
 	if current_hp <= 0:
 		died.emit()
+
+func _apply_retaliate(damage: float, attacker: Enemy):
+	"""应用以牙还牙词缀效果：对攻击者造成反射伤害"""
+	if not equipped_weapon:
+		return
+
+	# 检查武器是否有以牙还牙词缀
+	for affix in equipped_weapon.affixes:
+		if not affix:
+			continue
+		var trigger_condition = AffixEffects.get_triggered_affix_condition(affix)
+		if trigger_condition == "retaliate":
+			var result = AffixEffects.check_triggered_affix(self, "retaliate")
+			if result.get("activated", false):
+				var effect = AffixEffects.apply_triggered_affix(self, "retaliate", affix.value)
+				var reflect_ratio = effect.get("reflect_damage", 0.0)
+				if reflect_ratio > 0:
+					var reflect_damage = damage * reflect_ratio
+					attacker.take_damage(reflect_damage)
 
 func get_defense() -> int:
 	"""获取玩家总防御力"""
 	var total_defense = 0
 	if equipped_weapon:
 		total_defense += equipped_weapon.get_defense()
-	# 应用唯一装备防御加成（已在defense_mult中）
+	total_defense += armor_bonus
 	var unique_bonuses = RunState.get_unique_equipment_bonuses() if RunState else {}
 	total_defense = int(total_defense * unique_bonuses.get("defense_mult", 1.0))
 	return total_defense
+
+func add_armor(amount: int) -> void:
+	"""添加护甲加成"""
+	armor_bonus += amount
 
 func get_lifesteal() -> float:
 	"""获取生命汲取比例"""
@@ -278,7 +282,13 @@ func can_breakthrough() -> bool:
 	"""检查是否可以突破 - 正常突破需要属性达标"""
 	var realm_data = RealmData.get_realm_data(realm)
 	var requirements: Dictionary = realm_data.get("breakthrough_requirements", {})
-	var attributes = character_definition.base_attributes if character_definition else {"体质": 0, "精神": 0, "敏捷": 0}
+
+	# 使用有效属性（包含装备加成、增幅器乘数、境界特权）
+	var attributes = {
+		"体质": get_effective_attribute("体质"),
+		"精神": get_effective_attribute("精神"),
+		"敏捷": get_effective_attribute("敏捷")
+	}
 
 	# 检查属性是否达标
 	for attr in requirements.keys():
@@ -305,11 +315,11 @@ func breakthrough(trial: bool = false) -> bool:
 		return false  # 已经是最高境界
 
 	var cost = get_breakthrough_cost(trial)
-	if RunState.stardust < cost:
+	if not RunState.can_spend_stardust(cost):
 		return false  # 星尘不足
 
 	# 消耗星尘
-	RunState.stardust -= cost
+	RunState.spend_stardust(cost)
 
 	# 保存旧境界用于realm_changed信号
 	var old_realm = realm
@@ -346,9 +356,12 @@ func apply_realm_ability() -> void:
 	var ability = realm_data.get("special_ability", "")
 
 	match ability:
+		"基础修炼":
+			# 效果：基础境界，无特殊加成
+			pass
 		"星尘感应":
-			# 效果：地图上显示隐藏采集点，更易找到稀有材料
-			# 由地图系统处理
+			# 效果：材料获取量+20%，更容易发现稀有采集点
+			# 材料加成由RunState或MapGenerator处理
 			pass
 		"能量凝聚":
 			# 效果：能量上限+50，可使用中级技能
@@ -358,17 +371,19 @@ func apply_realm_ability() -> void:
 			realm_skill_power_bonus = 0.15
 			realm_atb_speed_bonus = 0.10
 		"星尘之躯":
-			# 效果：所有基础属性+20%，ATB速度上限突破至350
-			realm_attribute_multiplier = 1.20
-			realm_atb_cap_override = 350
+			# 效果：所有基础属性+15%，ATB速度上限突破至450
+			realm_attribute_multiplier = 1.15
+			realm_atb_cap_override = 450
 		"粒子化":
-			# 效果：解锁粒子系技能，免疫眩晕和减速
+			# 效果：免疫眩晕和减速，受伤减免+10%
 			realm_immune_to_stun = true
 			realm_immune_to_slow = true
+			damage_reduction += 0.10
 		"终极形态":
-			# 效果：解锁终极技能变体，所有属性达到顶峰
-			# 终极形态是最终境界，属性加成已经体现在属性成长中
-			pass
+			# 效果：所有基础属性+20%，ATB上限500，暴击伤害+25%
+			realm_attribute_multiplier = 1.20
+			realm_atb_cap_override = 500
+			crit_damage_bonus += 0.25
 
 	# 刷新属性
 	_refresh_attributes()
@@ -376,12 +391,12 @@ func apply_realm_ability() -> void:
 
 func adjust_attribute(attr_name: String, delta: int) -> void:
 	"""星尘重塑：50星尘可微调2点属性"""
-	if RunState.stardust < 50:
+	if not RunState.can_spend_stardust(50):
 		return
 	if abs(delta) > 2:
 		return  # 只能微调2点
 
-	RunState.stardust -= 50
+	RunState.spend_stardust(50)
 	if character_definition and character_definition.base_attributes.has(attr_name):
 		character_definition.base_attributes[attr_name] += delta
 
@@ -396,8 +411,16 @@ func apply_affixes() -> void:
 	if equipped_weapon:
 		all_affixes += equipped_weapon.affixes
 
-	# 应用恒定型词缀
+	# 应用恒定型词缀并收集激活的词缀
+	var activated_affixes: Array = []
+	for affix in all_affixes:
+		if affix is AffixDefinition:
+			activated_affixes.append(affix)
 	AffixEffects.apply_constant_affixes(self, all_affixes)
+
+	# 通知词缀激活事件
+	for affix in activated_affixes:
+		EventBus.equipment.affix_activated.emit(self, affix.id)
 
 	# 更新共鸣效果
 	update_resonance()
@@ -497,7 +520,14 @@ func update_set_effects() -> void:
 		equipped_items.append(equipped_weapon)
 
 	# 计算套装效果
+	var previous_sets = set_bonuses.keys()
 	set_bonuses = EquipmentSetData.calculate_set_bonuses(equipped_items)
+	var current_sets = set_bonuses.keys()
+
+	# 通知失效的套装
+	for set_id in previous_sets:
+		if not current_sets.has(set_id):
+			EventBus.equipment.set_bonus_deactivated.emit(set_id)
 
 	# 应用套装加成
 	for effect_name in set_bonuses:
@@ -515,6 +545,11 @@ func update_set_effects() -> void:
 				dodge_rate_bonus += value
 			"暴击伤害":
 				crit_damage_bonus += value
+
+	# 通知新激活的套装效果
+	for set_id in current_sets:
+		if not previous_sets.has(set_id):
+			EventBus.equipment.set_bonus_activated.emit(set_id, 1)  # 简化版，只传set_id和piece_count=1
 
 func _refresh_attributes() -> void:
 	"""刷新玩家属性计算"""

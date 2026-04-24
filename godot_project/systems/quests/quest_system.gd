@@ -23,6 +23,8 @@ func _ready():
 	EventBus.system.realm_changed.connect(_on_realm_changed)
 	EventBus.quest.quest_progress_updated.connect(_on_quest_progress_updated)
 	EventBus.map.node_completed.connect(_on_node_completed)
+	# 连接区域变化事件以解锁支线任务
+	EventBus.zone.zone_changed.connect(_on_zone_changed)
 
 func _init():
 	if quest_progress.is_empty():
@@ -128,9 +130,7 @@ func claim_reward(quest_id: String) -> Dictionary:
 
 	match reward_type:
 		"stardust":
-			var old_stardust = RunState.stardust
-			RunState.stardust += reward_amount
-			EventBus.inventory.stardust_changed.emit(old_stardust, RunState.stardust)
+			RunState.add_stardust(reward_amount)
 		"memory_fragment":
 			RunState.add_memory_fragments(reward_amount)
 
@@ -204,6 +204,15 @@ func get_completed_quests() -> Array:
 	return result
 
 # ==================== 事件处理 ====================
+
+func _on_zone_changed(zone_type: ZoneDefinition.ZoneType):
+	"""区域变化事件 - 解锁该区域的支线任务"""
+	var zone_id = ZoneData.get_zone_string_id(zone_type)
+	for quest in QuestData.get_side_quests():
+		var quest_id = quest.get("id", "")
+		var unlock_zone = quest.get("unlock_zone", "")
+		if unlock_zone == zone_id:
+			_unlock_quest(quest_id)
 
 func _on_zone_completed(zone_id: String):
 	"""区域完成事件"""

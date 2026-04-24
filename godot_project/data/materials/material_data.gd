@@ -128,6 +128,26 @@ func _create_all_materials():
 	_create_material(&"stardust_concentrate", "星尘浓缩剂", MaterialDefinition.MaterialType.SPECIAL, 5,
 		"高浓度星尘浓缩而成", "concentrate_stardust", 5, 800)
 
+	# ===== 装备强化材料 (ENHANCEMENT) =====
+	_create_material(&"desert_enhancer", "沙海强化粉", MaterialDefinition.MaterialType.SPECIAL, 2,
+		"沙漠材料制成的装备强化剂，可提升装备基础属性", "enhancer_desert", 20, 60)
+	_create_material(&"frost_enhancer", "寒冰强化晶", MaterialDefinition.MaterialType.SPECIAL, 3,
+		"冰霜材料制成的装备强化剂，可提升装备基础属性", "enhancer_frost", 15, 100)
+	_create_material(&"forest_enhancer", "翠蔓强化精华", MaterialDefinition.MaterialType.SPECIAL, 4,
+		"森林材料制成的装备强化剂，可提升装备基础属性", "enhancer_forest", 12, 140)
+	_create_material(&"machine_enhancer", "机魂强化核心", MaterialDefinition.MaterialType.SPECIAL, 5,
+		"机械材料制成的装备强化剂，可提升装备基础属性", "enhancer_machine", 10, 200)
+	_create_material(&"void_enhancer", "虚空强化碎片", MaterialDefinition.MaterialType.SPECIAL, 5,
+		"神秘材料制成的装备强化剂，可提升装备基础属性", "enhancer_void", 8, 300)
+	_create_material(&"attack_enhancement", "攻击强化剂", MaterialDefinition.MaterialType.CONSUMABLE, 5,
+		"永久提升角色基础攻击力", "enhance_attack", 10, 500)
+	_create_material(&"defense_enhancement", "防御强化剂", MaterialDefinition.MaterialType.CONSUMABLE, 4,
+		"永久提升角色基础防御力", "enhance_defense", 10, 350)
+	_create_material(&"health_enhancement", "生命强化剂", MaterialDefinition.MaterialType.CONSUMABLE, 3,
+		"永久提升角色最大生命值", "enhance_health", 15, 200)
+	_create_material(&"energy_enhancement", "能量强化剂", MaterialDefinition.MaterialType.CONSUMABLE, 5,
+		"永久提升角色能量上限", "enhance_energy", 8, 600)
+
 func _create_material(id: StringName, mat_name: String, type: MaterialDefinition.MaterialType,
 		tier: int, desc: String, icon: String, stack: int, price: int):
 

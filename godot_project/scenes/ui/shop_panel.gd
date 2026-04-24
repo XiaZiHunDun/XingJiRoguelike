@@ -50,11 +50,11 @@ const FACTION_SHOP_ITEMS: Dictionary = {
 	}
 }
 
-@onready var stardust_label: Label = $VBox/Header/StardustLabel
-@onready var discount_label: Label = $VBox/Header/DiscountLabel
-@onready var items_container: VBoxContainer = $VBox/ItemsScroll/ItemsContainer
-@onready var message_label: Label = $VBox/BottomBox/MessageLabel
-@onready var close_button: Button = $VBox/BottomBox/CloseButton
+@onready var stardust_label: Label = $Panel/VBox/TitleSection/StardustRow/StardustLabel
+@onready var discount_label: Label = $Panel/VBox/TitleSection/DiscountLabel
+@onready var items_container: VBoxContainer = $Panel/VBox/ItemsScroll/ItemsContainer
+@onready var message_label: Label = $Panel/VBox/BottomSection/MessageLabel
+@onready var close_button: Button = $Panel/VBox/BottomSection/CloseButton
 
 var shop_items: Array = []  # [{material_id, price, stock}]
 var current_discount: float = 1.0  # 声望折扣率，1.0表示无折扣
@@ -64,22 +64,31 @@ enum ShopTab { GOODS, FACTION }
 var current_tab: ShopTab = ShopTab.GOODS
 
 # UI引用
-@onready var goods_tab: Button = $VBox/TabsContainer/GoodsTab
-@onready var faction_tab: Button = $VBox/TabsContainer/FactionTab
-@onready var faction_shop_container: VBoxContainer = $VBox/FactionShopContainer
-@onready var faction_items_container: VBoxContainer = $VBox/FactionShopContainer/FactionItemsScroll/FactionItemsContainer
-@onready var faction_status_label: Label = $VBox/FactionShopContainer/FactionStatusLabel
+@onready var goods_tab: Button = $Panel/VBox/TabsContainer/GoodsTab
+@onready var faction_tab: Button = $Panel/VBox/TabsContainer/FactionTab
+@onready var faction_shop_container: VBoxContainer = $Panel/VBox/FactionShopContainer
+@onready var faction_items_container: VBoxContainer = $Panel/VBox/FactionShopContainer/FactionItemsScroll/FactionItemsContainer
+@onready var faction_status_label: Label = $Panel/VBox/FactionShopContainer/FactionStatusLabel
 
 func _ready():
 	close_button.pressed.connect(_on_close_pressed)
-	goods_tab.pressed.connect(_on_goods_tab_pressed)
-	faction_tab.pressed.connect(_on_faction_tab_pressed)
 	_refresh_display()
 	_load_shop_items()
 	_show_goods_tab()
+	# 连接星尘变化信号
+	if not EventBus.inventory.stardust_changed.is_connected(_on_stardust_changed):
+		EventBus.inventory.stardust_changed.connect(_on_stardust_changed)
+
+
+func _on_tab_changed(tab_name: String) -> void:
+	"""子组件标签页切换回调"""
+	if tab_name == "GOODS":
+		_show_goods_tab()
+	else:
+		_show_faction_tab()
 
 func _refresh_display():
-	stardust_label.text = "星尘: %d" % RunState.stardust
+	stardust_label.text = "星尘: %d" % RunState.get_stardust()
 	message_label.text = ""
 	# 更新折扣显示
 	_update_discount_display()
@@ -184,7 +193,7 @@ func _on_buy_pressed(index: int):
 	var final_price = int(original_price * current_discount)
 
 	# 检查星尘是否足够
-	if RunState.stardust < final_price:
+	if not RunState.can_spend_stardust(final_price):
 		_show_message("星尘不足!")
 		return
 
@@ -194,7 +203,7 @@ func _on_buy_pressed(index: int):
 		return
 
 	# 扣除星尘（应用折扣）
-	RunState.stardust -= final_price
+	RunState.spend_stardust(final_price)
 
 	# 减少库存
 	item["stock"] -= 1
@@ -207,7 +216,7 @@ func _on_buy_pressed(index: int):
 	RunState.add_material(material_id, 1)
 
 	# 通知物品获得
-	purchase_completed.emit(String(material_id), 1)
+	purchase_completed.emit(material_id, 1)
 
 	_show_message("购买了 %s!" % material_def.display_name if material_def else "物品")
 
@@ -272,6 +281,14 @@ func _update_discount_display():
 
 func _on_close_pressed():
 	close_requested.emit()
+
+func _on_stardust_changed(old_value: int, new_value: int):
+	_refresh_display()
+
+func _exit_tree():
+	# 断开 EventBus 连接，防止重复连接
+	if EventBus.inventory.stardust_changed.is_connected(_on_stardust_changed):
+		EventBus.inventory.stardust_changed.disconnect(_on_stardust_changed)
 
 # ========== 势力商店标签页 ==========
 

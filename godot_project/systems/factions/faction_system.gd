@@ -45,7 +45,7 @@ func _on_zone_completed(zone_id):
 func _on_enemy_killed_event(enemy, position: Vector2):
 	"""敌人死亡事件处理"""
 	# 检查是否是BOSS
-	var is_boss = enemy.is_boss if enemy and enemy.has("is_boss") else false
+	var is_boss = enemy.enemy_type == Enums.EnemyType.BOSS if enemy and enemy.has("enemy_type") else false
 	if is_boss:
 		# 获取zone_id
 		var zone_id = RunState.current_zone
@@ -280,7 +280,7 @@ func claim_quest_reward(quest_id: String) -> Dictionary:
 			if faction_name != "":
 				add_faction_item(faction_name + "徽记", reward_amount)
 		"stardust":
-			RunState.stardust += reward_amount
+			RunState.add_stardust(reward_amount)
 
 	# 增加声望
 	var rep_gain = quest.get("reputation_gain", 0)

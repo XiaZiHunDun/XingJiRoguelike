@@ -1,78 +1,564 @@
-[gd_scene load_steps=2 format=3 uid="uid://settings_panel"]
+[gd_scene load_steps=6 format=3 uid="uid://settings_panel"]
 
 [ext_resource type="Script" path="res://scenes/ui/settings_panel.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
+bg_color = Color(0.1, 0.12, 0.25, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.25, 0.4, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+bg_color = Color(0.18, 0.22, 0.4, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.5, 0.8, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
+bg_color = Color(0.22, 0.28, 0.5, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.6, 0.9, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_disabled"]
+bg_color = Color(0.06, 0.06, 0.12, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.1, 0.1, 0.15, 0.4)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
 
 [node name="SettingsPanel" type="Control"]
 layout_mode = 3
 anchors_preset = 15
-anchor_left = 0.0
-anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="VBox" type="VBoxContainer" parent="."]
+# Dark starry background
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.02, 0.06, 1)
+
+# Decorative stars
+[node name="Stars" type="Node2D" parent="."]
+
+[node name="s1" type="Label" parent="Stars"]
+offset_left = 100.0
+offset_top = 40.0
+offset_right = 110.0
+offset_bottom = 65.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.5)
+theme_override_font_sizes/font_size = 20
+
+[node name="s2" type="Label" parent="Stars"]
+offset_left = 350.0
+offset_top = 80.0
+offset_right = 360.0
+offset_bottom = 105.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 16
+
+[node name="s3" type="Label" parent="Stars"]
+offset_left = 700.0
+offset_top = 30.0
+offset_right = 710.0
+offset_bottom = 55.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.45)
+theme_override_font_sizes/font_size = 18
+
+[node name="s4" type="Label" parent="Stars"]
+offset_left = 1050.0
+offset_top = 120.0
+offset_right = 1060.0
+offset_bottom = 145.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+theme_override_font_sizes/font_size = 14
+
+[node name="s5" type="Label" parent="Stars"]
+offset_left = 1400.0
+offset_top = 60.0
+offset_right = 1410.0
+offset_bottom = 85.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 16
+
+[node name="s6" type="Label" parent="Stars"]
+offset_left = 250.0
+offset_top = 280.0
+offset_right = 260.0
+offset_bottom = 305.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+theme_override_font_sizes/font_size = 14
+
+[node name="s7" type="Label" parent="Stars"]
+offset_left = 850.0
+offset_top = 320.0
+offset_right = 860.0
+offset_bottom = 345.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 18
+
+[node name="s8" type="Label" parent="Stars"]
+offset_left = 1200.0
+offset_top = 380.0
+offset_right = 1210.0
+offset_bottom = 405.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 16
+
+[node name="s9" type="Label" parent="Stars"]
+offset_left = 550.0
+offset_top = 480.0
+offset_right = 560.0
+offset_bottom = 505.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+theme_override_font_sizes/font_size = 14
+
+[node name="s10" type="Label" parent="Stars"]
+offset_left = 1600.0
+offset_top = 280.0
+offset_right = 1610.0
+offset_bottom = 305.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.45)
+theme_override_font_sizes/font_size = 20
+
+# Main panel container
+[node name="Panel" type="Panel" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -280.0
-offset_right = 240.0
-offset_bottom = 280.0
+offset_left = -280.0
+offset_top = -320.0
+offset_right = 280.0
+offset_bottom = 320.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Header" type="VBoxContainer" parent="VBox"]
-layout_mode = 2
+[node name="PanelBG" type="ColorRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.15, 0.9)
 
-[node name="Title" type="Label" parent="VBox/Header"]
+[node name="BorderLeft" type="ColorRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_right = 2.0
+color = Color(0.4, 0.4, 0.6, 0.5)
+
+[node name="BorderRight" type="ColorRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -2.0
+color = Color(0.4, 0.4, 0.6, 0.5)
+
+[node name="BorderTop" type="ColorRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_bottom = 2.0
+color = Color(0.4, 0.4, 0.6, 0.5)
+
+[node name="BorderBottom" type="ColorRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+color = Color(0.4, 0.4, 0.6, 0.5)
+
+# Title with gear icon
+[node name="TitleContainer" type="HBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 15.0
+offset_right = -20.0
+offset_bottom = 55.0
+grow_horizontal = 2
+alignment = 1
+
+[node name="GearIcon" type="Label" parent="Panel/TitleContainer"]
 layout_mode = 2
-text = "设置"
+text = "⚙️"
 horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.7, 0.7, 0.9, 1)
 
-[node name="HSeparator" type="HSeparator" parent="VBox"]
+[node name="Title" type="Label" parent="Panel/TitleContainer"]
 layout_mode = 2
+text = "设 置"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.9, 0.85, 1.0, 1)
+theme_override_font_sizes/font_size = 28
 
-[node name="TabContainer" type="TabContainer" parent="VBox"]
+[node name="TitleSep" type="HSeparator" parent="Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 65.0
+offset_right = -20.0
+color = Color(0.3, 0.3, 0.5, 0.6)
+
+# Tab container for settings categories
+[node name="TabContainer" type="TabContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 15.0
+offset_top = 75.0
+offset_right = -15.0
+offset_bottom = -60.0
+grow_horizontal = 2
+grow_vertical = 2
+tab_alignment = 1
+tab_visible = true
+
+# --- 画面设置 ---
+[node name="GraphicsTab" type="MarginContainer" parent="Panel/TabContainer"]
 layout_mode = 2
-size_flags_vertical = 3
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
 
-[node name="Auxiliary" type="MarginContainer" parent="VBox/TabContainer"]
+[node name="GraphicsVBox" type="VBoxContainer" parent="Panel/TabContainer/GraphicsTab"]
 layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
+theme_constant_separation = 15
 
-[node name="VBox" type="VBoxContainer" parent="VBox/TabContainer/Auxiliary"]
+[node name="FullscreenRow" type="HBoxContainer" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox"]
 layout_mode = 2
+alignment = 1
 
-[node name="ColorblindLabel" type="Label" parent="VBox/TabContainer/Auxiliary/VBox"]
+[node name="Label" type="Label" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/FullscreenRow"]
 layout_mode = 2
-text = "色盲模式"
+text = "全屏模式"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
 
-[node name="ColorblindToggle" type="CheckButton" parent="VBox/TabContainer/Auxiliary/VBox"]
+[node name="Spacer" type="Control" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/FullscreenRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FullscreenToggle" type="CheckButton" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/FullscreenRow"]
 layout_mode = 2
 button_pressed = false
-text = "启用色盲友好配色"
+text = "启用"
 
-[node name="HSeparator1" type="HSeparator" parent="VBox/TabContainer/Auxiliary/VBox"]
+[node name="Sep1" type="HSeparator" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox"]
 layout_mode = 2
+color = Color(0.25, 0.25, 0.4, 0.5)
 
-[node name="AnimationLabel" type="Label" parent="VBox/TabContainer/Auxiliary/VBox"]
+[node name="VSyncRow" type="HBoxContainer" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/VSyncRow"]
+layout_mode = 2
+text = "垂直同步"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
+
+[node name="Spacer" type="Control" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/VSyncRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VSyncToggle" type="CheckButton" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/VSyncRow"]
+layout_mode = 2
+button_pressed = true
+text = "启用"
+
+[node name="Sep2" type="HSeparator" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox"]
+layout_mode = 2
+color = Color(0.25, 0.25, 0.4, 0.5)
+
+[node name="QualityRow" type="HBoxContainer" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/QualityRow"]
+layout_mode = 2
+text = "粒子质量"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
+
+[node name="Spacer" type="Control" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/QualityRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="QualityDropdown" type="OptionButton" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/QualityRow"]
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "高"
+popup/item_0/id = 0
+popup/item_1/text = "中"
+popup/item_1/id = 1
+popup/item_2/text = "低"
+popup/item_2/id = 2
+selected = 0
+
+[node name="Sep3" type="HSeparator" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox"]
+layout_mode = 2
+color = Color(0.25, 0.25, 0.4, 0.5)
+
+[node name="BrightnessRow" type="HBoxContainer" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/BrightnessRow"]
+layout_mode = 2
+text = "亮度"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
+
+[node name="Spacer" type="Control" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/BrightnessRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BrightnessHSlider" type="HSlider" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/BrightnessRow"]
+layout_mode = 2
+min_value = 50.0
+max_value = 150.0
+value = 100.0
+
+[node name="BrightnessVal" type="Label" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox/BrightnessRow"]
+layout_mode = 2
+text = "100%"
+custom_minimum_size = Vector2(50, 0)
+theme_override_colors/font_color = Color(0.7, 0.7, 0.9, 1)
+
+[node name="Sep4" type="HSeparator" parent="Panel/TabContainer/GraphicsTab/GraphicsVBox"]
+layout_mode = 2
+color = Color(0.25, 0.25, 0.4, 0.5)
+
+# --- 声音设置 ---
+[node name="AudioTab" type="MarginContainer" parent="Panel/TabContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="AudioVBox" type="VBoxContainer" parent="Panel/TabContainer/AudioTab"]
+layout_mode = 2
+theme_constant_separation = 15
+
+[node name="MasterVolumeRow" type="HBoxContainer" parent="Panel/TabContainer/AudioTab/AudioVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Panel/TabContainer/AudioTab/AudioVBox/MasterVolumeRow"]
+layout_mode = 2
+text = "主音量"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
+
+[node name="Spacer" type="Control" parent="Panel/TabContainer/AudioTab/AudioVBox/MasterVolumeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MasterSlider" type="HSlider" parent="Panel/TabContainer/AudioTab/AudioVBox/MasterVolumeRow"]
+layout_mode = 2
+min_value = 0.0
+max_value = 100.0
+value = 80.0
+
+[node name="MasterVal" type="Label" parent="Panel/TabContainer/AudioTab/AudioVBox/MasterVolumeRow"]
+layout_mode = 2
+text = "80%"
+custom_minimum_size = Vector2(50, 0)
+theme_override_colors/font_color = Color(0.7, 0.7, 0.9, 1)
+
+[node name="Sep1" type="HSeparator" parent="Panel/TabContainer/AudioTab/AudioVBox"]
+layout_mode = 2
+color = Color(0.25, 0.25, 0.4, 0.5)
+
+[node name="BGMVolumeRow" type="HBoxContainer" parent="Panel/TabContainer/AudioTab/AudioVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Panel/TabContainer/AudioTab/AudioVBox/BGMVolumeRow"]
+layout_mode = 2
+text = "背景音乐"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
+
+[node name="Spacer" type="Control" parent="Panel/TabContainer/AudioTab/AudioVBox/BGMVolumeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BGMSlider" type="HSlider" parent="Panel/TabContainer/AudioTab/AudioVBox/BGMVolumeRow"]
+layout_mode = 2
+min_value = 0.0
+max_value = 100.0
+value = 70.0
+
+[node name="BGMVal" type="Label" parent="Panel/TabContainer/AudioTab/AudioVBox/BGMVolumeRow"]
+layout_mode = 2
+text = "70%"
+custom_minimum_size = Vector2(50, 0)
+theme_override_colors/font_color = Color(0.7, 0.7, 0.9, 1)
+
+[node name="Sep2" type="HSeparator" parent="Panel/TabContainer/AudioTab/AudioVBox"]
+layout_mode = 2
+color = Color(0.25, 0.25, 0.4, 0.5)
+
+[node name="SFXVolumeRow" type="HBoxContainer" parent="Panel/TabContainer/AudioTab/AudioVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Panel/TabContainer/AudioTab/AudioVBox/SFXVolumeRow"]
+layout_mode = 2
+text = "音效"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
+
+[node name="Spacer" type="Control" parent="Panel/TabContainer/AudioTab/AudioVBox/SFXVolumeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SFXSlider" type="HSlider" parent="Panel/TabContainer/AudioTab/AudioVBox/SFXVolumeRow"]
+layout_mode = 2
+min_value = 0.0
+max_value = 100.0
+value = 80.0
+
+[node name="SFXVal" type="Label" parent="Panel/TabContainer/AudioTab/AudioVBox/SFXVolumeRow"]
+layout_mode = 2
+text = "80%"
+custom_minimum_size = Vector2(50, 0)
+theme_override_colors/font_color = Color(0.7, 0.7, 0.9, 1)
+
+[node name="Sep3" type="HSeparator" parent="Panel/TabContainer/AudioTab/AudioVBox"]
+layout_mode = 2
+color = Color(0.25, 0.25, 0.4, 0.5)
+
+[node name="VoiceVolumeRow" type="HBoxContainer" parent="Panel/TabContainer/AudioTab/AudioVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Panel/TabContainer/AudioTab/AudioVBox/VoiceVolumeRow"]
+layout_mode = 2
+text = "语音"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
+
+[node name="Spacer" type="Control" parent="Panel/TabContainer/AudioTab/AudioVBox/VoiceVolumeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VoiceSlider" type="HSlider" parent="Panel/TabContainer/AudioTab/AudioVBox/VoiceVolumeRow"]
+layout_mode = 2
+min_value = 0.0
+max_value = 100.0
+value = 100.0
+
+[node name="VoiceVal" type="Label" parent="Panel/TabContainer/AudioTab/AudioVBox/VoiceVolumeRow"]
+layout_mode = 2
+text = "100%"
+custom_minimum_size = Vector2(50, 0)
+theme_override_colors/font_color = Color(0.7, 0.7, 0.9, 1)
+
+# --- 游戏设置 ---
+[node name="GameTab" type="MarginContainer" parent="Panel/TabContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="GameVBox" type="VBoxContainer" parent="Panel/TabContainer/GameTab"]
+layout_mode = 2
+theme_constant_separation = 15
+
+[node name="AnimationRow" type="HBoxContainer" parent="Panel/TabContainer/GameTab/GameVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Panel/TabContainer/GameTab/GameVBox/AnimationRow"]
 layout_mode = 2
 text = "动画效果"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
 
-[node name="AnimationDropdown" type="OptionButton" parent="VBox/TabContainer/Auxiliary/VBox"]
+[node name="Spacer" type="Control" parent="Panel/TabContainer/GameTab/GameVBox/AnimationRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AnimationDropdown" type="OptionButton" parent="Panel/TabContainer/GameTab/GameVBox/AnimationRow"]
 layout_mode = 2
 item_count = 3
 popup/item_0/text = "完整"
@@ -83,14 +569,25 @@ popup/item_2/text = "关闭"
 popup/item_2/id = 2
 selected = 0
 
-[node name="HSeparator2" type="HSeparator" parent="VBox/TabContainer/Auxiliary/VBox"]
+[node name="Sep1" type="HSeparator" parent="Panel/TabContainer/GameTab/GameVBox"]
 layout_mode = 2
+color = Color(0.25, 0.25, 0.4, 0.5)
 
-[node name="InfoDensityLabel" type="Label" parent="VBox/TabContainer/Auxiliary/VBox"]
+[node name="InfoDensityRow" type="HBoxContainer" parent="Panel/TabContainer/GameTab/GameVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Panel/TabContainer/GameTab/GameVBox/InfoDensityRow"]
 layout_mode = 2
 text = "信息密度"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
 
-[node name="InfoDensityDropdown" type="OptionButton" parent="VBox/TabContainer/Auxiliary/VBox"]
+[node name="Spacer" type="Control" parent="Panel/TabContainer/GameTab/GameVBox/InfoDensityRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="InfoDensityDropdown" type="OptionButton" parent="Panel/TabContainer/GameTab/GameVBox/InfoDensityRow"]
 layout_mode = 2
 item_count = 2
 popup/item_0/text = "标准"
@@ -99,12 +596,159 @@ popup/item_1/text = "简洁"
 popup/item_1/id = 1
 selected = 0
 
-[node name="BottomBox" type="VBoxContainer" parent="VBox"]
+[node name="Sep2" type="HSeparator" parent="Panel/TabContainer/GameTab/GameVBox"]
 layout_mode = 2
+color = Color(0.25, 0.25, 0.4, 0.5)
 
-[node name="HSeparator2" type="HSeparator" parent="VBox/BottomBox"]
+[node name="ColorblindRow" type="HBoxContainer" parent="Panel/TabContainer/GameTab/GameVBox"]
 layout_mode = 2
+alignment = 1
 
-[node name="CloseButton" type="Button" parent="VBox/BottomBox"]
+[node name="Label" type="Label" parent="Panel/TabContainer/GameTab/GameVBox/ColorblindRow"]
 layout_mode = 2
-text = "关闭"
+text = "色盲模式"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
+
+[node name="Spacer" type="Control" parent="Panel/TabContainer/GameTab/GameVBox/ColorblindRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ColorblindToggle" type="CheckButton" parent="Panel/TabContainer/GameTab/GameVBox/ColorblindRow"]
+layout_mode = 2
+button_pressed = false
+text = "启用"
+
+[node name="Sep3" type="HSeparator" parent="Panel/TabContainer/GameTab/GameVBox"]
+layout_mode = 2
+color = Color(0.25, 0.25, 0.4, 0.5)
+
+[node name="DamageNumbersRow" type="HBoxContainer" parent="Panel/TabContainer/GameTab/GameVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Panel/TabContainer/GameTab/GameVBox/DamageNumbersRow"]
+layout_mode = 2
+text = "伤害数字"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
+
+[node name="Spacer" type="Control" parent="Panel/TabContainer/GameTab/GameVBox/DamageNumbersRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DamageNumbersToggle" type="CheckButton" parent="Panel/TabContainer/GameTab/GameVBox/DamageNumbersRow"]
+layout_mode = 2
+button_pressed = true
+text = "显示"
+
+[node name="Sep4" type="HSeparator" parent="Panel/TabContainer/GameTab/GameVBox"]
+layout_mode = 2
+color = Color(0.25, 0.25, 0.4, 0.5)
+
+[node name="AutoSaveRow" type="HBoxContainer" parent="Panel/TabContainer/GameTab/GameVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Panel/TabContainer/GameTab/GameVBox/AutoSaveRow"]
+layout_mode = 2
+text = "自动存档"
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
+
+[node name="Spacer" type="Control" parent="Panel/TabContainer/GameTab/GameVBox/AutoSaveRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AutoSaveToggle" type="CheckButton" parent="Panel/TabContainer/GameTab/GameVBox/AutoSaveRow"]
+layout_mode = 2
+button_pressed = true
+text = "启用"
+
+# Category tabs row above content
+[node name="CategoryTabs" type="HBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 30.0
+offset_top = 70.0
+offset_right = -30.0
+offset_bottom = 100.0
+grow_horizontal = 2
+alignment = 1
+theme_constant_separation = 10
+
+[node name="GraphicsBtn" type="Button" parent="Panel/CategoryTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🎨 画面"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="AudioBtn" type="Button" parent="Panel/CategoryTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🔊 声音"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="GameBtn" type="Button" parent="Panel/CategoryTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🎮 游戏"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+# Bottom buttons container
+[node name="BottomBox" type="HBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 15.0
+offset_top = -50.0
+offset_right = -15.0
+offset_bottom = -15.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment_1 = 1
+theme_constant_separation = 20
+
+[node name="CancelButton" type="Button" parent="Panel/BottomBox"]
+layout_mode = 2
+text = "取消"
+custom_minimum_size = Vector2(120, 40)
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="SaveButton" type="Button" parent="Panel/BottomBox"]
+layout_mode = 2
+text = "💾 保存设置"
+custom_minimum_size = Vector2(120, 40)
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+# Back button at top left
+[node name="BackButton" type="Button" parent="Panel"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 15.0
+offset_top = 12.0
+offset_right = 55.0
+offset_bottom = 42.0
+text = "←"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")

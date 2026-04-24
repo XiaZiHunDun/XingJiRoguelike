@@ -34,6 +34,10 @@ extends Resource
 @export var faction_reputation: Dictionary = {}
 # 材料背包数据 {material_id: quantity}
 @export var material_inventory: Dictionary = {}
+# 任务进度数据
+@export var quest_save_data: Dictionary = {}
+# 成就数据
+@export var achievement_data: Dictionary = {}
 # 创建时间戳
 @export var created_at: int = 0
 # 最后游玩时间戳

@@ -6,10 +6,8 @@ extends Node
 # ==================== 战斗域（高频） ====================
 class CombatEvents extends RefCounted:
 	signal atb_full(entity)  # ATB满了
-	signal atb_changed(entity, value: float, max_value: float)  # ATB变化
 	signal atb_frozen(entity)  # ATB冻结（溢出）
 	signal atb_drained(entity, amount: float)  # ATB倒退
-	signal turn_started(entity)  # 回合开始
 	signal damage_dealt(source, target, amount: float, is_critical: bool)  # 伤害结算
 	signal skill_executed(skill, source, target)  # 技能执行
 	signal skill_chain_triggered(skill1, skill2)  # 技能连携触发
@@ -17,6 +15,7 @@ class CombatEvents extends RefCounted:
 	signal battle_paused()  # 战斗暂停（菜单打开）
 	signal battle_resumed()  # 战斗恢复（菜单关闭）
 	signal enemy_killed(enemy, position: Vector2)  # 敌人死亡
+	signal player_hp_changed(current_hp: int, max_hp: int)  # 玩家HP变化（用于RunState同步）
 
 # ==================== 技能域（中频） ====================
 class SkillEvents extends RefCounted:
@@ -31,6 +30,7 @@ class EquipmentEvents extends RefCounted:
 	signal equipment_unequipped(equipment, slot: int)  # 装备卸下
 	signal equipment_dropped(equipment, position: Vector2)  # 装备掉落
 	signal equipment_forged(equipment)  # 装备锻造
+	signal equipment_forge_failed(equipment, reason: String)  # 装备锻造失败
 	signal affix_activated(entity, affix_id: String)  # 词缀激活
 	signal set_bonus_activated(set_id: String, piece_count: int)  # 套装激活
 	signal set_bonus_deactivated(set_id: String)  # 套装失效
@@ -59,6 +59,8 @@ class CollectionEvents extends RefCounted:
 # ==================== 背包域（低频） ====================
 class InventoryEvents extends RefCounted:
 	signal stardust_changed(old_value: int, new_value: int)  # 星尘变化
+	signal material_changed(material_id: StringName, old_quantity: int, new_quantity: int)  # 材料变化
+	signal material_removed(material_id: StringName)  # 材料被移除
 
 # ==================== 合成域（中频） ====================
 class CraftingEvents extends RefCounted:
@@ -105,6 +107,7 @@ class SystemEvents extends RefCounted:
 	signal breakthrough_succeeded(realm, trial: bool)  # 突破成功
 	signal realm_changed(old_realm, new_realm)  # 境界变化
 	signal consumable_used(item_id: String, effect_type: String, value: float)  # 消耗品使用
+	signal skill_hotkey_changed(slot_index: int, skill_id: String)  # 技能热键配置变化
 
 # ==================== 实例化 ====================
 var combat := CombatEvents.new()

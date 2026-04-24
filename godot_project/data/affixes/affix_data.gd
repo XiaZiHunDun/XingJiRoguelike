@@ -264,6 +264,67 @@ func _register_all_affixes():
 		"shield_break_damage", "res://assets/icons/affixes/shield_reflect.png"
 	))
 
+	# ========== 触发型扩展 (新增6种) ==========
+	_register_affix(AffixDefinition.create(
+		"affix_combo_crit",
+		"连击狂暴",
+		AffixDefinition.AffixType.TRIGGERED,
+		["物理", "通用"],
+		20.0,
+		"3连击后伤害 +{value}%",
+		"combo_crit", "res://assets/icons/affixes/combo_crit.png"
+	))
+
+	_register_affix(AffixDefinition.create(
+		"affix_kill_heal",
+		"斩杀回复",
+		AffixDefinition.AffixType.TRIGGERED,
+		["通用"],
+		8.0,
+		"击杀敌人时恢复 {value}% 生命",
+		"kill_heal", "res://assets/icons/affixes/kill_heal.png"
+	))
+
+	_register_affix(AffixDefinition.create(
+		"affix_shield_atb",
+		"护盾涌动",
+		AffixDefinition.AffixType.TRIGGERED,
+		["通用"],
+		15.0,
+		"获得护盾时ATB +{value}%",
+		"shield_gain_atb", "res://assets/icons/affixes/shield_atb.png"
+	))
+
+	_register_affix(AffixDefinition.create(
+		"affix_crit_stack",
+		"暴击叠加",
+		AffixDefinition.AffixType.TRIGGERED,
+		["物理", "奥术"],
+		5.0,
+		"暴击时获得 {value}% 伤害加成，可叠加最多5层",
+		"crit_stack", "res://assets/icons/affixes/crit_stack.png"
+	))
+
+	_register_affix(AffixDefinition.create(
+		"affix_dodge_energy",
+		"闪避充能",
+		AffixDefinition.AffixType.TRIGGERED,
+		["通用"],
+		10.0,
+		"完美闪避时恢复 {value} 点能量",
+		"dodge_energy", "res://assets/icons/affixes/dodge_energy.png"
+	))
+
+	_register_affix(AffixDefinition.create(
+		"affix_low_hp_shield",
+		"绝境护盾",
+		AffixDefinition.AffixType.TRIGGERED,
+		["通用"],
+		20.0,
+		"生命值低于30%时每5秒获得 {value}% 最大生命的护盾",
+		"low_hp_shield", "res://assets/icons/affixes/low_hp_shield.png"
+	))
+
 	# ========== 代价型 (8) ==========
 	_register_affix(AffixDefinition.create(
 		"玻璃大炮·弱",

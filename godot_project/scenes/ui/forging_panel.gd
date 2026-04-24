@@ -5,15 +5,15 @@ extends Control
 
 signal close_requested()
 
-@onready var weapon_tab: Button = $VBox/TabsContainer/WeaponTab
-@onready var inventory_tab: Button = $VBox/TabsContainer/InventoryTab
-@onready var equipment_list: VBoxContainer = $VBox/EquipmentScroll/EquipmentList
-@onready var detail_panel: VBoxContainer = $VBox/DetailScroll/DetailPanel
-@onready var cost_label: Label = $VBox/CostLabel
-@onready var protection_check: CheckButton = $VBox/ProtectionCheck
-@onready var forge_button: Button = $VBox/BottomBox/ButtonsContainer/ForgeButton
-@onready var close_button: Button = $VBox/BottomBox/ButtonsContainer/CloseButton
-@onready var message_label: Label = $VBox/BottomBox/MessageLabel
+@onready var weapon_tab: Button = $MainPanel/VBox/TabsContainer/WeaponTab
+@onready var inventory_tab: Button = $MainPanel/VBox/TabsContainer/InventoryTab
+@onready var equipment_list: VBoxContainer = $MainPanel/VBox/EquipmentScroll/EquipmentList
+@onready var detail_panel: VBoxContainer = $MainPanel/VBox/DetailScroll/DetailPanel
+@onready var cost_label: Label = $MainPanel/VBox/CostSection/CostValue
+@onready var protection_check: CheckButton = $MainPanel/VBox/ProtectionCheck
+@onready var forge_button: Button = $MainPanel/VBox/BottomBox/ButtonsContainer/ForgeButton
+@onready var close_button: Button = $MainPanel/VBox/BottomBox/ButtonsContainer/CloseButton
+@onready var message_label: Label = $MainPanel/VBox/BottomBox/MessageLabel
 
 enum Tab { WEAPON, INVENTORY }
 var current_tab: Tab = Tab.WEAPON
@@ -32,6 +32,18 @@ func _ready():
 
 	forging_system = ForgingSystem.new()
 	add_child(forging_system)
+
+	# 连接星尘变化信号
+	if not EventBus.inventory.stardust_changed.is_connected(_on_stardust_changed):
+		EventBus.inventory.stardust_changed.connect(_on_stardust_changed)
+
+
+func _on_tab_changed(tab_name: String) -> void:
+	"""子组件标签页切换回调"""
+	match tab_name:
+		"WEAPON": current_tab = Tab.WEAPON
+		"INVENTORY": current_tab = Tab.INVENTORY
+	_refresh_display()
 
 	_refresh_display()
 
@@ -362,3 +374,11 @@ func _set_material_tooltip(material_id: String, tooltip: String) -> void:
 			cost_label.tooltip_text = tooltip
 		"protection_charm":
 			protection_check.tooltip_text = tooltip
+
+func _on_stardust_changed(old_value: int, new_value: int):
+	_update_cost_display()
+
+func _exit_tree():
+	# 断开 EventBus 连接，防止重复连接
+	if EventBus.inventory.stardust_changed.is_connected(_on_stardust_changed):
+		EventBus.inventory.stardust_changed.disconnect(_on_stardust_changed)

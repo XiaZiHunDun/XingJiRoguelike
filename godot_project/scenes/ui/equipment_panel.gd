@@ -5,13 +5,13 @@ extends Control
 
 signal close_requested()
 
-@onready var weapon_slot: VBoxContainer = $VBox/WeaponSlot
-@onready var weapon_info_label: Label = $VBox/WeaponSlot/WeaponInfo
-@onready var unequip_button: Button = $VBox/WeaponSlot/UnequipButton
-@onready var armor_info_label: Label = $VBox/ArmorSlot/ArmorInfo
-@onready var armor_unequip_button: Button = $VBox/ArmorSlot/ArmorUnequipButton
-@onready var accessory_info_label: Label = $VBox/AccessorySlot/AccessoryInfo
-@onready var accessory_unequip_button: Button = $VBox/AccessorySlot/AccessoryUnequipButton
+@onready var weapon_slot: PanelContainer = $VBox/WeaponSlot
+@onready var weapon_info_label: Label = $VBox/WeaponSlot/WeaponContent/WeaponDetails/WeaponInfo
+@onready var unequip_button: Button = $VBox/WeaponSlot/WeaponContent/WeaponBtnContainer/UnequipButton
+@onready var armor_info_label: Label = $VBox/ArmorSlot/ArmorContent/ArmorDetails/ArmorInfo
+@onready var armor_unequip_button: Button = $VBox/ArmorSlot/ArmorContent/ArmorBtnContainer/ArmorUnequipButton
+@onready var accessory_info_label: Label = $VBox/AccessorySlot/AccessoryContent/AccessoryDetails/AccessoryInfo
+@onready var accessory_unequip_button: Button = $VBox/AccessorySlot/AccessoryContent/AccessoryBtnContainer/AccessoryUnequipButton
 @onready var inventory_container: VBoxContainer = $VBox/InventoryScroll/InventoryContainer
 @onready var attributes_label: Label = $VBox/BottomBox/AttributesLabel
 @onready var close_button: Button = $VBox/BottomBox/CloseButton
@@ -22,7 +22,14 @@ func _ready():
 	unequip_button.pressed.connect(_on_unequip_pressed)
 	armor_unequip_button.pressed.connect(_on_armor_unequip_pressed)
 	accessory_unequip_button.pressed.connect(_on_accessory_unequip_pressed)
+	EventBus.equipment.equipment_equipped.connect(_on_equipment_equipped)
+	EventBus.equipment.equipment_forged.connect(_on_equipment_forged)
 	_refresh_display()
+
+func _exit_tree():
+	EventBus.equipment.equipment_equipped.disconnect(_on_equipment_equipped)
+	EventBus.equipment.equipment_forged.disconnect(_on_equipment_forged)
+
 
 func _refresh_display():
 	var weapon_save = RunState.equipped_weapon_save
@@ -54,13 +61,65 @@ func _refresh_display():
 		weapon_info_label.text = text
 		unequip_button.disabled = false
 
-	# 护甲槽（暂时stub，显示暂无护甲）
-	armor_info_label.text = "(无护甲)\n护甲槽位开发中"
-	armor_unequip_button.disabled = true
+	# 护甲槽
+	var armor_save = RunState.equipped_armor_save
+	if armor_save.is_empty():
+		armor_info_label.text = "(无护甲)"
+		armor_unequip_button.disabled = true
+	else:
+		var def_id = armor_save.get("definition_id", "")
+		var def = null
+		if DataManager:
+			def = DataManager.get_equipment(StringName(def_id))
+		var rarity = armor_save.get("rarity", 0) as int
+		var level = armor_save.get("level", 1)
+		var affix_ids = armor_save.get("affix_ids", [])
 
-	# 饰品槽（暂时stub，显示暂无饰品）
-	accessory_info_label.text = "(无饰品)\n饰品槽位开发中"
-	accessory_unequip_button.disabled = true
+		var text = ""
+		if def:
+			text = "[%s] %s 等级%d\n" % [_get_rarity_name(rarity), def.display_name, level]
+			if def.base_defense > 0:
+				text += "防御: +%d\n" % def.base_defense
+		else:
+			text = "[%s] %s 等级%d\n" % [_get_rarity_name(rarity), def_id, level]
+
+		text += "词缀:\n"
+		for affix_id in affix_ids:
+			text += "  - %s\n" % affix_id
+
+		armor_info_label.text = text
+		armor_unequip_button.disabled = false
+
+	# 饰品槽
+	var accessory_save = RunState.equipped_accessory_save
+	if accessory_save.is_empty():
+		accessory_info_label.text = "(无饰品)"
+		accessory_unequip_button.disabled = true
+	else:
+		var def_id = accessory_save.get("definition_id", "")
+		var def = null
+		if DataManager:
+			def = DataManager.get_equipment(StringName(def_id))
+		var rarity = accessory_save.get("rarity", 0) as int
+		var level = accessory_save.get("level", 1)
+		var affix_ids = accessory_save.get("affix_ids", [])
+
+		var text = ""
+		if def:
+			text = "[%s] %s 等级%d\n" % [_get_rarity_name(rarity), def.display_name, level]
+			if def.base_attack > 0:
+				text += "攻击: +%d\n" % def.base_attack
+			if def.base_defense > 0:
+				text += "防御: +%d\n" % def.base_defense
+		else:
+			text = "[%s] %s 等级%d\n" % [_get_rarity_name(rarity), def_id, level]
+
+		text += "词缀:\n"
+		for affix_id in affix_ids:
+			text += "  - %s\n" % affix_id
+
+		accessory_info_label.text = text
+		accessory_unequip_button.disabled = false
 
 	for child in inventory_container.get_children():
 		child.queue_free()
@@ -117,9 +176,21 @@ func _add_inventory_row(item_data: Dictionary, index: int):
 	var rarity = item_data.get("rarity", 0) as int
 	var level = item_data.get("level", 1)
 
+	# 获取装备槽位和图标
+	var slot = 0
+	var icon = "⚔️"
+	var slot_name = "武器"
+	if def:
+		slot = def.slot if "slot" in def else 0
+		match slot:
+			0: icon = "⚔️"; slot_name = "武器"
+			1: icon = "🛡️"; slot_name = "护甲"
+			2, 3: icon = "💍"; slot_name = "饰品"
+			_: icon = "⚔️"; slot_name = "武器"
+
 	# 图标
 	var icon_label = Label.new()
-	icon_label.text = "⚔️"
+	icon_label.text = icon
 	icon_label.custom_minimum_size = Vector2(30, 0)
 	hbox.add_child(icon_label)
 
@@ -134,27 +205,45 @@ func _add_inventory_row(item_data: Dictionary, index: int):
 	var detail_button = Button.new()
 	detail_button.text = "详情"
 	detail_button.custom_minimum_size = Vector2(50, 0)
-	detail_button.tooltip_text = "查看 %s 的详细属性和词缀" % (def.display_name if def else def_id)
+	detail_button.tooltip_text = "查看 %s 的详细属性和词缀" % (def.display_name if def else str(def_id))
 	detail_button.pressed.connect(_on_detail_pressed.bind(item_data))
 	hbox.add_child(detail_button)
 
 	var equip_button = Button.new()
 	equip_button.text = "装备"
 	equip_button.custom_minimum_size = Vector2(50, 0)
-	equip_button.tooltip_text = "将 %s 装备到武器槽" % (def.display_name if def else def_id)
-	equip_button.pressed.connect(_on_equip_pressed.bind(index, item_data))
+	equip_button.tooltip_text = "将 %s 装备到%s槽" % ((def.display_name if def else def_id), slot_name)
+	equip_button.pressed.connect(_on_equip_pressed.bind(index, item_data, slot))
 	hbox.add_child(equip_button)
 
 	inventory_container.add_child(hbox)
 
-func _on_equip_pressed(index: int, item_data: Dictionary):
-	if not RunState.equipped_weapon_save.is_empty():
-		RunState.add_equipment_to_inventory(RunState.equipped_weapon_save)
+func _on_equip_pressed(index: int, item_data: Dictionary, slot: int = 0):
+	var slot_name = "武器"
+	var current_equipped = RunState.equipped_weapon_save
 
-	RunState.equipped_weapon_save = item_data.duplicate(true)
+	match slot:
+		0:  # WEAPON
+			if not RunState.equipped_weapon_save.is_empty():
+				RunState.add_equipment_to_inventory(RunState.equipped_weapon_save)
+			RunState.equipped_weapon_save = item_data.duplicate(true)
+			slot_name = "武器"
+		1:  # ARMOR
+			if not RunState.equipped_armor_save.is_empty():
+				RunState.add_equipment_to_inventory(RunState.equipped_armor_save)
+			RunState.equipped_armor_save = item_data.duplicate(true)
+			slot_name = "护甲"
+		2, 3:  # ACCESSORY_1, ACCESSORY_2
+			if not RunState.equipped_accessory_save.is_empty():
+				RunState.add_equipment_to_inventory(RunState.equipped_accessory_save)
+			RunState.equipped_accessory_save = item_data.duplicate(true)
+			slot_name = "饰品"
+		_:
+			slot_name = "武器"
+
 	RunState.equipment_inventory_saves.remove_at(index)
 
-	_show_message("已装备 %s" % item_data.get("definition_id", "武器"))
+	_show_message("已装备 %s 到%s槽" % [item_data.get("definition_id", "装备"), slot_name])
 	_refresh_display()
 
 func _on_detail_pressed(item_data: Dictionary):
@@ -255,10 +344,24 @@ func _on_unequip_pressed():
 	_refresh_display()
 
 func _on_armor_unequip_pressed():
-	_show_message("护甲槽位开发中")
+	if RunState.equipped_armor_save.is_empty():
+		return
+
+	RunState.add_equipment_to_inventory(RunState.equipped_armor_save)
+	RunState.equipped_armor_save = {}
+
+	_show_message("已卸下护甲")
+	_refresh_display()
 
 func _on_accessory_unequip_pressed():
-	_show_message("饰品槽位开发中")
+	if RunState.equipped_accessory_save.is_empty():
+		return
+
+	RunState.add_equipment_to_inventory(RunState.equipped_accessory_save)
+	RunState.equipped_accessory_save = {}
+
+	_show_message("已卸下饰品")
+	_refresh_display()
 
 func _show_message(msg: String):
 	message_label.text = msg
@@ -285,3 +388,9 @@ func _get_rarity_name(rarity: int) -> String:
 
 func _on_close_pressed():
 	close_requested.emit()
+
+func _on_equipment_equipped(equipment, slot: int):
+	_refresh_display()
+
+func _on_equipment_forged(equipment):
+	_refresh_display()

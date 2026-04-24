@@ -24,11 +24,16 @@ signal atb_changed(value: float, max_value: float)  # ATB变化
 signal kinetic_changed(amount: float)  # 动能变化
 
 func _ready():
-	# 尝试获取BattleClock
-	_battle_clock = get_node_or_null("/root/BattleClock")
-	if not _battle_clock:
-		_battle_clock = BattleClock.new()
-		add_child(_battle_clock)
+	# 注意：BattleClock应该在战斗开始时通过setup()注入
+	# 如果没有注入，则创建一个本地实例（仅用于非战斗场景）
+	pass
+
+func setup(battle_clock: Node) -> void:
+	"""由BattleManager调用，设置共享的BattleClock"""
+	# 移除可能创建的本地实例
+	if _battle_clock and _battle_clock.get_parent() == self:
+		_battle_clock.queue_free()
+	_battle_clock = battle_clock
 
 func _process(delta: float):
 	# 处理冻结效果

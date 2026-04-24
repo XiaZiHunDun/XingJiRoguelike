@@ -125,7 +125,7 @@ func _create_player_save_data() -> PlayerSaveData:
 	# 基础数据
 	save_data.realm_level = RunState.current_realm as int
 	save_data.current_level = RunState.current_level
-	save_data.stardust = RunState.stardust
+	save_data.stardust = RunState.get_stardust()
 	save_data.memory_fragments = RunState.memory_fragments
 
 	# 已解锁区域列表 - 使用当前区域作为已解锁区域
@@ -154,11 +154,20 @@ func _create_player_save_data() -> PlayerSaveData:
 		if row is Dictionary:
 			save_data.equipment_inventory_save.append((row as Dictionary).duplicate(true))
 
-	# 唯一装备和势力声望
+	# 唯一装备和势力数据
 	save_data.owned_unique_equipment = RunState.owned_unique_equipment.duplicate()
 	var fs = FactionSystem.get_instance()
 	if fs:
-		save_data.faction_reputation = fs.get_reputation_data().duplicate()
+		save_data.faction_data = fs.get_save_data()
+
+	# 任务进度数据
+	var qs = QuestSystem.get_instance()
+	if qs:
+		save_data.quest_save_data = qs.get_save_data()
+
+	# 成就数据
+	if AchievementManager:
+		save_data.achievement_data = AchievementManager.get_save_data()
 
 	# 时间戳
 	save_data.update_last_played()
@@ -172,7 +181,7 @@ func _load_game_data(save_data: PlayerSaveData) -> void:
 	RunState.current_character_id = save_data.character_id
 	RunState.current_realm = save_data.realm_level as RealmDefinition.RealmType
 	RunState.current_level = save_data.current_level
-	RunState.stardust = save_data.stardust
+	StardustManager.set_value(save_data.stardust)
 	RunState.total_xp = save_data.total_xp
 
 	# 解锁区域 - 从ID反查ZoneType
@@ -201,12 +210,21 @@ func _load_game_data(save_data: PlayerSaveData) -> void:
 		"inventory": save_data.equipment_inventory_save
 	})
 
-	# 加载唯一装备和势力声望
+	# 加载唯一装备和势力数据
 	if not save_data.owned_unique_equipment.is_empty():
 		RunState.owned_unique_equipment = save_data.owned_unique_equipment.duplicate()
 	var fs = FactionSystem.get_instance()
-	if fs and not save_data.faction_reputation.is_empty():
-		fs.load_reputation_data(save_data.faction_reputation)
+	if fs and save_data.get("faction_data", {}).size() > 0:
+		fs.load_save_data(save_data.faction_data)
+
+	# 加载任务进度数据
+	var qs = QuestSystem.get_instance()
+	if qs and not save_data.quest_save_data.is_empty():
+		qs.load_save_data(save_data.quest_save_data)
+
+	# 加载成就数据
+	if AchievementManager and save_data.has("achievement_data"):
+		AchievementManager.load_from_save(save_data.achievement_data)
 
 
 # 根据zone id反查ZoneType

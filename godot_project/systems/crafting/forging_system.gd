@@ -69,7 +69,7 @@ func can_forge(equipment_data: Dictionary, locked_affixes: Array[String], use_pr
 	if not RunState.has_material("forging_stone", stone_cost):
 		return {"can_forge": false, "reason": "锻造石不足 (需要 %d)" % stone_cost}
 
-	if RunState.stardust < stardust_cost:
+	if not RunState.can_spend_stardust(stardust_cost):
 		return {"can_forge": false, "reason": "星尘不足 (需要 %d)" % stardust_cost}
 
 	if use_protection and not can_use_protection_charm():
@@ -117,9 +117,7 @@ func forge_equipment(
 	var stardust_cost = get_stardust_cost(level, rarity)
 
 	RunState.spend_material("forging_stone", stone_cost)
-	var old_stardust = RunState.stardust
-	RunState.stardust -= stardust_cost
-	EventBus.inventory.stardust_changed.emit(old_stardust, RunState.stardust)
+	RunState.spend_stardust(stardust_cost)  # 信号通过StardustManager→RunState→EventBus链传递
 
 	if use_protection:
 		RunState.spend_material("protection_charm", 1)
@@ -130,6 +128,7 @@ func forge_equipment(
 	# 成功判定
 	if randf() > success_rate:
 		# 失败：词缀不变，只消耗材料
+		EventBus.equipment.equipment_forge_failed.emit(equipment_data, "锻造失败！")
 		return {
 			"success": false,
 			"message": "锻造失败！但词缀保持不变",

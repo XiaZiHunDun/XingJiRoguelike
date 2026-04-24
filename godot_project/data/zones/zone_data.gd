@@ -22,7 +22,15 @@ const ZONES: Dictionary = {
 		"map_5_level_range": Vector2i(57, 70),
 		"enemy_types": ["desert_bandit", "sand_worm", "scorpion"],
 		"elite_templates": ["desert_elite_1", "desert_elite_2"],
+		"elite_affix_config": {  # 精英敌人词缀配置
+			"affix_count_range": Vector2i(1, 2),
+			"available_types": ["bleed", "lifesteal", "vulnerable"]
+		},
 		"boss_template": "desert_boss_sand_king",
+		"boss_affix_config": {  # BOSS词缀配置
+			"affix_count": 2,
+			"available_types": ["bleed", "reflect", "lifesteal", "stealth"]
+		},
 		"boss_count_range": Vector2i(3, 5),
 		"materials": ["sand_essence", "desert_stone", "scorpion_stinger"],
 		"unique_equipment_templates": ["sandwalker_boots", "mirage_cloak"]
@@ -37,7 +45,15 @@ const ZONES: Dictionary = {
 		"map_5_level_range": Vector2i(58, 70),
 		"enemy_types": ["frost_spirit", "ice_golem", "frost_beast"],
 		"elite_templates": ["frost_elite_1", "frost_elite_2"],
+		"elite_affix_config": {
+			"affix_count_range": Vector2i(1, 2),
+			"available_types": ["regen", "vulnerable", "reflect"]
+		},
 		"boss_template": "frost_boss_ice_queen",
+		"boss_affix_config": {
+			"affix_count": 2,
+			"available_types": ["regen", "reflect", "vulnerable", "lifesteal"]
+		},
 		"boss_count_range": Vector2i(4, 6),
 		"materials": ["ice_crystal", "frost_essence", "frozen_heart"],
 		"unique_equipment_templates": ["frost_gauntlets", "blizzard_crown"]
@@ -52,7 +68,15 @@ const ZONES: Dictionary = {
 		"map_5_level_range": Vector2i(59, 70),
 		"enemy_types": ["forest_sprite", "vine_beast", "ancient_tree"],
 		"elite_templates": ["forest_elite_1", "forest_elite_2"],
+		"elite_affix_config": {
+			"affix_count_range": Vector2i(1, 2),
+			"available_types": ["regen", "bleed", "lifesteal"]
+		},
 		"boss_template": "forest_boss_treant_king",
+		"boss_affix_config": {
+			"affix_count": 2,
+			"available_types": ["regen", "bleed", "vulnerable", "stealth"]
+		},
 		"boss_count_range": Vector2i(5, 7),
 		"materials": ["verdant_leaf", "tree_sap", "forest_essence"],
 		"unique_equipment_templates": ["nature_blade", "root_armor"]
@@ -67,7 +91,15 @@ const ZONES: Dictionary = {
 		"map_5_level_range": Vector2i(61, 70),
 		"enemy_types": ["scrap_metal_golem", "steam_dragon", "mechanical_scorpion"],
 		"elite_templates": ["mech_elite_1", "mech_elite_2"],
+		"elite_affix_config": {
+			"affix_count_range": Vector2i(2, 3),
+			"available_types": ["reflect", "vulnerable", "lifesteal"]
+		},
 		"boss_template": "mech_boss_locomotiv_heart",
+		"boss_affix_config": {
+			"affix_count": 3,
+			"available_types": ["reflect", "vulnerable", "regen", "lifesteal"]
+		},
 		"boss_count_range": Vector2i(6, 8),
 		"materials": ["gear_fragment", "steam_essence", "machine_core"],
 		"unique_equipment_templates": ["gear_helm", "steam_jetpack"]
@@ -82,7 +114,15 @@ const ZONES: Dictionary = {
 		"map_5_level_range": Vector2i(66, 70),
 		"enemy_types": ["void_specter", "cosmic_dragon", "mystic_golem"],
 		"elite_templates": ["mystic_elite_1", "mystic_elite_2"],
+		"elite_affix_config": {
+			"affix_count_range": Vector2i(2, 3),
+			"available_types": ["stealth", "lifesteal", "reflect", "regen"]
+		},
 		"boss_template": "mystic_boss_core_guardian",
+		"boss_affix_config": {
+			"affix_count": 3,
+			"available_types": ["stealth", "lifesteal", "reflect", "vulnerable", "bleed"]
+		},
 		"boss_count_range": Vector2i(7, 10),
 		"materials": ["void_shard", "cosmic_dust", "primordial_essence"],
 		"unique_equipment_templates": ["void_staff", "cosmic_robe"]
@@ -124,6 +164,16 @@ static func create_zone_definition(zone_type: ZoneDefinition.ZoneType) -> ZoneDe
 	zone.materials.assign(data.get("materials", []))
 	zone.unique_equipment_templates.assign(data.get("unique_equipment_templates", []))
 	return zone
+
+# 获取区域的精英词缀配置
+static func get_elite_affix_config(zone_type: ZoneDefinition.ZoneType) -> Dictionary:
+	var data = ZONES.get(zone_type, {})
+	return data.get("elite_affix_config", {"affix_count_range": Vector2i(1, 2), "available_types": []})
+
+# 获取区域的BOSS词缀配置
+static func get_boss_affix_config(zone_type: ZoneDefinition.ZoneType) -> Dictionary:
+	var data = ZONES.get(zone_type, {})
+	return data.get("boss_affix_config", {"affix_count": 2, "available_types": []})
 
 # 获取简单zone字符串ID（用于任务匹配）
 static func get_zone_string_id(zone_type: ZoneDefinition.ZoneType) -> String:

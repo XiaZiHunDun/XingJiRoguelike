@@ -5,17 +5,17 @@ extends Control
 
 signal close_requested()
 
-@onready var realm_name_label: Label = $VBox/RealmName
-@onready var level_info_label: Label = $VBox/LevelInfo
-@onready var xp_progress: ProgressBar = $VBox/XPProgress
-@onready var req_physique: Label = $VBox/ReqPhysique
-@onready var req_spirit: Label = $VBox/ReqSpirit
-@onready var req_agility: Label = $VBox/ReqAgility
-@onready var cost_info: Label = $VBox/CostInfo
-@onready var special_ability: Label = $VBox/SpecialAbility
-@onready var amplifier_slots_label: Label = $VBox/AmplifierSlots
-@onready var breakthrough_button: Button = $VBox/BottomBox/BreakthroughButton
-@onready var close_button: Button = $VBox/BottomBox/CloseButton
+@onready var realm_name_label: Label = $MainPanel/VBox/RealmName
+@onready var level_info_label: Label = $MainPanel/VBox/LevelInfo
+@onready var xp_progress: ProgressBar = $MainPanel/VBox/XPProgress
+@onready var req_physique: Label = $MainPanel/VBox/ReqPhysique
+@onready var req_spirit: Label = $MainPanel/VBox/ReqSpirit
+@onready var req_agility: Label = $MainPanel/VBox/ReqAgility
+@onready var cost_info: Label = $MainPanel/VBox/CostInfo
+@onready var special_ability: Label = $MainPanel/VBox/SpecialAbility
+@onready var amplifier_slots_label: Label = $MainPanel/VBox/AmplifierSlots
+@onready var breakthrough_button: Button = $MainPanel/VBox/BottomBox/BreakthroughButton
+@onready var close_button: Button = $MainPanel/VBox/BottomBox/CloseButton
 
 func _ready():
 	breakthrough_button.pressed.connect(_on_breakthrough_pressed)
@@ -28,6 +28,9 @@ func _connect_signals():
 		EventBus.system.breakthrough_succeeded.connect(_on_breakthrough_succeeded)
 	if not EventBus.system.realm_changed.is_connected(_on_realm_changed):
 		EventBus.system.realm_changed.connect(_on_realm_changed)
+	# 连接星尘变化信号
+	if not EventBus.inventory.stardust_changed.is_connected(_on_stardust_changed):
+		EventBus.inventory.stardust_changed.connect(_on_stardust_changed)
 
 func _on_close_pressed():
 	close_requested.emit()
@@ -59,7 +62,7 @@ func _on_breakthrough_pressed():
 
 	# 检查星尘是否足够
 	var cost: int = realm_data.get("breakthrough_cost", 50)
-	if RunState.stardust < cost:
+	if not RunState.can_spend_stardust(cost):
 		_show_message("星尘不足！需要 %d 星尘" % cost)
 		return
 
@@ -68,7 +71,7 @@ func _on_breakthrough_pressed():
 
 func _run_breakthrough(cost: int):
 	# 消耗星尘
-	RunState.stardust -= cost
+	RunState.spend_stardust(cost)
 
 	# 保存旧境界
 	var old_realm = RunState.current_realm
@@ -82,6 +85,10 @@ func _run_breakthrough(cost: int):
 		RealmDefinition.RealmType.GATHERING:
 			RunState.current_realm = RealmDefinition.RealmType.CORE
 		RealmDefinition.RealmType.CORE:
+			RunState.current_realm = RealmDefinition.RealmType.STARDUST
+		RealmDefinition.RealmType.STARDUST:
+			RunState.current_realm = RealmDefinition.RealmType.PARTICLE
+		RealmDefinition.RealmType.PARTICLE:
 			RunState.current_realm = RealmDefinition.RealmType.STARFIRE
 		_:
 			pass
@@ -170,7 +177,7 @@ func _update_display():
 	else:
 		var all_ok = physique_ok and spirit_ok and agility_ok
 		var breakthrough_cost: int = realm_data.get("breakthrough_cost", 50)
-		var has_enough_stardust = RunState.stardust >= breakthrough_cost
+		var has_enough_stardust = RunState.can_spend_stardust(breakthrough_cost)
 		breakthrough_button.disabled = not (all_ok and has_enough_stardust)
 		breakthrough_button.text = "突破" if breakthrough_button.disabled == false else "突破(属性/星尘不足)"
 
@@ -179,3 +186,11 @@ func _on_breakthrough_succeeded(new_realm, trial: bool):
 
 func _on_realm_changed(old_realm, new_realm):
 	_update_display()
+
+func _on_stardust_changed(old_value: int, new_value: int):
+	_update_display()
+
+func _exit_tree():
+	# 断开 EventBus 连接，防止重复连接
+	if EventBus.inventory.stardust_changed.is_connected(_on_stardust_changed):
+		EventBus.inventory.stardust_changed.disconnect(_on_stardust_changed)

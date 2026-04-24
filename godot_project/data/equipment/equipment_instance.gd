@@ -113,13 +113,19 @@ func get_set_id() -> StringName:
 	return set_id if set_id != &"" else (definition.set_id if definition else &"")
 
 func get_attack() -> int:
-	return definition.base_attack if definition else 0
+	var base = definition.base_attack if definition else 0
+	var mult = Consts.RARITY_BASE_MULT.get(rarity, 1.0)
+	return int(base * mult)
 
 func get_defense() -> int:
-	return definition.base_defense if definition else 0
+	var base = definition.base_defense if definition else 0
+	var mult = Consts.RARITY_BASE_MULT.get(rarity, 1.0)
+	return int(base * mult)
 
 func get_health() -> int:
-	return definition.base_health if definition else 0
+	var base = definition.base_health if definition else 0
+	var mult = Consts.RARITY_BASE_MULT.get(rarity, 1.0)
+	return int(base * mult)
 
 func can_wear(player) -> bool:
 	"""检查玩家是否可以穿戴此装备"""
@@ -132,43 +138,11 @@ func can_wear(player) -> bool:
 		if player_level < level:
 			return false
 
-	# 检查属性需求
+	# 检查属性需求（使用共享解析函数）
 	for attr in wear_requirements:
 		var required = wear_requirements[attr]
-
-		# 境界需求（与生成器键名统一为「境界」；旧存档/旧键「境界等级」仍兼容）
-		if attr == "境界" or attr == "境界等级":
-			var req_realm := int(required)
-			if attr == "境界等级" and req_realm > 5:
-				req_realm = clampi(ceili(float(req_realm) / 2.0), 1, 5)
-			else:
-				req_realm = clampi(req_realm, 1, 5)
-			var player_realm_level = player.get_realm_level() if player.has_method("get_realm_level") else 1
-			if int(player_realm_level) < req_realm:
-				return false
-		# 技能等级需求
-		elif attr == "技能等级":
-			if typeof(required) != TYPE_DICTIONARY:
-				continue
-			for skill_name in required.keys():
-				var required_level = required[skill_name]
-				var player_skill_level = player.get_skill_level(str(skill_name)) if player.has_method("get_skill_level") else 0
-				if player_skill_level < int(required_level):
-					return false
-		# 属性需求
-		else:
-			var player_value = 0
-			if attr == "体质" and player.has_method("get_effective_attribute"):
-				player_value = player.get_effective_attribute("体质")
-			elif attr == "精神" and player.has_method("get_effective_attribute"):
-				player_value = player.get_effective_attribute("精神")
-			elif attr == "敏捷" and player.has_method("get_effective_attribute"):
-				player_value = player.get_effective_attribute("敏捷")
-			else:
-				player_value = player.get_effective_attribute(attr) if player.has_method("get_effective_attribute") else 0
-
-			if player_value < required:
-				return false
+		if not _check_requirement_met(attr, required, player):
+			return false
 
 	return true
 
@@ -266,26 +240,69 @@ func get_requirement_texts(player = null) -> Array:
 	var texts: Array = []
 	for attr in wear_requirements:
 		var required = wear_requirements[attr]
-		var met := false
-
-		if attr == "境界" or attr == "境界等级":
-			var req_show := int(required)
-			if attr == "境界等级" and req_show > 5:
-				req_show = clampi(ceili(float(req_show) / 2.0), 1, 5)
-			else:
-				req_show = clampi(req_show, 1, 5)
-			var player_realm = player.get_realm_level() if player and player.has_method("get_realm_level") else 1
-			met = int(player_realm) >= req_show
-			texts.append({"name": "境界", "required": req_show, "met": met})
-		elif attr == "技能等级":
-			if typeof(required) == TYPE_DICTIONARY:
-				for skill_name in required.keys():
-					var sk_key := str(skill_name)
-					var player_skill_level = player.get_skill_level(sk_key) if player and player.has_method("get_skill_level") else 0
-					met = player_skill_level >= int(required[skill_name])
-					texts.append({"name": sk_key + "等级", "required": required[skill_name], "met": met})
+		var req_info = _get_requirement_text(attr, required, player)
+		if req_info.is_empty():
+			continue
+		# 技能等级可能返回多个条目
+		if req_info is Array:
+			texts.append_array(req_info)
 		else:
-			var player_value = player.get_effective_attribute(attr) if player and player.has_method("get_effective_attribute") else 0
-			met = player_value >= required
-			texts.append({"name": attr, "required": required, "met": met})
+			texts.append(req_info)
 	return texts
+
+func _get_requirement_text(attr: String, required, player) -> Dictionary:
+	"""解析需求属性用于显示，返回包含显示名称、需求值、是否满足的字典"""
+	if attr == "境界" or attr == "境界等级":
+		var req_show := int(required)
+		if attr == "境界等级" and req_show > 5:
+			req_show = clampi(ceili(float(req_show) / 2.0), 1, 5)
+		else:
+			req_show = clampi(req_show, 1, 5)
+		var player_realm = player.get_realm_level() if player and player.has_method("get_realm_level") else 1
+		var met = int(player_realm) >= req_show
+		return {"name": "境界", "required": req_show, "met": met}
+	elif attr == "技能等级":
+		if typeof(required) == TYPE_DICTIONARY:
+			var results: Array = []
+			for skill_name in required.keys():
+				var sk_key := str(skill_name)
+				var player_skill_level = player.get_skill_level(sk_key) if player and player.has_method("get_skill_level") else 0
+				var met = player_skill_level >= int(required[skill_name])
+				results.append({"name": sk_key + "等级", "required": required[skill_name], "met": met})
+			return results if results.size() > 0 else {}
+		return {}
+	else:
+		var player_value = player.get_effective_attribute(attr) if player and player.has_method("get_effective_attribute") else 0
+		var met = player_value >= required
+		return {"name": attr, "required": required, "met": met}
+
+func _check_requirement_met(attr: String, required, player) -> bool:
+	"""检查单个需求是否满足"""
+	if attr == "境界" or attr == "境界等级":
+		var req_realm := int(required)
+		if attr == "境界等级" and req_realm > 5:
+			req_realm = clampi(ceili(float(req_realm) / 2.0), 1, 5)
+		else:
+			req_realm = clampi(req_realm, 1, 5)
+		var player_realm_level = player.get_realm_level() if player.has_method("get_realm_level") else 1
+		return int(player_realm_level) >= req_realm
+	elif attr == "技能等级":
+		if typeof(required) != TYPE_DICTIONARY:
+			return true
+		for skill_name in required.keys():
+			var required_level = required[skill_name]
+			var player_skill_level = player.get_skill_level(str(skill_name)) if player.has_method("get_skill_level") else 0
+			if player_skill_level < int(required_level):
+				return false
+		return true
+	else:
+		var player_value = 0
+		if attr == "体质" and player.has_method("get_effective_attribute"):
+			player_value = player.get_effective_attribute("体质")
+		elif attr == "精神" and player.has_method("get_effective_attribute"):
+			player_value = player.get_effective_attribute("精神")
+		elif attr == "敏捷" and player.has_method("get_effective_attribute"):
+			player_value = player.get_effective_attribute("敏捷")
+		else:
+			player_value = player.get_effective_attribute(attr) if player.has_method("get_effective_attribute") else 0
+		return player_value >= required

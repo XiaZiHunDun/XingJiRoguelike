@@ -14,6 +14,10 @@ signal node_clicked(node_data: MapNode)
 @onready var locked_overlay: Panel = $LockedOverlay
 @onready var cleared_check: Label = $ClearedCheck
 
+# 缓存样式避免内存泄漏
+var _cached_style: StyleBoxFlat = null
+var _current_border_color: Color = Color("#6B6B8D")
+
 const ICON_EMOJIS = {
 	"sword": "⚔",
 	"skull": "💀",
@@ -21,7 +25,8 @@ const ICON_EMOJIS = {
 	"shop": "🛒",
 	"chest": "📦",
 	"crown": "👑",
-	"gem": "💎"
+	"gem": "💎",
+	"heart": "❤"
 }
 
 func _ready() -> void:
@@ -60,23 +65,44 @@ func _update_panel_color() -> void:
 	if not node_data:
 		return
 
-	var style = panel.get_theme_stylebox("panel")
-	if style is StyleBoxFlat:
-		match node_data.node_type:
-			MapNode.NodeType.BOSS:
-				style.border_color = Color("#FF6B35")  # Orange-red for boss
-			MapNode.NodeType.ELITE_BATTLE:
-				style.border_color = Color("#FFD700")  # Gold for elite
-			MapNode.NodeType.TREASURE:
-				style.border_color = Color("#90EE90")  # Light green for treasure
-			MapNode.NodeType.SHOP:
-				style.border_color = Color("#87CEEB")  # Sky blue for shop
-			MapNode.NodeType.EVENT:
-				style.border_color = Color("#DDA0DD")  # Plum for event
-			MapNode.NodeType.COLLECTION:
-				style.border_color = Color("#00CED1")  # Dark cyan for collection
-			_:
-				style.border_color = Color("#6B6B8D")  # Default gray-purple
+	# 获取基础样式并缓存
+	var base_style = panel.get_theme_stylebox("panel")
+	if not base_style or not (base_style is StyleBoxFlat):
+		return
+
+	# 复用缓存的样式或创建新的
+	if _cached_style == null:
+		_cached_style = base_style.duplicate()
+
+	# 根据节点类型设置边框颜色
+	match node_data.node_type:
+		MapNode.NodeType.BOSS:
+			_current_border_color = Color("#FF6B35")  # Orange-red for boss
+		MapNode.NodeType.ELITE_BATTLE:
+			_current_border_color = Color("#FFD700")  # Gold for elite
+		MapNode.NodeType.TREASURE:
+			_current_border_color = Color("#90EE90")  # Light green for treasure
+		MapNode.NodeType.SHOP:
+			_current_border_color = Color("#87CEEB")  # Sky blue for shop
+		MapNode.NodeType.EVENT:
+			_current_border_color = Color("#DDA0DD")  # Plum for event
+		MapNode.NodeType.COLLECTION:
+			_current_border_color = Color("#00CED1")  # Dark cyan for collection
+		MapNode.NodeType.HEALING_SHRINE:
+			_current_border_color = Color("#FF69B4")  # Hot pink for healing shrine
+		MapNode.NodeType.MYSTERY_MERCHANT:
+			_current_border_color = Color("#BA55D3")  # Medium orchid for mystery merchant
+		MapNode.NodeType.BLESSING_SHRINE:
+			_current_border_color = Color("#7B68EE")  # Medium slate blue for blessing shrine
+		MapNode.NodeType.CURSE_CHALLENGE:
+			_current_border_color = Color("#8B0000")  # Dark red for curse challenge
+		MapNode.NodeType.REST_NODE:
+			_current_border_color = Color("#20B2AA")  # Light sea green for rest node
+		_:
+			_current_border_color = Color("#6B6B8D")  # Default gray-purple
+
+	_cached_style.border_color = _current_border_color
+	panel.add_theme_stylebox_override("panel", _cached_style)
 
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -86,15 +112,23 @@ func _on_gui_input(event: InputEvent) -> void:
 				node_clicked.emit(node_data)
 
 func set_highlighted(highlight: bool) -> void:
-	var style = panel.get_theme_stylebox("panel")
-	if style is StyleBoxFlat:
-		if highlight:
-			style.border_width_left = 4
-			style.border_width_top = 4
-			style.border_width_right = 4
-			style.border_width_bottom = 4
-		else:
-			style.border_width_left = 2
-			style.border_width_top = 2
-			style.border_width_right = 2
-			style.border_width_bottom = 2
+	# 获取基础样式
+	var base_style = panel.get_theme_stylebox("panel")
+	if not base_style or not (base_style is StyleBoxFlat):
+		return
+
+	# 复用缓存的样式
+	if _cached_style == null:
+		_cached_style = base_style.duplicate()
+
+	if highlight:
+		_cached_style.border_width_left = 4
+		_cached_style.border_width_top = 4
+		_cached_style.border_width_right = 4
+		_cached_style.border_width_bottom = 4
+	else:
+		_cached_style.border_width_left = 2
+		_cached_style.border_width_top = 2
+		_cached_style.border_width_right = 2
+		_cached_style.border_width_bottom = 2
+	panel.add_theme_stylebox_override("panel", _cached_style)

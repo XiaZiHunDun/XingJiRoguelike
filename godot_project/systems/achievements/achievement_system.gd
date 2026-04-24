@@ -28,8 +28,8 @@ func _on_combat_ended(victory: bool):
 
 func _on_enemy_killed(enemy, position: Vector2):
 	"""敌人死亡时更新击杀计数"""
-	var is_elite = enemy.is_elite if enemy and enemy.has("is_elite") else false
-	var is_boss = enemy.is_boss if enemy and enemy.has("is_boss") else false
+	var is_elite = enemy.enemy_type == Enums.EnemyType.ELITE if enemy and enemy.has("enemy_type") else false
+	var is_boss = enemy.enemy_type == Enums.EnemyType.BOSS if enemy and enemy.has("enemy_type") else false
 
 	# first_blood: 击败第一个敌人
 	_update_progress("first_blood", 1)

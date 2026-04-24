@@ -11,7 +11,6 @@ var base_speed: float = Consts.BASE_PLAYER_SPEED
 # 局外成长（星尘）
 var stardust: int = 0
 var max_stardust_bonus: float = Consts.STARDUST_MAX_BONUS
-var _stardust_manager: Node = null  # 星尘管理器引用
 
 # 永久强化系统
 var permanent_inventory: PermanentInventory
@@ -38,9 +37,6 @@ var equipped_weapon_save: Dictionary = {}
 var equipped_armor_save: Dictionary = {}
 var equipped_accessory_save: Dictionary = {}
 var equipment_inventory_saves: Array[Dictionary] = []
-
-# 材料背包：material_id -> quantity
-var material_inventory: Dictionary = {}
 
 # 任务系统
 # 任务定义
@@ -104,25 +100,21 @@ func _ready():
 	rng = RandomNumberGenerator.new()
 	rng.seed = Time.get_unix_time_from_system()
 	permanent_inventory = PermanentInventory.new()
-	_stardust_manager = get_node("/root/StardustManager") if has_node("/root/StardustManager") else null
 
 	# 连接存档相关事件
 	EventBus.system.breakthrough_succeeded.connect(_on_breakthrough_succeeded)
 	# 连接战斗事件（用于同步玩家HP，消除对tree的依赖）
 	EventBus.combat.player_hp_changed.connect(_on_player_hp_changed)
-
-func _get_stardust_manager() -> Node:
-	"""获取星尘管理器（懒加载）"""
-	if not _stardust_manager:
-		_stardust_manager = get_node("/root/StardustManager") if has_node("/root/StardustManager") else null
-	return _stardust_manager
+	# 连接StardustManager信号到EventBus（信号链修复）
+	if StardustManager:
+		StardustManager.stardust_changed.connect(_on_stardust_manager_changed)
 
 # 获取带星尘加成的属性
 func get_attack_with_bonus() -> int:
-	return int(float(base_attack) * (1.0 + stardust * 0.01 * max_stardust_bonus))
+	return int(float(base_attack) * (1.0 + get_stardust() * 0.01 * max_stardust_bonus))
 
 func get_speed_with_bonus() -> float:
-	return base_speed * (1.0 + stardust * 0.005 * max_stardust_bonus)
+	return base_speed * (1.0 + get_stardust() * 0.005 * max_stardust_bonus)
 
 # ==================== 势力专属装备加成 ====================
 
@@ -240,7 +232,9 @@ func start_new_run():
 	max_hp = Consts.BASE_PLAYER_HP
 	base_attack = Consts.BASE_PLAYER_ATTACK
 	base_speed = Consts.BASE_PLAYER_SPEED
-	stardust = 0
+	# 重置星尘（通过StardustManager）
+	if StardustManager:
+		StardustManager.reset()
 	memory_fragments = 0
 	current_realm = RealmDefinition.RealmType.MORTAL
 	current_level = 1
@@ -377,17 +371,6 @@ func add_memory_fragments(amount: int):
 	memory_fragments += amount
 	EventBus.system.time_sand_changed.emit(memory_fragments, Consts.MEMORY_FRAGMENTS_REFERENCE_MAX)
 
-func add_stardust(amount: int):
-	"""添加星尘（带事件通知）"""
-	if amount <= 0:
-		return
-	var old_stardust = stardust
-	stardust += amount
-	EventBus.inventory.stardust_changed.emit(old_stardust, stardust)
-	# 同步到StardustManager
-	if _get_stardust_manager():
-		_stardust_manager.set_value(stardust)
-
 func spend_memory_fragments(amount: int) -> bool:
 	"""消耗记忆碎片"""
 	if memory_fragments >= amount:
@@ -470,21 +453,22 @@ func load_equipment_save_payload(payload: Dictionary) -> void:
 func clear_run_equipment_on_defeat() -> void:
 	# 应用死亡保留星尘逻辑
 	var keep_rate = _get_keep_stardust_rate()
-	if keep_rate > 0.0 and stardust > 0:
-		var kept_stardust = int(float(stardust) * keep_rate)
-		var old_stardust = stardust
-		stardust = kept_stardust
-		EventBus.inventory.stardust_changed.emit(old_stardust, stardust)
-		GameLogger.debug("保留星尘", {"kept": kept_stardust, "rate": keep_rate * 100, "original": stardust})
+	var current_stardust = get_stardust()
+	if keep_rate > 0.0 and current_stardust > 0:
+		var kept_stardust = int(float(current_stardust) * keep_rate)
+		StardustManager.set_value(kept_stardust)
+		GameLogger.debug("保留星尘", {"kept": kept_stardust, "rate": keep_rate * 100, "original": current_stardust})
 	else:
-		var old_stardust = stardust
-		stardust = 0
-		EventBus.inventory.stardust_changed.emit(old_stardust, stardust)
+		StardustManager.set_value(0)
 
 	equipped_weapon_save = {}
 	equipped_armor_save = {}
 	equipped_accessory_save = {}
 	equipment_inventory_saves.clear()
+
+	# 发出战斗结束和局结束信号
+	EventBus.combat.combat_ended.emit(false)
+	EventBus.system.run_ended.emit()
 
 func _get_keep_stardust_rate() -> float:
 	"""获取死亡保留星尘比例（来自唯一装备加成）"""
@@ -670,7 +654,6 @@ func load_save_data(data: Dictionary):
 		# 同步到MaterialManager（委托管理模式）
 		if MaterialManager:
 			MaterialManager.load_from_dict(data["material_inventory"])
-		material_inventory = data["material_inventory"].duplicate(true) if data["material_inventory"] is Dictionary else {}
 	if data.has("achievements"):
 		var ach_data = data["achievements"]
 		achievement_unlocked = ach_data.get("unlocked", []).duplicate()
@@ -694,6 +677,10 @@ func get_achievement_save_data() -> Dictionary:
 		"unlocked": achievement_unlocked.duplicate(),
 		"progress": achievement_progress.duplicate(true)
 	}
+
+func _on_stardust_manager_changed(old_value: int, new_value: int) -> void:
+	"""监听StardustManager星尘变化，转发到EventBus（信号链修复）"""
+	EventBus.inventory.stardust_changed.emit(old_value, new_value)
 
 func _on_player_hp_changed(current_hp: int, max_hp: int) -> void:
 	"""监听玩家HP变化，同步到current_battle_hp（消除对tree的依赖）"""

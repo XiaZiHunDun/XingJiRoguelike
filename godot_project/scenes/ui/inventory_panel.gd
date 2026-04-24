@@ -6,15 +6,15 @@ extends Control
 signal close_requested()
 signal item_selected(item_data: Dictionary)
 
-@onready var tabs_container: HBoxContainer = $VBox/TabsContainer
-@onready var equipment_tab: Button = $VBox/TabsContainer/EquipmentTab
-@onready var materials_tab: Button = $VBox/TabsContainer/MaterialsTab
-@onready var consumables_tab: Button = $VBox/TabsContainer/ConsumablesTab
-@onready var items_container: VBoxContainer = $VBox/ItemsScroll/ItemsContainer
-@onready var detail_panel: VBoxContainer = $VBox/DetailPanel
-@onready var detail_label: Label = $VBox/DetailPanel/DetailLabel
-@onready var close_button: Button = $VBox/BottomBox/CloseButton
-@onready var message_label: Label = $VBox/BottomBox/MessageLabel
+@onready var tabs_container: HBoxContainer = $VBox/Panel/VBoxInner/TabsContainer
+@onready var equipment_tab: Button = $VBox/Panel/VBoxInner/TabsContainer/EquipmentTab
+@onready var materials_tab: Button = $VBox/Panel/VBoxInner/TabsContainer/MaterialsTab
+@onready var consumables_tab: Button = $VBox/Panel/VBoxInner/TabsContainer/ConsumablesTab
+@onready var items_container: VBoxContainer = $VBox/Panel/VBoxInner/ItemsScroll/ItemsContainer
+@onready var detail_panel: VBoxContainer = $VBox/Panel/VBoxInner/DetailPanel
+@onready var detail_label: Label = $VBox/Panel/VBoxInner/DetailPanel/DetailLabel
+@onready var close_button: Button = $VBox/Panel/VBoxInner/BottomBox/CloseButton
+@onready var message_label: Label = $VBox/Panel/VBoxInner/BottomBox/MessageLabel
 @onready var item_detail_popup: PopupPanel = $ItemDetailPopup
 @onready var popup_item_name: Label = $ItemDetailPopup/PopupVBox/ItemName
 @onready var popup_item_type: Label = $ItemDetailPopup/PopupVBox/ItemType
@@ -25,21 +25,25 @@ signal item_selected(item_data: Dictionary)
 @onready var popup_close_button: Button = $ItemDetailPopup/PopupVBox/PopupCloseButton
 
 # 排序和筛选 UI
-@onready var sort_button: Button = $VBox/TabsContainer/SortButton
+@onready var sort_button: Button = $VBox/Panel/VBoxInner/SearchFilterContainer/SortButton
 @onready var sort_popup: PopupMenu = $SortPopup
-@onready var search_line_edit: LineEdit = $VBox/SearchContainer/SearchLineEdit
-@onready var filter_button: Button = $VBox/SearchContainer/FilterButton
+@onready var search_line_edit: LineEdit = $VBox/Panel/VBoxInner/SearchFilterContainer/SearchLineEdit
+@onready var filter_button: Button = $VBox/Panel/VBoxInner/SearchFilterContainer/FilterButton
 @onready var filter_popup: PopupMenu = $FilterPopup
 
 # 操作按钮（底部动态显示）
-@onready var action_bar: HBoxContainer = $VBox/ActionBar
-@onready var equip_button: Button = $VBox/ActionBar/EquipButton
-@onready var use_button: Button = $VBox/ActionBar/UseButton
+@onready var action_bar: HBoxContainer = $VBox/Panel/VBoxInner/ActionBar
+@onready var equip_button: Button = $VBox/Panel/VBoxInner/ActionBar/EquipButton
+@onready var use_button: Button = $VBox/Panel/VBoxInner/ActionBar/UseButton
 
 var item_compare_popup_resource: PackedScene = null
 
 var is_sort_popup_visible: bool = false
 var isfilter_popup_visible: bool = false
+
+# 子组件（从InventoryPanel God Class提取）
+var _sort_filter_component: Node  # 排序筛选组件
+var _item_list_renderer: Node  # 物品列表渲染器
 
 enum Tab { EQUIPMENT, MATERIALS, CONSUMABLES }
 var current_tab: Tab = Tab.EQUIPMENT
@@ -65,6 +69,9 @@ var current_filter: String = "ALL"
 var search_query: String = ""
 
 func _ready():
+	# 初始化子组件
+	_init_sub_components()
+
 	# 加载装备对比弹窗场景
 	item_compare_popup_resource = preload("res://scenes/ui/item_compare_popup.tscn")
 
@@ -73,29 +80,41 @@ func _ready():
 	materials_tab.pressed.connect(_on_materials_tab_pressed)
 	consumables_tab.pressed.connect(_on_consumables_tab_pressed)
 	popup_close_button.pressed.connect(_on_popup_close_pressed)
-	sort_button.pressed.connect(_on_sort_button_pressed)
-	search_line_edit.text_changed.connect(_on_search_text_changed)
-	sort_popup.id_pressed.connect(_on_sort_item_selected)
-	filter_popup.id_pressed.connect(_on_filter_item_selected)
 	equip_button.pressed.connect(_on_equip_button_pressed)
-	_init_sort_popup()
-	_initfilter_popup()
+	use_button.pressed.connect(_on_use_button_pressed)
+	filter_button.pressed.connect(_on_filter_button_pressed)
+	search_line_edit.text_changed.connect(_on_search_text_changed)
+	EventBus.inventory.material_changed.connect(_on_material_changed)
+	# 连接材料添加信号
+	if not EventBus.collection.material_added.is_connected(_on_material_added):
+		EventBus.collection.material_added.connect(_on_material_added)
 	_refresh_display()
 
-func _init_sort_popup():
-	sort_popup.add_item("等级降序", SortMode.LEVEL_DESC)
-	sort_popup.add_item("价值降序", SortMode.VALUE_DESC)
-	sort_popup.add_item("类型", SortMode.TYPE)
-	sort_popup.add_item("稀有度", SortMode.RARITY)
-	sort_popup.add_item("获取时间", SortMode.ACQUIRE_TIME)
 
-func _initfilter_popup():
-	filter_popup.add_item("全部", 0)
-	filter_popup.add_item("武器", 1)
-	filter_popup.add_item("护甲", 2)
-	filter_popup.add_item("饰品", 3)
+func _init_sub_components() -> void:
+	"""初始化背包面板的子组件"""
+	# 排序筛选组件
+	_sort_filter_component = load("res://scenes/ui/components/inventory_sort_filter.gd").new()
+	add_child(_sort_filter_component)
+	_sort_filter_component.setup(sort_button, filter_button, sort_popup, filter_popup)
+	_sort_filter_component.sort_mode_changed.connect(_on_sort_mode_changed)
+	_sort_filter_component.filter_changed.connect(_on_filter_changed)
+	_sort_filter_component.search_text_changed.connect(_on_search_text_changed)
 
-func _on_sort_button_pressed():
+	# 物品列表渲染器
+	_item_list_renderer = load("res://scenes/ui/components/item_list_renderer.gd").new()
+	add_child(_item_list_renderer)
+	_item_list_renderer.setup(items_container)
+
+# ==================== 子组件信号处理 ====================
+
+func _on_sort_mode_changed(mode: int) -> void:
+	current_sort_mode = mode
+	_refresh_display()
+
+func _on_filter_changed(filter_type: String) -> void:
+	current_filter = filter_type
+	_refresh_display()
 	# 切换排序弹窗显示
 	var popup_pos = Vector2(sort_button.global_position.x, sort_button.global_position.y + sort_button.size.y)
 	sort_popup.position = popup_pos
@@ -227,6 +246,16 @@ func _refresh_display():
 	detail_label.text = ""
 	message_label.text = ""
 	_update_action_buttons()
+
+func _on_material_changed(material_id: StringName, old_quantity: int, new_quantity: int) -> void:
+	# 材料变化时刷新显示
+	if current_tab == Tab.MATERIALS:
+		_refresh_display()
+
+func _on_material_added(material_id: StringName, quantity: int) -> void:
+	# 材料添加时刷新显示
+	if current_tab == Tab.MATERIALS:
+		_refresh_display()
 
 func _update_action_buttons() -> void:
 	match current_tab:
@@ -678,6 +707,13 @@ func _get_rarity_color(rarity: int) -> Color:
 func _on_close_pressed():
 	close_requested.emit()
 
+func _exit_tree():
+	# 断开 EventBus 连接，防止重复连接
+	if EventBus.inventory.material_changed.is_connected(_on_material_changed):
+		EventBus.inventory.material_changed.disconnect(_on_material_changed)
+	if EventBus.collection.material_added.is_connected(_on_material_added):
+		EventBus.collection.material_added.disconnect(_on_material_added)
+
 # 双击检测
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -729,11 +765,13 @@ func _on_item_double_clicked(item_data: Dictionary) -> void:
 func _get_equipped_for_slot(slot: int) -> Dictionary:
 	# 根据slot类型获取当前已装备的物品
 	# 0=WEAPON, 1=ARMOR, 2=ACCESSORY_1, 3=ACCESSORY_2
-	# 当前只实现了武器槽
 	match slot:
 		0:  # WEAPON
 			return RunState.equipped_weapon_save
-		# 护甲和饰品槽暂未实现
+		1:  # ARMOR
+			return RunState.equipped_armor_save
+		2, 3:  # ACCESSORY_1, ACCESSORY_2
+			return RunState.equipped_accessory_save
 		_:
 			return {}
 
@@ -776,15 +814,23 @@ func _on_equip_from_compare(new_item: Dictionary) -> void:
 	if not equipped_item.is_empty():
 		RunState.add_equipment_to_inventory(equipped_item.duplicate(true))
 
-	# 装备新物品（目前只实现武器槽）
-	if slot == 0:
-		RunState.equipped_weapon_save = new_item.duplicate(true)
-		# 从背包移除
-		RunState.equipment_inventory_saves.remove_at(item_index)
-		_show_message("已装备 %s" % new_item.get("definition_id", "装备"))
-	else:
-		_show_message("该槽位暂未开放")
-		return
+	# 装备新物品
+	match slot:
+		0:  # WEAPON
+			RunState.equipped_weapon_save = new_item.duplicate(true)
+			RunState.equipment_inventory_saves.remove_at(item_index)
+			_show_message("已装备 %s" % new_item.get("definition_id", "装备"))
+		1:  # ARMOR
+			RunState.equipped_armor_save = new_item.duplicate(true)
+			RunState.equipment_inventory_saves.remove_at(item_index)
+			_show_message("已装备 %s" % new_item.get("definition_id", "装备"))
+		2, 3:  # ACCESSORY
+			RunState.equipped_accessory_save = new_item.duplicate(true)
+			RunState.equipment_inventory_saves.remove_at(item_index)
+			_show_message("已装备 %s" % new_item.get("definition_id", "装备"))
+		_:
+			_show_message("该槽位暂未开放")
+			return
 
 	_refresh_display()
 
@@ -793,3 +839,21 @@ func _on_equip_button_pressed() -> void:
 		return
 
 	_on_item_double_clicked(selected_item_data)
+
+func _on_use_button_pressed() -> void:
+	if selected_item_data.is_empty():
+		return
+
+	var item_type = selected_item_data.get("type", "")
+	# 消耗品直接使用
+	if item_type == "consumable":
+		var item_id = selected_item_data.get("id", "")
+		var quantity = selected_item_data.get("quantity", 1)
+		if quantity > 1:
+			selected_item_data["quantity"] = quantity - 1
+		else:
+			RunState.remove_inventory_item(item_id)
+		_show_message("使用了 %s" % item_id)
+		_refresh_display()
+	else:
+		_show_message("该物品无法使用")

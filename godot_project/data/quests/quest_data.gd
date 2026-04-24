@@ -29,10 +29,9 @@ const MAIN_STORY_QUESTS: Array = [
 		"chapter": 0,
 		"chapter_name": "序章",
 		"title": "觉醒",
-		"description": "在沙海回声中醒来，你发现自己失去了大部分记忆。探索这个区域，找回你的力量。",
-		"target_type": "zone_complete",
-		"target_zone": "desert",
-		"target_count": 1,
+		"description": "在沙海回声中醒来，你发现自己失去了大部分记忆。\n\n【操作提示】\n• 点击敌人选择目标\n• ATB槽充满后即可攻击\n• 按1-4释放技能\n• 按Z使用时砂（子弹时间）\n\n击败3个普通敌人来证明你的实力！",
+		"target_type": "kill_enemy_count",
+		"target_count": 3,
 		"reward_type": "stardust",
 		"reward_amount": 100,
 		"next_quest": "main_1_first_victory"

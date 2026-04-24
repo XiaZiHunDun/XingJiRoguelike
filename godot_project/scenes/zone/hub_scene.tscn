@@ -1,6 +1,70 @@
-[gd_scene load_steps=2 format=3 uid="uid://hub_scene"]
+[gd_scene load_steps=5 format=3 uid="uid://hub_scene"]
 
 [ext_resource type="Script" path="res://scenes/zone/hub_scene.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
+bg_color = Color(0.1, 0.12, 0.25, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.25, 0.4, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+bg_color = Color(0.18, 0.22, 0.4, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.5, 0.8, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
+bg_color = Color(0.22, 0.28, 0.5, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.6, 0.9, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_disabled"]
+bg_color = Color(0.06, 0.06, 0.12, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.1, 0.1, 0.15, 0.4)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
 
 [node name="HubScene" type="Control"]
 layout_mode = 3
@@ -18,225 +82,416 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.08, 0.08, 0.12, 1)
+color = Color(0.02, 0.02, 0.06, 1)
 
-[node name="TitleBar" type="Panel" parent="."]
-layout_mode = 1
-anchors_preset = 0
-offset_left = 0
-offset_top = 0
-offset_right = 1300
-offset_bottom = 60
-grow_horizontal = 2
+[node name="Stars" type="Node2D" parent="."]
 
-[node name="GameTitle" type="Label" parent="TitleBar"]
+[node name="s1" type="Label" parent="Stars"]
+offset_left = 120.0
+offset_top = 50.0
+offset_right = 130.0
+offset_bottom = 75.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.5)
+theme_override_font_sizes/font_size = 20
+
+[node name="s2" type="Label" parent="Stars"]
+offset_left = 400.0
+offset_top = 100.0
+offset_right = 410.0
+offset_bottom = 125.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 16
+
+[node name="s3" type="Label" parent="Stars"]
+offset_left = 800.0
+offset_top = 40.0
+offset_right = 810.0
+offset_bottom = 65.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.45)
+theme_override_font_sizes/font_size = 18
+
+[node name="s4" type="Label" parent="Stars"]
+offset_left = 1100.0
+offset_top = 150.0
+offset_right = 1110.0
+offset_bottom = 175.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+theme_override_font_sizes/font_size = 14
+
+[node name="s5" type="Label" parent="Stars"]
+offset_left = 1500.0
+offset_top = 80.0
+offset_right = 1510.0
+offset_bottom = 105.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 16
+
+[node name="s6" type="Label" parent="Stars"]
+offset_left = 300.0
+offset_top = 300.0
+offset_right = 310.0
+offset_bottom = 325.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+theme_override_font_sizes/font_size = 14
+
+[node name="s7" type="Label" parent="Stars"]
+offset_left = 900.0
+offset_top = 350.0
+offset_right = 910.0
+offset_bottom = 375.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 18
+
+[node name="s8" type="Label" parent="Stars"]
+offset_left = 1300.0
+offset_top = 400.0
+offset_right = 1310.0
+offset_bottom = 425.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 16
+
+[node name="s9" type="Label" parent="Stars"]
+offset_left = 600.0
+offset_top = 500.0
+offset_right = 610.0
+offset_bottom = 525.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+theme_override_font_sizes/font_size = 14
+
+[node name="s10" type="Label" parent="Stars"]
+offset_left = 1700.0
+offset_top = 300.0
+offset_right = 1710.0
+offset_bottom = 325.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.45)
+theme_override_font_sizes/font_size = 20
+
+[node name="s11" type="Label" parent="Stars"]
+offset_left = 200.0
+offset_top = 450.0
+offset_right = 210.0
+offset_bottom = 475.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 16
+
+[node name="s12" type="Label" parent="Stars"]
+offset_left = 1600.0
+offset_top = 500.0
+offset_right = 1610.0
+offset_bottom = 525.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 18
+
+[node name="Title" type="Label" parent="."]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = 10
 anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 10.0
-offset_bottom = -10.0
+offset_top = 25.0
+offset_bottom = 75.0
 grow_horizontal = 2
-text = "星陨纪元 - 枢纽"
+text = "选择行动"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PlayerInfo" type="Panel" parent="."]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = -100.0
-offset_right = 320.0
-offset_bottom = -20.0
-grow_vertical = 0
-
-[node name="InfoLabel" type="Label" parent="PlayerInfo"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 5.0
-offset_right = -10.0
-offset_bottom = -5.0
-text = "境界: 凡人身 Lv.1
-星尘: 0"
-
-[node name="CharacterDisplay" type="Panel" parent="."]
+[node name="LeftPanel" type="Panel" parent="."]
 layout_mode = 1
 anchors_preset = 0
-offset_left = 20.0
-offset_top = 70.0
-offset_right = 220.0
-offset_bottom = 290.0
+offset_left = 50.0
+offset_top = 100.0
+offset_right = 430.0
+offset_bottom = 600.0
 
-[node name="VBox" type="VBoxContainer" parent="CharacterDisplay"]
+[node name="PanelBG" type="ColorRect" parent="LeftPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
+color = Color(0.08, 0.08, 0.15, 0.6)
 
-[node name="CharacterPortrait" type="TextureRect" parent="CharacterDisplay/VBox"]
+[node name="VBox" type="VBoxContainer" parent="LeftPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_constant_separation = 12
+
+[node name="StatsRow" type="HBoxContainer" parent="LeftPanel/VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(150, 200)
-size_flags_horizontal = 4
-size_flags_vertical = 4
-expand_mode = 1
-stretch_mode = 5
-metadata/_edit_use_anchors_ = true
+theme_constant_separation = 20
 
-[node name="HBox" type="HBoxContainer" parent="CharacterDisplay/VBox"]
-layout_mode = 2
-
-[node name="ATKLabel" type="Label" parent="CharacterDisplay/VBox/HBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "攻击: 10"
-horizontal_alignment = 1
-
-[node name="CRILabel" type="Label" parent="CharacterDisplay/VBox/HBox"]
+[node name="ATK" type="VBoxContainer" parent="LeftPanel/VBox/StatsRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "暴击: 5%"
+
+[node name="Icon" type="Label" parent="LeftPanel/VBox/StatsRow/ATK"]
+layout_mode = 2
+text = "⚔️"
 horizontal_alignment = 1
 
-[node name="DEFLabel" type="Label" parent="CharacterDisplay/VBox/HBox"]
+[node name="Val" type="Label" parent="LeftPanel/VBox/StatsRow/ATK"]
+layout_mode = 2
+text = "10"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.6, 0.6, 1)
+
+[node name="CRI" type="VBoxContainer" parent="LeftPanel/VBox/StatsRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "防御: 5"
+
+[node name="Icon" type="Label" parent="LeftPanel/VBox/StatsRow/CRI"]
+layout_mode = 2
+text = "🎯"
 horizontal_alignment = 1
 
-[node name="SPILabel" type="Label" parent="CharacterDisplay/VBox/HBox"]
+[node name="Val" type="Label" parent="LeftPanel/VBox/StatsRow/CRI"]
+layout_mode = 2
+text = "5%"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.85, 0.5, 1)
+
+[node name="DEF" type="VBoxContainer" parent="LeftPanel/VBox/StatsRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "灵力: 0"
+
+[node name="Icon" type="Label" parent="LeftPanel/VBox/StatsRow/DEF"]
+layout_mode = 2
+text = "🛡️"
 horizontal_alignment = 1
 
-[node name="HBox2" type="HBoxContainer" parent="CharacterDisplay/VBox"]
+[node name="Val" type="Label" parent="LeftPanel/VBox/StatsRow/DEF"]
 layout_mode = 2
+text = "5"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.6, 0.8, 1, 1)
 
-[node name="DetailButton" type="Button" parent="CharacterDisplay/VBox/HBox2"]
+[node name="SPI" type="VBoxContainer" parent="LeftPanel/VBox/StatsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Icon" type="Label" parent="LeftPanel/VBox/StatsRow/SPI"]
+layout_mode = 2
+text = "✨"
+horizontal_alignment = 1
+
+[node name="Val" type="Label" parent="LeftPanel/VBox/StatsRow/SPI"]
+layout_mode = 2
+text = "10"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+
+[node name="BtnRow" type="HBoxContainer" parent="LeftPanel/VBox"]
+layout_mode = 2
+theme_constant_separation = 15
+
+[node name="DetailBtn" type="Button" parent="LeftPanel/VBox/BtnRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "详情[C]"
-shortcut_context = NodePath(".")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
 
-[node name="SkillButton" type="Button" parent="CharacterDisplay/VBox/HBox2"]
+[node name="SkillBtn" type="Button" parent="LeftPanel/VBox/BtnRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "技能[K]"
-shortcut_context = NodePath(".")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
 
-[node name="MenuPanel" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 0
-offset_left = 250
-offset_top = 60
-offset_right = 650
-offset_bottom = 620
-alignment = 1
-
-[node name="MenuTitle" type="Label" parent="MenuPanel"]
+[node name="RealmText" type="Label" parent="LeftPanel/VBox"]
 layout_mode = 2
-text = "选择行动"
+text = "🔮 境界: 凡人身 Lv.1"
 horizontal_alignment = 1
 
-[node name="ShopButton" type="Button" parent="MenuPanel"]
+[node name="StardustText" type="Label" parent="LeftPanel/VBox"]
 layout_mode = 2
-size_flags_vertical = 3
-text = "🛒 商店"
+text = "⭐ 星尘: 0"
+horizontal_alignment = 1
 
-[node name="EquipmentButton" type="Button" parent="MenuPanel"]
+[node name="ExitBtn" type="Button" parent="LeftPanel/VBox"]
 layout_mode = 2
-size_flags_vertical = 3
-text = "⚔️ 装备管理"
+text = "🚪 退出游戏"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
 
-[node name="QuestButton" type="Button" parent="MenuPanel"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "📜 任务"
-
-[node name="CharacterButton" type="Button" parent="MenuPanel"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "👤 角色"
-
-[node name="InventoryButton" type="Button" parent="MenuPanel"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "🎒 背包"
-
-[node name="CraftingButton" type="Button" parent="MenuPanel"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "🔨 合成"
-
-[node name="ForgingButton" type="Button" parent="MenuPanel"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "⚒️ 锻造"
-
-[node name="FactionButton" type="Button" parent="MenuPanel"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "⚜️ 势力"
-
-[node name="AchievementButton" type="Button" parent="MenuPanel"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "🏆 成就"
-
-[node name="RealmButton" type="Button" parent="MenuPanel"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "🔮 境界"
-
-[node name="PermanentButton" type="Button" parent="MenuPanel"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "💫 永久强化"
-
-[node name="MapButton" type="Button" parent="MenuPanel"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "🗺️ 地图"
-
-[node name="StartRunButton" type="Button" parent="MenuPanel"]
-layout_mode = 2
-size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 60)
-text = "🎮 开始探索"
-
-[node name="ExitButton" type="Button" parent="."]
+[node name="MenuVBox" type="VBoxContainer" parent="."]
 layout_mode = 1
-anchors_preset = 0
-offset_left = 50
-offset_top = 70
-offset_right = 150
-offset_bottom = 100
-text = "退出游戏"
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -230.0
+offset_right = 200.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_constant_separation = 4
 
-[node name="SaveHintLabel" type="Label" parent="."]
+[node name="GrowthLabel" type="Label" parent="MenuVBox"]
+layout_mode = 2
+text = "━━━ 成长 ━━━"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.8, 0.65, 1.0, 1)
+
+[node name="CharacterBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+text = "👤 角色"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="RealmBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+text = "🔮 境界"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="PermanentBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+text = "💫 永久强化"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="EquipLabel" type="Label" parent="MenuVBox"]
+layout_mode = 2
+text = "━━━ 装备 ━━━"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.55, 0.8, 1.0, 1)
+
+[node name="EquipmentBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+text = "⚔️ 装备管理"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="InventoryBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+text = "🎒 背包"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="CraftingBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+text = "🔨 合成"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="ForgingBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+text = "⚒️ 锻造"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="ShopBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+text = "🛒 商店"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="QuestLabel" type="Label" parent="MenuVBox"]
+layout_mode = 2
+text = "━━━ 任务 ━━━"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1.0, 0.8, 0.45, 1)
+
+[node name="QuestBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+text = "📜 任务"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="FactionBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+text = "⚜️ 势力"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="AchievementBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+text = "🏆 成就"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="ExploreLabel" type="Label" parent="MenuVBox"]
+layout_mode = 2
+text = "━━━ 探索 ━━━"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.45, 1.0, 0.65, 1)
+
+[node name="MapBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+text = "🗺️ 地图"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="StartRunBtn" type="Button" parent="MenuVBox"]
+layout_mode = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 70)
+text = "🎮 开始探索"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="SaveHint" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -80.0
-offset_top = -50.0
-offset_right = 80.0
-offset_bottom = -10.0
+offset_left = -140.0
+offset_top = -45.0
+offset_right = 140.0
+offset_bottom = -15.0
 grow_horizontal = 2
 grow_vertical = 0
-text = "按 S 键快速存档"
+text = "💾 按 S 键快速存档"
 horizontal_alignment = 1
-vertical_alignment = 1

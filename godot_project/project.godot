@@ -17,12 +17,17 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+Consts="*res://core/consts.gd"
+Enums="*res://core/enums.gd"
 DataManager="*res://autoload/data_manager.gd"
 EventBus="*res://autoload/event_bus.gd"
 RunState="*res://autoload/run_state.gd"
 SaveManager="*res://autoload/save_manager.gd"
-Consts="*res://core/consts.gd"
-Enums="*res://core/enums.gd"
+StardustManager="*res://autoload/stardust_manager.gd"
+QuestManager="*res://autoload/quest_manager.gd"
+MaterialManager="*res://autoload/material_manager.gd"
+EquipmentManager="*res://autoload/equipment_manager.gd"
+AchievementManager="*res://autoload/achievement_manager.gd"
 AchievementSystem="*res://systems/achievements/achievement_system.gd"
 FactionSystem="*res://systems/factions/faction_system.gd"
 QuestSystem="*res://systems/quests/quest_system.gd"
@@ -31,8 +36,8 @@ GameSettings="*res://autoload/game_settings.gd"
 
 [display]
 
-window/size/viewport_width=1280
-window/size/viewport_height=720
+window/size/viewport_width=1920
+window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
 
 [input]

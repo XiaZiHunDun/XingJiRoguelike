@@ -120,10 +120,16 @@ func _create_all_skills():
 		Enums.SkillType.SUPPORT, Enums.Element.PHYSICAL, 1, 20, &"")
 	_create_skill(&"dodge", "闪避", "闪避下一次攻击",
 		Enums.SkillType.DEFENSE, Enums.Element.PHYSICAL, 0, 0, &"")
-
-	# ===== 通用技能 =====
-	_create_skill(&"quick_attack", "快攻", "低伤害，无消耗",
-		Enums.SkillType.ATTACK, Enums.Element.PHYSICAL, 0, 8, &"")
+	_create_skill(&"疾跑", "疾跑", "提升移动速度，持续5秒",
+		Enums.SkillType.SUPPORT, Enums.Element.PHYSICAL, 1, 0, &"")
+	_create_skill(&"闪现", "闪现", "瞬间移动到目标位置",
+		Enums.SkillType.SUPPORT, Enums.Element.PHYSICAL, 2, 0, &"")
+	_create_skill(&"法术护盾", "法术护盾", "魔法护盾吸收伤害",
+		Enums.SkillType.DEFENSE, Enums.Element.PHYSICAL, 2, 0, &"")
+	_create_skill(&"奥术弹", "奥术弹", "发射奥术弹，造成奥术伤害",
+		Enums.SkillType.ATTACK, Enums.Element.ARCANE, 1, 15, &"")
+	_create_skill(&"奥术风暴", "奥术风暴", "释放奥术风暴，伤害所有敌人",
+		Enums.SkillType.ULTIMATE, Enums.Element.ARCANE, 3, 40, &"")
 	_create_skill(&"focus", "专注", "下次攻击必定暴击",
 		Enums.SkillType.SUPPORT, Enums.Element.PHYSICAL, 1, 0, &"")
 	_create_skill(&"stamina", "蓄力", "动能+10%",
@@ -361,6 +367,20 @@ func get_equipment(id: StringName) -> EquipmentDefinition:
 	return equipment_definitions.get(id)
 
 func get_affix(id: StringName) -> Dictionary:
+	# 优先使用 AffixData（完整的 AffixDefinition 系统）
+	# 如果找不到，才回退到旧的 dictionary 系统
+	var affix_data = AffixData.new()
+	var affix_def = affix_data.get_affix(String(id))
+	if affix_def:
+		return {
+			"id": affix_def.id,
+			"name": affix_def.display_name,
+			"description": affix_def.description,
+			"type": affix_def.affix_type,
+			"value": affix_def.value,
+			"is_core": false
+		}
+	# 回退到旧数据
 	return affix_definitions.get(id, {})
 
 func get_set(id: StringName) -> Dictionary:

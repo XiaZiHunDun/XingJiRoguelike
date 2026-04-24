@@ -17,6 +17,99 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
+# Decorative stars (8 stars)
+[node name="Stars" type="Node2D" parent="."]
+
+[node name="s1" type="Label" parent="Stars"]
+offset_left = 80.0
+offset_top = 50.0
+offset_right = 90.0
+offset_bottom = 75.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.45)
+theme_override_font_sizes/font_size = 16
+
+[node name="s2" type="Label" parent="Stars"]
+offset_left = 280.0
+offset_top = 30.0
+offset_right = 290.0
+offset_bottom = 55.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 14
+
+[node name="s3" type="Label" parent="Stars"]
+offset_left = 500.0
+offset_top = 80.0
+offset_right = 510.0
+offset_bottom = 105.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 18
+
+[node name="s4" type="Label" parent="Stars"]
+offset_left = 700.0
+offset_top = 40.0
+offset_right = 710.0
+offset_bottom = 65.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+theme_override_font_sizes/font_size = 14
+
+[node name="s5" type="Label" parent="Stars"]
+offset_left = 150.0
+offset_top = 400.0
+offset_right = 160.0
+offset_bottom = 425.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 16
+
+[node name="s6" type="Label" parent="Stars"]
+offset_left = 450.0
+offset_top = 350.0
+offset_right = 460.0
+offset_bottom = 375.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 14
+
+[node name="s7" type="Label" parent="Stars"]
+offset_left = 800.0
+offset_top = 300.0
+offset_right = 810.0
+offset_bottom = 325.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.45)
+theme_override_font_sizes/font_size = 18
+
+[node name="s8" type="Label" parent="Stars"]
+offset_left = 1000.0
+offset_top = 450.0
+offset_right = 1010.0
+offset_bottom = 475.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+theme_override_font_sizes/font_size = 14
+
+[node name="s9" type="Label" parent="Stars"]
+offset_left = 600.0
+offset_top = 500.0
+offset_right = 610.0
+offset_bottom = 525.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 16
+
+[node name="s10" type="Label" parent="Stars"]
+offset_left = 1100.0
+offset_top = 150.0
+offset_right = 1110.0
+offset_bottom = 175.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 14
+
 [node name="VBox" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
@@ -24,9 +117,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -250.0
+offset_left = -220.0
 offset_top = -300.0
-offset_right = 250.0
+offset_right = 220.0
 offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -51,6 +144,11 @@ size_flags_vertical = 3
 
 [node name="HSeparator2" type="HSeparator" parent="VBox"]
 layout_mode = 2
+
+[node name="InstructionLabel" type="Label" parent="VBox"]
+layout_mode = 2
+text = "点击技能，再点击快捷槽进行配置"
+horizontal_alignment = 1
 
 [node name="HotkeysTitle" type="Label" parent="VBox"]
 layout_mode = 2

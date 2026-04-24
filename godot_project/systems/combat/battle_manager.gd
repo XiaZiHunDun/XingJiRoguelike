@@ -156,12 +156,8 @@ func _on_enemy_died(enemy: Enemy):
 	if selected_target == enemy:
 		_select_next_target()
 
-	# 获取敌人等级（如果敌人有 level 属性）
-	var enemy_level = 1
-	if enemy.has_method("get_level"):
-		enemy_level = enemy.get_level()
-	elif enemy.has("level"):
-		enemy_level = enemy.level
+	# 获取敌人等级
+	var enemy_level = enemy.get_level()
 
 	# 发送敌人死亡事件（用于成就系统）
 	EventBus.combat.enemy_killed.emit(enemy, enemy.position)
@@ -206,11 +202,16 @@ func player_use_skill(skill: SkillInstance, target: Enemy = null) -> bool:
 
 	# 计算伤害
 	var base_damage = skill.definition.damage
-	var atb_bonus = player.get_atb_percent() if player else 1.0
+	var atb_percent = player.get_atb_percent() if player else 0.0
+
+	# 时机加成（ATB填充时机影响伤害，0.8-1.15）
+	var timing_bonus = 1.0
+	if player and player.atb_component:
+		timing_bonus = player.atb_component.get_timing_bonus()
 
 	# 动能加成
 	var kinetic = energy_system.get_kinetic_bonus()
-	var total_damage = base_damage * atb_bonus * (1.0 + kinetic)
+	var total_damage = base_damage * timing_bonus * (1.0 + kinetic)
 
 	# 暴击判定
 	var is_critical = false
@@ -280,17 +281,50 @@ func _check_triggered_affixes_after_damage(player: Player, target, is_critical: 
 		if trigger_condition == "":
 			continue
 
+		# 构建参数字典
 		var params = {
 			"target": target,
-			"is_crit": is_critical
+			"is_crit": is_critical,
+			"combo_count": player.combo_count if player.has("combo_count") else 0,
+			"perfect_dodged": false,
+			"arcane_hit": false,
+			"damage_taken": 0.0,
+			"killed": false,
+			"shield_gained": false
 		}
 
-		var result = AffixEffects.check_triggered_affix(player, trigger_condition, params)
-		if result.get("activated", false):
-			# 应用触发效果（额外伤害、加成等）
-			var extra_damage = result.get("damage_bonus", 0.0)
-			if extra_damage > 0 and is_instance_valid(target):
+		# 检查条件是否满足
+		var check_result = AffixEffects.check_triggered_affix(player, trigger_condition, params)
+		if not check_result.get("activated", false):
+			continue
+
+		# 应用触发效果
+		var effect_result = AffixEffects.apply_triggered_affix(player, trigger_condition, affix.value)
+
+		# 处理伤害加成效果（斩杀追击、低血狂暴、连击狂暴等）
+		var damage_multiplier = effect_result.get("damage_multiplier", 0.0)
+		if damage_multiplier > 0 and is_instance_valid(target):
+			var extra_damage = float(target.attack) * (damage_multiplier - 1.0)
+			if extra_damage > 0:
 				target.take_damage(extra_damage)
+
+		# 处理能量恢复效果（暴击回能、闪避充能）
+		var energy_restore = effect_result.get("energy_restore", 0.0)
+		if energy_restore > 0 and energy_system:
+			energy_system.restore_energy(int(energy_restore))
+
+		# 处理治疗效果（斩杀回复）
+		var heal_percent = effect_result.get("heal_percent", 0.0)
+		if heal_percent > 0 and player.has_method("heal"):
+			var heal_amount = int(float(player.max_hp) * heal_percent)
+			if heal_amount > 0:
+				player.heal(heal_amount)
+
+		# 处理ATB增加效果（护盾涌动）
+		var atb_increase = effect_result.get("atb_increase", 0.0)
+		if atb_increase > 0 and player.atb_component:
+			var atb_val = player.atb_component.atb_value + atb_increase
+			player.atb_component.atb_value = min(atb_val, player.atb_component.atb_max)
 
 func end_turn():
 	"""结束玩家回合"""
@@ -316,7 +350,7 @@ func _grant_faction_reward(enemy: Enemy) -> void:
 
 		# 星尘奖励
 		var stardust = randi() % 21 + 20  # 20-40
-		RunState.stardust += stardust
+		RunState.add_stardust(stardust)
 
 		EventBus.faction.faction_reward_earned.emit(faction_name, "守墓人徽记", token_amount)
 	else:

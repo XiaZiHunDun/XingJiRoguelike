@@ -1,6 +1,6 @@
 # autoload/stardust_manager.gd
 # 星尘管理系统 - Phase 0
-# 从RunState提取，负责星尘的获取、消耗、加成计算
+# StardustManager 是星尘的权威数据源，所有变化通过 stardust_changed 信号扩散
 
 extends Node
 
@@ -10,12 +10,9 @@ var stardust: int = 0
 var max_stardust_bonus: float = Consts.STARDUST_MAX_BONUS
 
 func _ready():
-	# 连接事件
-	EventBus.inventory.stardust_changed.connect(_on_stardust_changed_from_event)
-
-func _on_stardust_changed_from_event(old_value: int, new_value: int) -> void:
-	# 同步来自RunState的星尘变化事件
-	stardust = new_value
+	# StardustManager 是星尘的权威数据源
+	# 信号通过 RunState._on_stardust_manager_changed() 转发到 EventBus.inventory.stardust_changed
+	pass
 
 func add(amount: int) -> void:
 	"""添加星尘"""
@@ -47,11 +44,17 @@ func get_speed_bonus() -> float:
 
 func reset() -> void:
 	"""重置星尘（死亡时调用）"""
+	var old = stardust
 	stardust = 0
+	if old != 0:
+		stardust_changed.emit(old, 0)
 
 func set_value(value: int) -> void:
 	"""设置星尘值（用于从存档加载）"""
+	var old = stardust
 	stardust = value
+	if old != value:
+		stardust_changed.emit(old, value)
 
 func get_stardust() -> int:
 	"""获取当前星尘数量"""

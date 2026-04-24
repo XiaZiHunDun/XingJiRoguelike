@@ -5,12 +5,12 @@ extends Control
 
 signal close_requested()
 
-@onready var materials_list: VBoxContainer = $VBox/MaterialsScroll/MaterialsList
-@onready var recipes_list: VBoxContainer = $VBox/RecipesScroll/RecipesList
-@onready var craft_button: Button = $VBox/BottomBox/CraftButton
-@onready var result_label: Label = $VBox/BottomBox/ResultLabel
-@onready var close_button: Button = $VBox/BottomBox/CloseButton
-@onready var category_buttons: HBoxContainer = $VBox/CategoryButtons
+@onready var materials_list: VBoxContainer = $MainPanel/VBox/MaterialsScroll/MaterialsList
+@onready var recipes_list: VBoxContainer = $MainPanel/VBox/RecipesScroll/RecipesList
+@onready var craft_button: Button = $MainPanel/VBox/ButtonBox/CraftButton
+@onready var result_label: Label = $MainPanel/VBox/ResultLabel
+@onready var close_button: Button = $MainPanel/VBox/ButtonBox/CloseButton
+@onready var category_buttons: HBoxContainer = $MainPanel/VBox/CategoryButtons
 
 var selected_recipe_id: String = ""
 var current_category: int = -1  # -1 = all
@@ -21,6 +21,7 @@ func _ready():
 	_setup_category_buttons()
 	_refresh_materials_display()
 	_refresh_recipes_display()
+
 
 func _setup_category_buttons():
 	# 清空现有按钮

@@ -17,7 +17,9 @@ const NODE_TYPE_WEIGHTS = {
 		MapNode.NodeType.COLLECTION: 15,
 		MapNode.NodeType.SHOP: 10,
 		MapNode.NodeType.ELITE_BATTLE: 10,
-		MapNode.NodeType.HEALING_SHRINE: 10
+		MapNode.NodeType.HEALING_SHRINE: 10,
+		MapNode.NodeType.MYSTERY_MERCHANT: 5,
+		MapNode.NodeType.REST_NODE: 5
 	},
 	2: {  # Second node - exploring
 		MapNode.NodeType.NORMAL_BATTLE: 25,
@@ -26,7 +28,9 @@ const NODE_TYPE_WEIGHTS = {
 		MapNode.NodeType.COLLECTION: 15,
 		MapNode.NodeType.SHOP: 10,
 		MapNode.NodeType.ELITE_BATTLE: 10,
-		MapNode.NodeType.HEALING_SHRINE: 10
+		MapNode.NodeType.HEALING_SHRINE: 10,
+		MapNode.NodeType.MYSTERY_MERCHANT: 5,
+		MapNode.NodeType.REST_NODE: 5
 	},
 	3: {  # Third node - challenging
 		MapNode.NodeType.NORMAL_BATTLE: 30,
@@ -35,7 +39,9 @@ const NODE_TYPE_WEIGHTS = {
 		MapNode.NodeType.TREASURE: 10,
 		MapNode.NodeType.COLLECTION: 10,
 		MapNode.NodeType.SHOP: 10,
-		MapNode.NodeType.HEALING_SHRINE: 5
+		MapNode.NodeType.HEALING_SHRINE: 5,
+		MapNode.NodeType.CURSE_CHALLENGE: 5,
+		MapNode.NodeType.BLESSING_SHRINE: 5
 	},
 	4: {  # Fourth node - danger
 		MapNode.NodeType.NORMAL_BATTLE: 25,
@@ -44,7 +50,9 @@ const NODE_TYPE_WEIGHTS = {
 		MapNode.NodeType.TREASURE: 10,
 		MapNode.NodeType.COLLECTION: 10,
 		MapNode.NodeType.SHOP: 15,
-		MapNode.NodeType.HEALING_SHRINE: 5
+		MapNode.NodeType.HEALING_SHRINE: 5,
+		MapNode.NodeType.CURSE_CHALLENGE: 5,
+		MapNode.NodeType.BLESSING_SHRINE: 5
 	},
 	5: {  # Boss - always boss
 		MapNode.NodeType.BOSS: 100
@@ -59,7 +67,11 @@ const NODE_TYPE_NAMES = {
 	MapNode.NodeType.TREASURE: "宝箱",
 	MapNode.NodeType.COLLECTION: "采集点",
 	MapNode.NodeType.HEALING_SHRINE: "回复神龛",
-	MapNode.NodeType.BOSS: "BOSS"
+	MapNode.NodeType.BOSS: "BOSS",
+	MapNode.NodeType.MYSTERY_MERCHANT: "神秘商人",
+	MapNode.NodeType.BLESSING_SHRINE: "祝福祭坛",
+	MapNode.NodeType.CURSE_CHALLENGE: "诅咒挑战",
+	MapNode.NodeType.REST_NODE: "休息点"
 }
 
 const NODE_ICONS = {
@@ -70,7 +82,11 @@ const NODE_ICONS = {
 	MapNode.NodeType.TREASURE: "chest",
 	MapNode.NodeType.COLLECTION: "gem",
 	MapNode.NodeType.HEALING_SHRINE: "heart",
-	MapNode.NodeType.BOSS: "crown"
+	MapNode.NodeType.BOSS: "crown",
+	MapNode.NodeType.MYSTERY_MERCHANT: "question",
+	MapNode.NodeType.BLESSING_SHRINE: "gem",
+	MapNode.NodeType.CURSE_CHALLENGE: "skull",
+	MapNode.NodeType.REST_NODE: "heart"
 }
 
 static func generate_zone_map(zone: ZoneDefinition, current_level: int) -> Array[MapNode]:

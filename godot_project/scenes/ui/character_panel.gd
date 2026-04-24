@@ -5,17 +5,20 @@ extends Control
 
 signal close_requested()
 
-@onready var character_name_label: Label = $VBox/Header/CharacterName
-@onready var realm_label: Label = $VBox/Header/RealmLabel
-@onready var level_label: Label = $VBox/Header/LevelLabel
-@onready var stardust_label: Label = $VBox/Header/StardustLabel
-@onready var attributes_container: VBoxContainer = $VBox/AttributesScroll/AttributesContainer
-@onready var skills_container: VBoxContainer = $VBox/SkillsContainer
-@onready var close_button: Button = $VBox/BottomBox/CloseButton
+@onready var character_name_label: Label = $MainPanel/VBox/CharacterName
+@onready var realm_label: Label = $MainPanel/VBox/RealmLabel
+@onready var level_label: Label = $MainPanel/VBox/LevelLabel
+@onready var stardust_label: Label = $MainPanel/VBox/StardustLabel
+@onready var attributes_container: VBoxContainer = $MainPanel/VBox/AttributesScroll/AttributesContainer
+@onready var skills_container: VBoxContainer = $MainPanel/VBox/SkillsContainer
+@onready var close_button: Button = $MainPanel/VBox/CloseButton
 
 func _ready():
 	close_button.pressed.connect(_on_close_pressed)
 	_refresh_display()
+	# 连接星尘变化信号
+	if not EventBus.inventory.stardust_changed.is_connected(_on_stardust_changed):
+		EventBus.inventory.stardust_changed.connect(_on_stardust_changed)
 
 func _refresh_display():
 	# 获取角色定义
@@ -33,7 +36,7 @@ func _refresh_display():
 	level_label.text = "等级: %d / %d" % [RunState.current_level, level_range.y]
 
 	# 显示星尘
-	stardust_label.text = "星尘: %d (加成: %.1f%%)" % [RunState.stardust, RunState.stardust * 0.01 * RunState.max_stardust_bonus]
+	stardust_label.text = "星尘: %d (加成: %.1f%%)" % [RunState.get_stardust(), RunState.get_stardust() * 0.01 * RunState.max_stardust_bonus]
 
 	# 清空属性列表
 	for child in attributes_container.get_children():
@@ -89,3 +92,11 @@ func _get_character_definition() -> CharacterDefinition:
 
 func _on_close_pressed():
 	close_requested.emit()
+
+func _on_stardust_changed(old_value: int, new_value: int):
+	_refresh_display()
+
+func _exit_tree():
+	# 断开 EventBus 连接，防止重复连接
+	if EventBus.inventory.stardust_changed.is_connected(_on_stardust_changed):
+		EventBus.inventory.stardust_changed.disconnect(_on_stardust_changed)

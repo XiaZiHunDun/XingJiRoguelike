@@ -6,10 +6,11 @@ extends Node
 
 # 配方类型
 enum RecipeCategory {
-	ORE_PROCESSING,  # 矿石加工
-	HERB_CRAFTING,   # 药材炼制
-	CONSUMABLE_MADE, # 消耗品制作
-	SPECIAL_ALCHEMY  # 特殊炼金
+	ORE_PROCESSING,      # 矿石加工
+	HERB_CRAFTING,       # 药材炼制
+	CONSUMABLE_MADE,     # 消耗品制作
+	SPECIAL_ALCHEMY,     # 特殊炼金
+	EQUIPMENT_ENHANCE    # 装备强化
 }
 
 # 完整配方列表
@@ -196,6 +197,107 @@ const RECIPES: Array = [
 		"result_qty": 3,
 		"ingredients": {"spirit_flower": 5},
 		"tier_required": 1
+	},
+
+	# ===== 装备强化材料 =====
+	{
+		"id": "recipe_desert_enhancer",
+		"category": 4,  # EQUIPMENT_ENHANCE
+		"display_name": "沙海强化粉",
+		"description": "用沙漠材料制作装备强化剂",
+		"result_id": "desert_enhancer",
+		"result_display": "沙海强化粉",
+		"result_qty": 1,
+		"ingredients": {"desert_stone": 5, "sand_essence": 2},
+		"tier_required": 2
+	},
+	{
+		"id": "recipe_frost_enhancer",
+		"category": 4,  # EQUIPMENT_ENHANCE
+		"display_name": "寒冰强化晶",
+		"description": "用冰霜材料制作装备强化剂",
+		"result_id": "frost_enhancer",
+		"result_display": "寒冰强化晶",
+		"result_qty": 1,
+		"ingredients": {"ice_crystal": 5, "frost_essence": 2},
+		"tier_required": 3
+	},
+	{
+		"id": "recipe_forest_enhancer",
+		"category": 4,  # EQUIPMENT_ENHANCE
+		"display_name": "翠蔓强化精华",
+		"description": "用森林材料制作装备强化剂",
+		"result_id": "forest_enhancer",
+		"result_display": "翠蔓强化精华",
+		"result_qty": 1,
+		"ingredients": {"verdant_leaf": 5, "tree_sap": 3},
+		"tier_required": 4
+	},
+	{
+		"id": "recipe_machine_enhancer",
+		"category": 4,  # EQUIPMENT_ENHANCE
+		"display_name": "机魂强化核心",
+		"description": "用机械材料制作装备强化剂",
+		"result_id": "machine_enhancer",
+		"result_display": "机魂强化核心",
+		"result_qty": 1,
+		"ingredients": {"gear_fragment": 5, "machine_core": 2},
+		"tier_required": 5
+	},
+	{
+		"id": "recipe_void_enhancer",
+		"category": 4,  # EQUIPMENT_ENHANCE
+		"display_name": "虚空强化碎片",
+		"description": "用神秘材料制作装备强化剂",
+		"result_id": "void_enhancer",
+		"result_display": "虚空强化碎片",
+		"result_qty": 1,
+		"ingredients": {"void_shard": 3, "cosmic_dust": 3},
+		"tier_required": 6
+	},
+	{
+		"id": "recipe_attack_enhancement",
+		"category": 4,  # EQUIPMENT_ENHANCE
+		"display_name": "攻击强化剂",
+		"description": "制作攻击强化剂永久提升攻击",
+		"result_id": "attack_enhancement",
+		"result_display": "攻击强化剂",
+		"result_qty": 1,
+		"ingredients": {"meteor_forge": 1, "starlight_bar": 2},
+		"tier_required": 5
+	},
+	{
+		"id": "recipe_defense_enhancement",
+		"category": 4,  # EQUIPMENT_ENHANCE
+		"display_name": "防御强化剂",
+		"description": "制作防御强化剂永久提升防御",
+		"result_id": "defense_enhancement",
+		"result_display": "防御强化剂",
+		"result_qty": 1,
+		"ingredients": {"refined_ingot": 5, "ancient_lubricant": 2},
+		"tier_required": 4
+	},
+	{
+		"id": "recipe_health_enhancement",
+		"category": 4,  # EQUIPMENT_ENHANCE
+		"display_name": "生命强化剂",
+		"description": "制作生命强化剂永久提升最大生命",
+		"result_id": "health_enhancement",
+		"result_display": "生命强化剂",
+		"result_qty": 1,
+		"ingredients": {"hemostatic_grass": 8, "spirit_flower": 3},
+		"tier_required": 3
+	},
+	{
+		"id": "recipe_energy_enhancement",
+		"category": 4,  # EQUIPMENT_ENHANCE
+		"display_name": "能量强化剂",
+		"description": "制作能量强化剂永久提升能量上限",
+		"result_id": "energy_enhancement",
+		"result_display": "能量强化剂",
+		"result_qty": 1,
+		"ingredients": {"stardust_concentrate": 1, "vine_essence_bottle": 1},
+		"tier_required": 5
 	}
 ]
 
@@ -229,4 +331,6 @@ static func get_category_name(category: int) -> String:
 			return "消耗品制作"
 		3:  # SPECIAL_ALCHEMY
 			return "特殊炼金"
+		4:  # EQUIPMENT_ENHANCE
+			return "装备强化"
 	return "未知"

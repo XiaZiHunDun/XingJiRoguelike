@@ -294,14 +294,44 @@
 
 | 类别 | 数量 |
 |------|------|
-| GDScript文件(.gd) | 80 |
-| 场景文件(.tscn) | 20+ |
-| 总文件数 | ~100 |
+| GDScript文件(.gd) | 93 |
+| 场景文件(.tscn) | 26 |
+| 总文件数 | ~120 |
 
 ---
 
-## 最近修复 (2026-04-22)
+## 最近修复 (2026-04-23)
 
+### UI优化完成 ✅
+| 修复项 | 文件 | 问题 |
+|--------|------|------|
+| 16个UI界面 | `scenes/ui/*.tscn` | 统一太空主题，添加星星装饰 |
+| 分辨率调整 | `project.godot` | 1280x720 → 1920x1080 |
+| 战斗场景 | `battle_scene.tscn/gd` | StartGameButton默认可见，ATBLabel路径修复 |
+| 主界面 | `hub_scene.tscn` | load_steps修正，LeftPanel宽度380px，添加12个星星 |
+| 背包面板 | `inventory_panel.gd` | 添加filter_button信号连接 |
+| 地图节点 | `node_scene.gd` | StyleBox需duplicate()防止共享引用 |
+| 成就面板 | `achievement_panel.gd` | 移除重复的popup_close_button信号 |
+| 境界面板 | `realm_panel.gd` | 修复STARDUST/PARTICLE境界跳跃 |
+| 装备面板 | `equipment_panel.gd` | 修正6个装备槽节点路径 |
+| 角色面板 | `character_panel.gd/tscn` | 修正节点路径，添加缺失的SkillsContainer |
+| 设置面板 | `settings_panel.tscn/gd` | 自定义标签按钮，视觉优化 |
+
+### 代码审查修复 (2026-04-23 下午)
+| 修复项 | 文件 | 问题 |
+|--------|------|------|
+| autoload顺序 | `project.godot` | Consts/Enums移到RunState之前 |
+| 技能库补全 | `data_manager.gd` | 添加疾跑/闪现/法术护盾/奥术弹/奥术风暴 |
+| 支线任务解锁 | `quest_system.gd` | 添加_on_zone_changed解锁区域支线 |
+| 区域变化信号 | `run_state.gd` | set_zone时触发zone_changed信号 |
+| ATB组件修复 | `atb_component.gd` | setup()注入BattleClock替代直接获取 |
+| 突破属性检查 | `player.gd` | 使用effective_attributes替代base_attributes |
+| STARDUST消耗 | `realm_data.gd` | 200→300星尘修正 |
+| 盾牌槽位 | `equipment_templates.gd` | WEAPON→ARMOR修正 |
+| 玩家伤害时机加成 | `battle_manager.gd` | 应用get_timing_bonus()到伤害计算 |
+| 节点图标 | `node_scene.gd` | 添加heart图标映射 |
+
+### 历史修复 (2026-04-22)
 | 修复项 | 文件 | 问题 |
 |--------|------|------|
 | Element枚举 | `core/enums.gd` | 缺少`NONE`(0)和`VOID`(7)，导致编译错误 |
@@ -327,15 +357,24 @@
 
 ## 待完善项
 
-### Playtest发现的问题
-- [ ] 地图节点点击（已修复，等待验证）
-- [ ] 商店面板UI（已修复，等待验证）
-- [ ] 各功能按钮交互（需完整测试）
+### UI优化 ✅ (2026-04-23)
+- [x] 16个UI界面统一太空主题
+- [x] 分辨率调整为1920x1080
+- [x] 修复各面板代码审查发现的问题
+- [x] StartGameButton默认可见
+- [x] 装备/角色面板节点路径修正
+
+### Playtest待验证
+- [ ] 地图节点点击交互
+- [ ] 商店面板完整功能
+- [ ] 战斗ATB系统流畅度
+- [ ] 装备Build多样性体验
 
 ### 待优化项
 1. **数值平衡**：根据测试反馈调整怪物属性、掉落率
-2. **UI细节优化**：面板交互动画、提示信息完善
-3. **Linux兼容性**：autoload脚本编译顺序问题（headless模式限制）
+2. **UI动画**：面板交互动画、过渡效果
+3. **声音系统**：BGM/SFX音量控制
+4. **Linux兼容性**：autoload脚本编译顺序问题（headless模式限制）
 
 ---
 

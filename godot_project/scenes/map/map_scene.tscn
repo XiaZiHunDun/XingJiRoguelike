@@ -1,7 +1,57 @@
-[gd_scene load_steps=3 format=3 uid="uid://map_scene"]
+[gd_scene load_steps=4 format=3 uid="uid://map_scene"]
 
 [ext_resource type="Script" path="res://scenes/map/map_scene.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://node_scene" path="res://scenes/map/node_scene.tscn" id="2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_title"]
+bg_color = Color(0.05, 0.05, 0.12, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.4, 0.6, 0.5)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0.1, 0.15, 0.3, 0.3)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_normal"]
+bg_color = Color(0.1, 0.15, 0.25, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.5, 0.7, 0.6)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
+bg_color = Color(0.15, 0.25, 0.4, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.7, 1.0, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_zone_info"]
+bg_color = Color(0.05, 0.05, 0.12, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.4, 0.6, 0.4)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="MapScene" type="Control"]
 layout_mode = 3
@@ -25,27 +75,81 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.1, 0.1, 0.15, 1)
+color = Color(0.02, 0.02, 0.06, 1)
+
+[node name="Stars" type="Node2D" parent="."]
+position = Vector2(0, 0)
+
+[node name="Star1" type="Label" parent="Stars"]
+modulate = Color(1, 1, 1, 0.4)
+offset_left = 100.0
+offset_top = 80.0
+text = "·"
+
+[node name="Star2" type="Label" parent="Stars"]
+modulate = Color(0.8, 0.9, 1, 0.3)
+offset_left = 250.0
+offset_top = 150.0
+text = "·"
+
+[node name="Star3" type="Label" parent="Stars"]
+modulate = Color(1, 0.95, 0.8, 0.35)
+offset_left = 400.0
+offset_top = 60.0
+text = "·"
+
+[node name="Star4" type="Label" parent="Stars"]
+modulate = Color(0.7, 0.85, 1, 0.25)
+offset_left = 600.0
+offset_top = 200.0
+text = "·"
+
+[node name="Star5" type="Label" parent="Stars"]
+modulate = Color(1, 1, 1, 0.3)
+offset_left = 750.0
+offset_top = 100.0
+text = "·"
+
+[node name="Star6" type="Label" parent="Stars"]
+modulate = Color(0.9, 0.95, 1, 0.35)
+offset_left = 150.0
+offset_top = 350.0
+text = "·"
+
+[node name="Star7" type="Label" parent="Stars"]
+modulate = Color(1, 0.9, 0.85, 0.28)
+offset_left = 500.0
+offset_top = 380.0
+text = "·"
+
+[node name="Star8" type="Label" parent="Stars"]
+modulate = Color(0.8, 0.9, 1, 0.32)
+offset_left = 850.0
+offset_top = 300.0
+text = "·"
 
 [node name="TitlePanel" type="Panel" parent="."]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 0.0
-offset_top = 20.0
+offset_top = 25.0
 offset_right = 0.0
-offset_bottom = 80.0
+offset_bottom = 105.0
 grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_title")
 
 [node name="ZoneName" type="Label" parent="TitlePanel"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 20.0
-offset_top = 10.0
+offset_top = 8.0
 offset_right = -20.0
-offset_bottom = 50.0
+offset_bottom = 42.0
 grow_horizontal = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 26
 text = "沙海回声"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -55,10 +159,12 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 20.0
-offset_top = 40.0
+offset_top = 45.0
 offset_right = -20.0
-offset_bottom = 60.0
+offset_bottom = 75.0
 grow_horizontal = 2
+theme_override_colors/font_color = Color(0.6, 0.75, 0.9, 1)
+theme_override_font_sizes/font_size = 16
 text = "进度: 0/4 (BOSS未解锁)"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -70,69 +176,107 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -350.0
-offset_top = -150.0
-offset_right = 350.0
-offset_bottom = 150.0
+offset_left = -380.0
+offset_top = -120.0
+offset_right = 380.0
+offset_bottom = 120.0
 grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
 [node name="Node1" parent="MapContainer" instance=ExtResource("2")]
-custom_minimum_size = Vector2(120, 80)
+custom_minimum_size = Vector2(130, 90)
 layout_mode = 2
 
-[node name="Connector1" type="Label" parent="MapContainer"]
+[node name="Connector1" type="Panel" parent="MapContainer"]
+custom_minimum_size = Vector2(50, 4)
 layout_mode = 2
-size_flags_horizontal = 3
-text = "—→"
-horizontal_alignment = 1
-vertical_alignment = 1
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Line1" type="ColorRect" parent="MapContainer/Connector1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.3, 0.5, 0.8, 0.6)
 
 [node name="Node2" parent="MapContainer" instance=ExtResource("2")]
-custom_minimum_size = Vector2(120, 80)
+custom_minimum_size = Vector2(130, 90)
 layout_mode = 2
 
-[node name="Connector2" type="Label" parent="MapContainer"]
+[node name="Connector2" type="Panel" parent="MapContainer"]
+custom_minimum_size = Vector2(50, 4)
 layout_mode = 2
-size_flags_horizontal = 3
-text = "—→"
-horizontal_alignment = 1
-vertical_alignment = 1
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Line2" type="ColorRect" parent="MapContainer/Connector2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.3, 0.5, 0.8, 0.6)
 
 [node name="Node3" parent="MapContainer" instance=ExtResource("2")]
-custom_minimum_size = Vector2(120, 80)
+custom_minimum_size = Vector2(130, 90)
 layout_mode = 2
 
-[node name="Connector3" type="Label" parent="MapContainer"]
+[node name="Connector3" type="Panel" parent="MapContainer"]
+custom_minimum_size = Vector2(50, 4)
 layout_mode = 2
-size_flags_horizontal = 3
-text = "—→"
-horizontal_alignment = 1
-vertical_alignment = 1
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Line3" type="ColorRect" parent="MapContainer/Connector3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.3, 0.5, 0.8, 0.6)
 
 [node name="Node4" parent="MapContainer" instance=ExtResource("2")]
-custom_minimum_size = Vector2(120, 80)
+custom_minimum_size = Vector2(130, 90)
 layout_mode = 2
 
-[node name="Connector4" type="Label" parent="MapContainer"]
+[node name="Connector4" type="Panel" parent="MapContainer"]
+custom_minimum_size = Vector2(50, 4)
 layout_mode = 2
-size_flags_horizontal = 3
-text = "—→"
-horizontal_alignment = 1
-vertical_alignment = 1
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Line4" type="ColorRect" parent="MapContainer/Connector4"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.3, 0.5, 0.8, 0.6)
 
 [node name="Node5" parent="MapContainer" instance=ExtResource("2")]
-custom_minimum_size = Vector2(120, 80)
+custom_minimum_size = Vector2(130, 90)
 layout_mode = 2
 
 [node name="BackButton" type="Button" parent="."]
 layout_mode = 1
 anchors_preset = 0
-offset_left = 50.0
-offset_top = 50.0
-offset_right = 150.0
-offset_bottom = 80.0
+offset_left = 40.0
+offset_top = 45.0
+offset_right = 160.0
+offset_bottom = 82.0
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_normal")
 text = "← 返回枢纽"
 
 [node name="ZoneInfo" type="Panel" parent="."]
@@ -141,20 +285,23 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 20.0
-offset_top = -120.0
-offset_right = 300.0
+offset_top = -130.0
+offset_right = 320.0
 offset_bottom = -20.0
 grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_zone_info")
 
 [node name="InfoLabel" type="Label" parent="ZoneInfo"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 5.0
-offset_right = -10.0
-offset_bottom = -5.0
+offset_left = 15.0
+offset_top = 8.0
+offset_right = -15.0
+offset_bottom = -8.0
+theme_override_colors/font_color = Color(0.7, 0.8, 0.95, 1)
+theme_override_font_sizes/font_size = 14
 text = "环境: 沙漠
 敌人等级: 1-56
 BOSS等级: 57-70"

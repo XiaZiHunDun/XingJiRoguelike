@@ -41,7 +41,7 @@ static func generate_equipment(zone_level: int, equipment_type: EquipmentType) -
 			instance.skill_ids.append(skill_id)
 
 	# 生成随机等级（在区域等级附近波动）
-	instance.level = clamp(zone_level + randi_range(-3, 3), 1, 70)
+	instance.level = clamp(zone_level + randi_range(-1, 1), 1, 70)
 
 	# 生成穿戴需求
 	instance.wear_requirements = _generate_wear_requirements(template, instance.level)

@@ -28,7 +28,8 @@ enum PanelType {
 	BATTLE_PREVIEW,
 	WORDLY_INSIGHT,
 	SETTINGS,
-	PERMANENT
+	PERMANENT,
+	PAUSE
 }
 
 var current_state: GameState = GameState.CHARACTER_SELECT
@@ -56,6 +57,7 @@ var realm_panel_resource = preload("res://scenes/ui/realm_panel.tscn")
 var permanent_panel_resource = preload("res://scenes/ui/permanent_panel.tscn")
 var battle_preview_panel_resource = preload("res://scenes/ui/battle_preview_panel.tscn")
 var skill_config_panel_resource = preload("res://scenes/ui/skill_config_panel.tscn")
+var pause_panel_resource = preload("res://scenes/ui/pause_panel.tscn")
 
 # Current battle context
 var current_node_data: MapNode = null
@@ -244,7 +246,7 @@ func _process_victory(rewards: Dictionary):
 
 	# Apply rewards
 	RunState.total_xp += xp_gained
-	RunState.stardust += stardust_gained
+	RunState.add_stardust(stardust_gained)
 	RunState.add_memory_fragments(fragments_gained)
 
 	# Update quest progress
@@ -346,13 +348,13 @@ func _get_next_realm(current: RealmDefinition.RealmType) -> RealmDefinition.Real
 			return RealmDefinition.RealmType.STARFIRE
 
 func _attempt_breakthrough():
-	if RunState.stardust < 50:
+	if not RunState.can_spend_stardust(50):
 		# Not enough stardust, just go back to hub
 		_show_hub()
 		return
 
 	# Simple breakthrough: spend 50 stardust, advance realm
-	RunState.stardust -= 50
+	RunState.spend_stardust(50)
 
 	# Save old realm for the event
 	var old_realm = RunState.current_realm
@@ -482,7 +484,7 @@ func _show_defeat():
 	vbox.add_child(title)
 
 	var desc = Label.new()
-	desc.text = "你的角色倒下了...\n星尘: %d\n记忆碎片: %d" % [RunState.stardust, RunState.memory_fragments]
+	desc.text = "你的角色倒下了...\n星尘: %d\n记忆碎片: %d" % [RunState.get_stardust(), RunState.memory_fragments]
 	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(desc)
 
@@ -675,7 +677,7 @@ func _collect_treasure(node_data: MapNode):
 	var stardust_found = RunState.rng.randi_range(5, 15)
 	var fragments_found = RunState.rng.randi_range(1, 5) if RunState.rng.randf() > 0.5 else 0
 
-	RunState.stardust += stardust_found
+	RunState.add_stardust(stardust_found)
 	RunState.add_memory_fragments(fragments_found)
 
 	# 发送宝箱开启事件（用于成就系统）
@@ -774,7 +776,7 @@ func _on_event_node_selected(node_data: MapNode):
 	if roll <= 15:
 		# 优质事件：星尘
 		var stardust_found = RunState.rng.randi_range(10, 25)
-		RunState.stardust += stardust_found
+		RunState.add_stardust(stardust_found)
 		event_text = "在废墟中发现了一些星尘碎片!\n获得: %d 星尘" % stardust_found
 	elif roll <= 25:
 		# 优质事件：记忆碎片
@@ -791,8 +793,8 @@ func _on_event_node_selected(node_data: MapNode):
 	elif roll <= 45:
 		# 挑战事件：消耗星尘换取记忆碎片
 		var cost = RunState.rng.randi_range(10, 20)
-		if RunState.stardust >= cost:
-			RunState.stardust -= cost
+		if RunState.can_spend_stardust(cost):
+			RunState.spend_stardust(cost)
 			RunState.add_memory_fragments(1)
 			event_text = "使用了古老的转化装置\n消耗: %d 星尘\n获得: 1 记忆碎片" % cost
 		else:
@@ -807,14 +809,14 @@ func _on_event_node_selected(node_data: MapNode):
 		return  # 特殊处理，不直接完成节点
 	elif roll <= 65:
 		# 坏事件：星尘损失
-		var stardust_lost = mini(RunState.stardust, RunState.rng.randi_range(5, 15))
-		RunState.stardust -= stardust_lost
+		var stardust_lost = mini(RunState.get_stardust(), RunState.rng.randi_range(5, 15))
+		RunState.spend_stardust(stardust_lost)
 		event_text = "遭遇了一场小规模坍缩!\n损失: %d 星尘" % stardust_lost
 	elif roll <= 75:
 		# 坏事件：遇到小偷
 		var lose_percent = RunState.rng.randf_range(0.1, 0.25)
-		var stardust_lost = maxi(1, int(RunState.stardust * lose_percent))
-		RunState.stardust -= stardust_lost
+		var stardust_lost = maxi(1, int(RunState.get_stardust() * lose_percent))
+		RunState.spend_stardust(stardust_lost)
 		event_text = "一个黑影偷走了你的星尘!\n损失: %d 星尘" % stardust_lost
 	elif roll <= 85:
 		# 中性事件：回复道具
@@ -888,7 +890,7 @@ func _on_battle_with_bonus_complete(victory: bool, rewards: Dictionary):
 		_process_victory(rewards)
 		# 额外奖励
 		var bonus_stardust = RunState.rng.randi_range(5, 15)
-		RunState.stardust += bonus_stardust
+		RunState.add_stardust(bonus_stardust)
 		_show_event_message("战斗胜利", "击败了敌人!\n额外获得: %d 星尘" % bonus_stardust)
 	else:
 		_show_defeat()
@@ -929,13 +931,13 @@ func _do_trade(dlg, trade_type: String):
 		"fragment_to_stardust":
 			if RunState.memory_fragments >= 1:
 				RunState.memory_fragments -= 1
-				RunState.stardust += 15
+				RunState.add_stardust(15)
 				_show_event_message("交易完成", "神秘商人收走了1记忆碎片\n给了你15星尘")
 			else:
 				_show_event_message("交易失败", "你没有足够的记忆碎片...")
 		"stardust_to_fragment":
-			if RunState.stardust >= 15:
-				RunState.stardust -= 15
+			if RunState.can_spend_stardust(15):
+				RunState.spend_stardust(15)
 				RunState.add_memory_fragments(1)
 				_show_event_message("交易完成", "你支付了15星尘\n获得了1记忆碎片")
 			else:
@@ -1000,8 +1002,34 @@ func _handle_escape():
 func _show_pause_menu():
 	# Save current state for resuming
 	previous_main_state = current_state
-	# TODO: Show pause menu panel
+	# Show pause menu panel
+	var pause_panel = pause_panel_resource.instantiate()
+	pause_panel.resume_requested.connect(_on_pause_resume)
+	pause_panel.main_menu_requested.connect(_on_pause_main_menu)
+	pause_panel.quit_requested.connect(_on_pause_quit)
+	add_child(pause_panel)
+	current_scene = pause_panel
+	is_panel_open = true
+	current_panel = PanelType.PAUSE
 	GameLogger.info("Game: 暂停菜单")
+
+func _on_pause_resume():
+	_clear_current_scene()
+	is_panel_open = false
+	current_panel = PanelType.NONE
+	current_state = previous_main_state
+	GameLogger.info("Game: 继续游戏")
+
+func _on_pause_main_menu():
+	_clear_current_scene()
+	is_panel_open = false
+	current_panel = PanelType.NONE
+	_show_main_menu()
+	GameLogger.info("Game: 返回主菜单")
+
+func _on_pause_quit():
+	get_tree().quit()
+	GameLogger.info("Game: 退出游戏")
 
 func open_panel(panel_type: PanelType):
 	"""Open a panel and track its type"""

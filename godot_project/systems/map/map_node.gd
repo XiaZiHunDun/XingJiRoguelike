@@ -12,7 +12,11 @@ enum NodeType {
 	TREASURE,
 	COLLECTION,
 	HEALING_SHRINE,  # 回复神龛
-	BOSS
+	BOSS,
+	MYSTERY_MERCHANT,  # 神秘商人
+	BLESSING_SHRINE,   # 祝福祭坛
+	CURSE_CHALLENGE,   # 诅咒挑战
+	REST_NODE          # 休息点
 }
 
 @export var node_id: String

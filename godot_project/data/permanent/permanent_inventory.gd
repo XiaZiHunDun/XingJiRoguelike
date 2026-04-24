@@ -30,6 +30,26 @@ func _init_enhancement_definitions():
 	_define_enhancement("疾风露_中", EnhancementDefinition.EnhancementType.AGILITY, EnhancementDefinition.Quality.INTERMEDIATE, 2.0, 10, 0)
 	_define_enhancement("疾风露_极", EnhancementDefinition.EnhancementType.AGILITY, EnhancementDefinition.Quality.ULTIMATE, 5.0, 10, 100)
 
+	# 攻击强化剂: 攻击+5%, 5次/角色
+	_define_enhancement("攻击强化剂", EnhancementDefinition.EnhancementType.ATTACK, EnhancementDefinition.Quality.BASIC, 5.0, 5, 0)
+	_define_enhancement("攻击强化剂_高", EnhancementDefinition.EnhancementType.ATTACK, EnhancementDefinition.Quality.INTERMEDIATE, 10.0, 5, 150)
+	_define_enhancement("攻击强化剂_极", EnhancementDefinition.EnhancementType.ATTACK, EnhancementDefinition.Quality.ULTIMATE, 15.0, 3, 300)
+
+	# 防御强化剂: 防御+5%, 5次/角色
+	_define_enhancement("防御强化剂", EnhancementDefinition.EnhancementType.DEFENSE, EnhancementDefinition.Quality.BASIC, 5.0, 5, 0)
+	_define_enhancement("防御强化剂_高", EnhancementDefinition.EnhancementType.DEFENSE, EnhancementDefinition.Quality.INTERMEDIATE, 10.0, 5, 150)
+	_define_enhancement("防御强化剂_极", EnhancementDefinition.EnhancementType.DEFENSE, EnhancementDefinition.Quality.ULTIMATE, 15.0, 3, 300)
+
+	# 生命强化剂: 生命+5%, 5次/角色
+	_define_enhancement("生命强化剂", EnhancementDefinition.EnhancementType.HEALTH, EnhancementDefinition.Quality.BASIC, 5.0, 5, 0)
+	_define_enhancement("生命强化剂_高", EnhancementDefinition.EnhancementType.HEALTH, EnhancementDefinition.Quality.INTERMEDIATE, 10.0, 5, 150)
+	_define_enhancement("生命强化剂_极", EnhancementDefinition.EnhancementType.HEALTH, EnhancementDefinition.Quality.ULTIMATE, 15.0, 3, 300)
+
+	# 能量强化剂: 能量+1, 5次/角色
+	_define_enhancement("能量强化剂", EnhancementDefinition.EnhancementType.ENERGY, EnhancementDefinition.Quality.BASIC, 1.0, 5, 0)
+	_define_enhancement("能量强化剂_高", EnhancementDefinition.EnhancementType.ENERGY, EnhancementDefinition.Quality.INTERMEDIATE, 2.0, 3, 200)
+	_define_enhancement("能量强化剂_极", EnhancementDefinition.EnhancementType.ENERGY, EnhancementDefinition.Quality.ULTIMATE, 3.0, 2, 400)
+
 # 定义单个增强
 func _define_enhancement(id: String, type: EnhancementDefinition.EnhancementType, quality: EnhancementDefinition.Quality, bonus: float, max_uses: int, price: int):
 	var def = EnhancementDefinition.new()
@@ -45,9 +65,15 @@ func _define_enhancement(id: String, type: EnhancementDefinition.EnhancementType
 func get_or_create_inventory(character_id: String) -> Dictionary:
 	if not character_inventories.has(character_id):
 		character_inventories[character_id] = {
+			# 属性强化
 			"淬体液_初": 0, "淬体液_中": 0, "淬体液_极": 0,
 			"聚魂露_初": 0, "聚魂露_中": 0, "聚魂露_极": 0,
-			"疾风露_初": 0, "疾风露_中": 0, "疾风露_极": 0
+			"疾风露_初": 0, "疾风露_中": 0, "疾风露_极": 0,
+			# 战斗强化
+			"攻击强化剂": 0, "攻击强化剂_高": 0, "攻击强化剂_极": 0,
+			"防御强化剂": 0, "防御强化剂_高": 0, "防御强化剂_极": 0,
+			"生命强化剂": 0, "生命强化剂_高": 0, "生命强化剂_极": 0,
+			"能量强化剂": 0, "能量强化剂_高": 0, "能量强化剂_极": 0
 		}
 	return character_inventories[character_id]
 
@@ -84,9 +110,15 @@ func get_remaining_character(character_id: String, enhancement_id: String) -> in
 # 重置角色库存（用于新游戏）
 func reset_character(character_id: String):
 	character_inventories[character_id] = {
+		# 属性强化
 		"淬体液_初": 0, "淬体液_中": 0, "淬体液_极": 0,
 		"聚魂露_初": 0, "聚魂露_中": 0, "聚魂露_极": 0,
-		"疾风露_初": 0, "疾风露_中": 0, "疾风露_极": 0
+		"疾风露_初": 0, "疾风露_中": 0, "疾风露_极": 0,
+		# 战斗强化
+		"攻击强化剂": 0, "攻击强化剂_高": 0, "攻击强化剂_极": 0,
+		"防御强化剂": 0, "防御强化剂_高": 0, "防御强化剂_极": 0,
+		"生命强化剂": 0, "生命强化剂_高": 0, "生命强化剂_极": 0,
+		"能量强化剂": 0, "能量强化剂_高": 0, "能量强化剂_极": 0
 	}
 
 # 获取存档数据

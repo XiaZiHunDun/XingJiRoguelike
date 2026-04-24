@@ -23,8 +23,12 @@ signal battle_complete(victory: bool, rewards: Dictionary)
 @onready var time_sand_label: Label = $UILayer/TimeSandDisplay
 @onready var enemy_label: Label = $UILayer/EnemyInfo
 @onready var character_select: Control = $UILayer/CharacterSelect
-@onready var warrior_card: Panel = $UILayer/CharacterSelect/CenterPanel/WarriorCard
-@onready var mage_card: Panel = $UILayer/CharacterSelect/CenterPanel/MageCard
+@onready var warrior_card: Panel = $UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard
+@onready var mage_card: Panel = $UILayer/CharacterSelect/CenterContainer/HBox/MageCard
+@onready var warrior_button: Button = $UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox/SelectButton
+@onready var mage_button: Button = $UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox/SelectButton
+@onready var start_game_button: Button = $UILayer/CharacterSelect/StartGameButton
+@onready var skill_tooltip: Control = $UILayer/SkillTooltip
 
 var skill_buttons: Array[Button] = []
 var battle_started: bool = false
@@ -43,6 +47,7 @@ var _atb_flash_timer: float = 0.0
 var _atb_near_full: bool = false
 var _damage_popups: Array = []  # 伤害弹出数字队列
 
+
 func _ready():
 	battle_manager = $BattleManager
 	if not EventBus.equipment.equipment_dropped.is_connected(_on_equipment_dropped):
@@ -59,27 +64,26 @@ func _ready():
 	]
 
 	# 连接角色选择按钮
-	$UILayer/CharacterSelect/CenterPanel/WarriorCard/WarriorButton.pressed.connect(_on_warrior_selected)
-	$UILayer/CharacterSelect/CenterPanel/MageCard/MageButton.pressed.connect(_on_mage_selected)
+	warrior_button.pressed.connect(_on_warrior_selected)
+	mage_button.pressed.connect(_on_mage_selected)
+
+	# 连接悬停效果
+	warrior_card.mouse_entered.connect(_on_warrior_card_hover.bind(true))
+	warrior_card.mouse_exited.connect(_on_warrior_card_hover.bind(false))
+	mage_card.mouse_entered.connect(_on_mage_card_hover.bind(true))
+	mage_card.mouse_exited.connect(_on_mage_card_hover.bind(false))
+
+	# 连接开始游戏按钮
+	start_game_button.pressed.connect(_on_start_game_pressed)
 
 	# 初始化快捷物品槽
 	_init_quick_item_slots()
 
-	# 如果外部已选择角色，直接开始战斗
-	if external_character_id != "":
-		selected_character_id = external_character_id
-		external_character_id = ""  # Clear so we don't reuse
-		_start_battle()
-	else:
-		# 显示角色选择界面
-		_show_character_select()
-
 func _show_character_select():
 	"""显示角色选择界面"""
 	character_select.visible = true
-	# 显示角色卡片
-	warrior_card.visible = true
-	mage_card.visible = true
+	# 显示开始游戏按钮
+	start_game_button.visible = true
 	# 隐藏战斗UI直到选择完成
 	$UILayer/ATBBar.visible = false
 	$UILayer/ATBBar/ATBLabel.visible = false
@@ -110,41 +114,53 @@ func _on_mage_selected():
 	else:
 		_start_battle()
 
+func _on_warrior_card_hover(is_hovering: bool):
+	"""战士卡片悬停效果"""
+	if is_hovering and selected_character_id != "warrior":
+		warrior_card.modulate = Color(1, 1, 0.9, 1)
+	elif selected_character_id != "warrior":
+		warrior_card.modulate = Color(1, 1, 1, 1)
+
+func _on_mage_card_hover(is_hovering: bool):
+	"""法师卡片悬停效果"""
+	if is_hovering and selected_character_id != "mage":
+		mage_card.modulate = Color(1, 1, 0.9, 1)
+	elif selected_character_id != "mage":
+		mage_card.modulate = Color(1, 1, 1, 1)
+
 func _update_character_display():
 	"""更新角色选择界面的显示"""
-	# 重置所有卡片颜色
-	warrior_card.modulate = Color(1, 1, 1, 1)
-	mage_card.modulate = Color(1, 1, 1, 1)
+	# 重置所有卡片颜色和样式
+	_reset_card_style(warrior_card, false)
+	_reset_card_style(mage_card, false)
+
 	# 重置按钮文本
-	warrior_card.get_node("WarriorButton").text = "选择战士"
-	mage_card.get_node("MageButton").text = "选择法师"
+	warrior_button.text = "选择战士"
+	mage_button.text = "选择法师"
 
 	# 高亮选中的卡片
 	if selected_character_id == "warrior":
-		warrior_card.modulate = Color(1, 1, 0.7, 1)
-		warrior_card.get_node("WarriorButton").text = "已选择 ✓"
+		_reset_card_style(warrior_card, true)
+		warrior_button.text = "已选择 ✓"
 	else:
-		mage_card.modulate = Color(1, 1, 0.7, 1)
-		mage_card.get_node("MageButton").text = "已选择 ✓"
+		_reset_card_style(mage_card, true)
+		mage_button.text = "已选择 ✓"
+
+func _reset_card_style(card: Panel, selected: bool):
+	"""重置卡片样式"""
+	var card_bg = card.get_node("VBox/CardBG")
+	if selected:
+		# 选中状态：边框发光
+		card_bg.color = Color(0.15, 0.2, 0.35, 1) if card == warrior_card else Color(0.25, 0.15, 0.3, 1)
+		card.modulate = Color(1, 1, 0.8, 1)
+	else:
+		# 默认状态
+		card_bg.color = Color(0.1, 0.15, 0.3, 1) if card == warrior_card else Color(0.2, 0.1, 0.25, 1)
+		card.modulate = Color(1, 1, 1, 1)
 
 func _show_start_button():
-	# 只显示"开始游戏"按钮，不隐藏角色选择按钮
-	# 这样用户可以继续切换角色
-	var center_panel = $UILayer/CharacterSelect/CenterPanel
-	if not center_panel.has_node("StartGameButton"):
-		var start_btn = Button.new()
-		start_btn.name = "StartGameButton"
-		start_btn.text = "开始游戏"
-		start_btn.pressed.connect(_on_start_game_pressed)
-		center_panel.add_child(start_btn)
-		# Position it at the bottom of the panel
-		start_btn.set_anchors_preset(Control.PRESET_CENTER)
-		start_btn.offset_left = -80.0
-		start_btn.offset_top = 290.0
-		start_btn.offset_right = 80.0
-		start_btn.offset_bottom = 330.0
-	else:
-		center_panel.get_node("StartGameButton").visible = true
+	# 显示开始游戏按钮（selection_only_mode时使用）
+	start_game_button.visible = true
 
 func _on_start_game_pressed():
 	# Emit character selected and let game.gd handle the flow
@@ -167,7 +183,7 @@ func _start_battle():
 
 	# 显示战斗UI
 	$UILayer/ATBBar.visible = true
-	$UILayer/ATBBar/Label.visible = true
+	$UILayer/ATBBar/ATBLabel.visible = true
 	$UILayer/EnergyDisplay.visible = true
 	$UILayer/TimeSandDisplay.visible = true
 	$UILayer/SkillButtons.visible = true
@@ -280,6 +296,8 @@ func _start_battle():
 		e.current_hp = e.max_hp
 		e.attack = int(enemy_attack * variation)
 		e.enemy_type = enemy_type
+		# 设置攻击目标（消除对tree的依赖）
+		e.set_target(player)
 		add_child(e)
 		enemies.append(e)
 
@@ -314,6 +332,8 @@ func _start_battle():
 	# 连接技能按钮
 	for i in range(skill_buttons.size()):
 		skill_buttons[i].pressed.connect(_on_skill_button.bind(i))
+		skill_buttons[i].mouse_entered.connect(_on_skill_hover.bind(i))
+		skill_buttons[i].mouse_exited.connect(_on_skill_hover_end)
 
 	$UILayer/EndTurnButton.pressed.connect(_on_end_turn)
 
@@ -415,14 +435,48 @@ func _on_skill_button(index: int):
 	var skill = player.available_skills[index]
 	battle_manager.player_use_skill(skill)
 
-func _use_skill(index: int):
-	if battle_manager.current_state != battle_manager.State.PLAYER_TURN:
+func _on_skill_hover(index: int):
+	"""处理技能按钮悬停"""
+	if not player or player.available_skills.is_empty():
 		return
 	if index >= player.available_skills.size():
 		return
 
+	# 只在玩家回合显示tooltip
+	if battle_manager.current_state != battle_manager.State.PLAYER_TURN:
+		return
+
 	var skill = player.available_skills[index]
-	battle_manager.player_use_skill(skill)  # 使用selected_target
+	if skill_tooltip and skill_tooltip.has_method("show_skill"):
+		skill_tooltip.show_skill(skill)
+
+func _on_skill_hover_end():
+	"""处理技能按钮悬停结束"""
+	if skill_tooltip and skill_tooltip.has_method("hide"):
+		skill_tooltip.hide()
+
+func _use_skill(index: int):
+	if battle_manager.current_state != battle_manager.State.PLAYER_TURN:
+		return
+
+	var skill_to_use: SkillInstance = null
+
+	# Check if a specific skill is configured for this hotkey slot
+	var configured_skill_id = RunState.skill_hotkey_config.get(index, "")
+	if configured_skill_id != "":
+		# Find the skill with matching ID in player's available_skills
+		for skill in player.available_skills:
+			if skill and skill.definition and String(skill.definition.id) == configured_skill_id:
+				skill_to_use = skill
+				break
+
+	# Fall back to indexed skill if no configured skill found or slot not set
+	if skill_to_use == null:
+		if index >= player.available_skills.size():
+			return
+		skill_to_use = player.available_skills[index]
+
+	battle_manager.player_use_skill(skill_to_use)
 
 func _toggle_pause():
 	if not battle_started:
@@ -475,7 +529,7 @@ func _show_pause_overlay(visible: bool):
 			vbox.add_child(tip)
 
 			add_child(pause_panel)
-		pause_panel.visible = true
+			pause_panel.visible = true
 	else:
 		if is_instance_valid(pause_panel):
 			pause_panel.visible = false
@@ -499,6 +553,8 @@ func _on_player_hp_changed(current: int, max_value: int):
 	# 玩家受伤时屏幕闪红
 	if current < max_value:
 		_flash_screen_red()
+	# 通知EventBus更新RunState中的玩家HP（消除对tree的依赖）
+	EventBus.combat.player_hp_changed.emit(current, max_value)
 
 func _flash_screen_red():
 	"""屏幕红色闪烁效果"""
@@ -577,7 +633,8 @@ func _try_spawn_faction_enemy():
 		e.attack = int(e.attack * 1.2)
 
 	e.enemy_type = Enums.EnemyType.ELITE  # 势力敌人作为精英怪
-
+	# 设置攻击目标（消除对tree的依赖）
+	e.set_target(player)
 	add_child(e)
 	enemies.append(e)
 
@@ -655,7 +712,10 @@ func _on_elite_summon_requested(elite: Enemy, count: int):
 		e.current_hp = 20
 		e.attack = 5
 		e.enemy_type = Enums.EnemyType.NORMAL
+		e.faction = elite.faction  # 设置召唤小怪的faction属性
 		e.position = elite.position + Vector2(randi() % 100 - 50, randi() % 50)
+		# 设置攻击目标（消除对tree的依赖）
+		e.set_target(player)
 		add_child(e)
 		enemies.append(e)
 		battle_manager.active_enemies.append(e)
@@ -756,9 +816,20 @@ func _update_damage_popups(delta: float):
 	for popup in to_remove:
 		_damage_popups.erase(popup)
 
+func _clear_damage_popups():
+	"""清理所有伤害弹出数字"""
+	for popup in _damage_popups:
+		if is_instance_valid(popup.label):
+			popup.label.queue_free()
+	_damage_popups.clear()
+
 # ==================== 战斗结束 ====================
 
 func _on_battle_ended(victory: bool):
+	# 清理战斗资源
+	_clear_enemy_cards()
+	_clear_damage_popups()
+
 	if victory:
 		if is_instance_valid(player):
 			RunState.capture_weapon_from_player(player)
@@ -975,9 +1046,44 @@ func _init_quick_item_slots():
 
 func _fill_quick_slots_from_inventory():
 	"""从背包中自动填充快捷物品槽（消耗品优先）"""
-	# TODO: 当背包系统完善后，从背包中获取消耗品填充
-	# 目前暂时为空
-	pass
+	var consumables = RunState.get_consumables()
+	if consumables.is_empty():
+		return
+
+	# 消耗品优先级：HP恢复 > ATB恢复 > 解除debuff
+	# 同一类型按效果量排序
+	var priority_order = [
+		"health_potion_large",  # 大血瓶优先
+		"health_potion_small",  # 小血瓶
+		"energy_drink",         # 能量饮料
+		"antidote_potion"      # 解毒剂
+	]
+
+	var filled = 0
+	for priority_id in priority_order:
+		if filled >= QUICK_SLOT_COUNT:
+			break
+		if consumables.has(priority_id) and consumables[priority_id] > 0:
+			quick_item_slots[filled] = {"material_id": priority_id, "quantity": consumables[priority_id]}
+			filled += 1
+
+	# 如果还没填满，遍历所有消耗品补充
+	if filled < QUICK_SLOT_COUNT:
+		for mat_id in consumables.keys():
+			if filled >= QUICK_SLOT_COUNT:
+				break
+			if consumables[mat_id] > 0:
+				# 检查是否已经填充过
+				var already_filled = false
+				for i in range(filled):
+					if quick_item_slots[i].get("material_id") == mat_id:
+						already_filled = true
+						break
+				if not already_filled:
+					quick_item_slots[filled] = {"material_id": mat_id, "quantity": consumables[mat_id]}
+					filled += 1
+
+	_update_quick_item_slots()
 
 func _update_quick_item_slots():
 	"""更新快捷物品槽显示"""
@@ -990,12 +1096,23 @@ func use_quick_item(slot_index: int):
 		return
 
 	var item_data = quick_item_slots[slot_index]
-	if not item_data:
+	if not item_data or item_data.is_empty():
 		return
 
-	# TODO: 实现物品使用逻辑
-	# 消耗品效果：HP恢复、状态清除等
-	GameLogger.debug("使用快捷物品", {"slot": slot_index, "item": item_data})
+	var material_id = item_data.get("material_id", "")
+	if material_id == "":
+		return
+
+	# 调用RunState消耗品使用逻辑
+	var result = RunState.use_consumable(StringName(material_id))
+
+	if result.get("success", false):
+		GameLogger.debug("使用快捷物品", {"slot": slot_index, "item": material_id, "result": result})
+
+		# 更新快捷槽：物品被消耗后刷新
+		_fill_quick_slots_from_inventory()
+	else:
+		GameLogger.debug("使用快捷物品失败", {"slot": slot_index, "item": material_id, "result": result})
 
 func get_quick_item_slots() -> Array:
 	"""获取快捷物品槽列表"""

@@ -4,7 +4,7 @@
 class_name EnhancementDefinition
 extends Resource
 
-enum EnhancementType { BODY, SOUL, AGILITY }
+enum EnhancementType { BODY, SOUL, AGILITY, ATTACK, DEFENSE, HEALTH, ENERGY }
 enum Quality { BASIC, INTERMEDIATE, ULTIMATE }
 
 @export var id: String
@@ -20,6 +20,10 @@ func get_attribute_name() -> String:
 		EnhancementType.BODY: return "体质"
 		EnhancementType.SOUL: return "精神"
 		EnhancementType.AGILITY: return "敏捷"
+		EnhancementType.ATTACK: return "攻击"
+		EnhancementType.DEFENSE: return "防御"
+		EnhancementType.HEALTH: return "生命"
+		EnhancementType.ENERGY: return "能量"
 	return "体质"
 
 # 名称

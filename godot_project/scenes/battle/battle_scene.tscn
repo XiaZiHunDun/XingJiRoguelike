@@ -1,7 +1,71 @@
-[gd_scene load_steps=3 format=3 uid="uid://battle_scene"]
+[gd_scene load_steps=7 format=3 uid="uid://battle_scene"]
 
 [ext_resource type="Script" path="res://scenes/battle/battle_scene.gd" id="1"]
 [ext_resource type="Script" path="res://systems/combat/battle_manager.gd" id="2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
+bg_color = Color(0.1, 0.12, 0.25, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.25, 0.4, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+bg_color = Color(0.18, 0.22, 0.4, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.5, 0.8, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
+bg_color = Color(0.22, 0.28, 0.5, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.6, 0.9, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_disabled"]
+bg_color = Color(0.06, 0.06, 0.12, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.1, 0.1, 0.15, 0.4)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
 
 [node name="BattleScene" type="Node2D"]
 script = ExtResource("1")
@@ -27,125 +91,264 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.05, 0.05, 0.15, 1)
 
-[node name="CenterPanel" type="Panel" parent="UILayer/CharacterSelect"]
-layout_mode = 2
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = -280.0
-offset_right = 250.0
-offset_bottom = 280.0
+[node name="TitleLabel" type="Label" parent="UILayer/CharacterSelect"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 40.0
+offset_bottom = 100.0
 grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 0
-
-[node name="Title" type="Label" parent="UILayer/CharacterSelect/CenterPanel"]
-layout_mode = 2
-offset_top = 10.0
-offset_bottom = 50.0
 text = "选择你的角色"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Separator" type="HSeparator" parent="UILayer/CharacterSelect/CenterPanel"]
-layout_mode = 2
-offset_top = 55.0
-offset_bottom = 60.0
-
-[node name="WarriorCard" type="Panel" parent="UILayer/CharacterSelect/CenterPanel"]
-layout_mode = 2
-offset_left = 20.0
-offset_top = 70.0
-offset_right = 235.0
-offset_bottom = 260.0
-mouse_filter = 0
-
-[node name="WarriorName" type="Label" parent="UILayer/CharacterSelect/CenterPanel/WarriorCard"]
+[node name="SubtitleLabel" type="Label" parent="UILayer/CharacterSelect"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 10.0
-offset_bottom = 40.0
+offset_top = 95.0
+offset_bottom = 125.0
 grow_horizontal = 2
+text = "选择一个职业开始你的冒险"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="UILayer/CharacterSelect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBox" type="HBoxContainer" parent="UILayer/CharacterSelect/CenterContainer"]
+layout_mode = 2
+theme_constant_separation = 60
+
+[node name="WarriorCard" type="Panel" parent="UILayer/CharacterSelect/CenterContainer/HBox"]
+custom_minimum_size = Vector2(280, 400)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.0
+
+[node name="VBox" type="VBoxContainer" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_constant_separation = 10
+
+[node name="CardBG" type="ColorRect" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+color = Color(0.1, 0.15, 0.3, 1)
+
+[node name="IconContainer" type="CenterContainer" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="IconBG" type="ColorRect" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox/IconContainer"]
+custom_minimum_size = Vector2(160, 160)
+layout_mode = 2
+color = Color(0.2, 0.25, 0.5, 1)
+
+[node name="IconLabel" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox/IconContainer/IconBG"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "⚔"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 72
+
+[node name="NameLabel" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox"]
+layout_mode = 2
 text = "星际战士"
 horizontal_alignment = 1
 
-[node name="WarriorPortrait" type="ColorRect" parent="UILayer/CharacterSelect/CenterPanel/WarriorCard"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 45.0
-offset_bottom = 145.0
-grow_horizontal = 2
-color = Color(0.3, 0.3, 0.5, 1)
+[node name="ClassLabel" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox"]
+layout_mode = 2
+text = "物理输出 · 近战"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.6, 0.8, 1.0, 1)
 
-[node name="WarriorStats" type="Label" parent="UILayer/CharacterSelect/CenterPanel/WarriorCard"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 150.0
-offset_bottom = 190.0
-grow_horizontal = 2
-text = "体质:40  精神:30  敏捷:30
-武器:巨剑 | 伤害:物理"
+[node name="HSeparator" type="HSeparator" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox"]
+layout_mode = 2
+
+[node name="StatsContainer" type="VBoxContainer" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox"]
+layout_mode = 2
+theme_constant_separation = 6
+
+[node name="HPStat" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox/StatsContainer"]
+layout_mode = 2
+text = "❤️ 体质: 40"
 horizontal_alignment = 1
 
-[node name="WarriorButton" type="Button" parent="UILayer/CharacterSelect/CenterPanel/WarriorCard"]
+[node name="MPStat" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox/StatsContainer"]
+layout_mode = 2
+text = "💫 精神: 30"
+horizontal_alignment = 1
+
+[node name="SPDStat" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox/StatsContainer"]
+layout_mode = 2
+text = "💨 敏捷: 30"
+horizontal_alignment = 1
+
+[node name="WeaponStat" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox/StatsContainer"]
+layout_mode = 2
+text = "⚔ 武器: 巨剑"
+horizontal_alignment = 1
+
+[node name="DamageType" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox/StatsContainer"]
+layout_mode = 2
+text = "💥 伤害: 物理"
+horizontal_alignment = 1
+
+[node name="HSeparator2" type="HSeparator" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox"]
+layout_mode = 2
+
+[node name="DescLabel" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox"]
+layout_mode = 2
+text = "擅长近战物理攻击，拥有高额伤害输出"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="SelectButton" type="Button" parent="UILayer/CharacterSelect/CenterContainer/HBox/WarriorCard/VBox"]
+layout_mode = 2
+text = "选择战士"
+size_flags_vertical = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="MageCard" type="Panel" parent="UILayer/CharacterSelect/CenterContainer/HBox"]
+custom_minimum_size = Vector2(280, 400)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.0
+
+[node name="VBox" type="VBoxContainer" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_constant_separation = 10
+
+[node name="CardBG" type="ColorRect" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+color = Color(0.2, 0.1, 0.25, 1)
+
+[node name="IconContainer" type="CenterContainer" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="IconBG" type="ColorRect" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox/IconContainer"]
+custom_minimum_size = Vector2(160, 160)
+layout_mode = 2
+color = Color(0.35, 0.2, 0.4, 1)
+
+[node name="IconLabel" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox/IconContainer/IconBG"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 200.0
-text = "选择战士"
-
-[node name="MageCard" type="Panel" parent="UILayer/CharacterSelect/CenterPanel"]
-layout_mode = 2
-offset_left = 265.0
-offset_top = 70.0
-offset_right = 480.0
-offset_bottom = 260.0
-mouse_filter = 0
-
-[node name="MageName" type="Label" parent="UILayer/CharacterSelect/CenterPanel/MageCard"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 10.0
-offset_bottom = 40.0
 grow_horizontal = 2
+grow_vertical = 2
+text = "🔮"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 72
+
+[node name="NameLabel" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox"]
+layout_mode = 2
 text = "奥术师"
 horizontal_alignment = 1
 
-[node name="MagePortrait" type="ColorRect" parent="UILayer/CharacterSelect/CenterPanel/MageCard"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 45.0
-offset_bottom = 145.0
-grow_horizontal = 2
-color = Color(0.5, 0.3, 0.3, 1)
+[node name="ClassLabel" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox"]
+layout_mode = 2
+text = "奥术输出 · 远程"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.8, 0.6, 1.0, 1)
 
-[node name="MageStats" type="Label" parent="UILayer/CharacterSelect/CenterPanel/MageCard"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 150.0
-offset_bottom = 190.0
-grow_horizontal = 2
-text = "体质:30  精神:40  敏捷:30
-武器:法杖 | 伤害:奥术"
+[node name="HSeparator" type="HSeparator" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox"]
+layout_mode = 2
+
+[node name="StatsContainer" type="VBoxContainer" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox"]
+layout_mode = 2
+theme_constant_separation = 6
+
+[node name="HPStat" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox/StatsContainer"]
+layout_mode = 2
+text = "❤️ 体质: 30"
 horizontal_alignment = 1
 
-[node name="MageButton" type="Button" parent="UILayer/CharacterSelect/CenterPanel/MageCard"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 200.0
+[node name="MPStat" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox/StatsContainer"]
+layout_mode = 2
+text = "💫 精神: 40"
+horizontal_alignment = 1
+
+[node name="SPDStat" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox/StatsContainer"]
+layout_mode = 2
+text = "💨 敏捷: 30"
+horizontal_alignment = 1
+
+[node name="WeaponStat" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox/StatsContainer"]
+layout_mode = 2
+text = "🪄 武器: 法杖"
+horizontal_alignment = 1
+
+[node name="DamageType" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox/StatsContainer"]
+layout_mode = 2
+text = "✨ 伤害: 奥术"
+horizontal_alignment = 1
+
+[node name="HSeparator2" type="HSeparator" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox"]
+layout_mode = 2
+
+[node name="DescLabel" type="Label" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox"]
+layout_mode = 2
+text = "精通元素魔法，擅长范围奥术攻击"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="SelectButton" type="Button" parent="UILayer/CharacterSelect/CenterContainer/HBox/MageCard/VBox"]
+layout_mode = 2
 text = "选择法师"
+size_flags_vertical = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="StartGameButton" type="Button" parent="UILayer/CharacterSelect"]
+visible = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 100.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "🚀 开始游戏"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
 
 [node name="ATBBar" type="ProgressBar" parent="UILayer"]
 visible = false
@@ -203,18 +406,34 @@ offset_bottom = 400.0
 [node name="Skill1" type="Button" parent="UILayer/SkillButtons"]
 layout_mode = 2
 text = "火焰斩 (1费)"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
 
 [node name="Skill2" type="Button" parent="UILayer/SkillButtons"]
 layout_mode = 2
 text = "火球术 (2费)"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
 
 [node name="Skill3" type="Button" parent="UILayer/SkillButtons"]
 layout_mode = 2
 text = "防御 (1费)"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
 
 [node name="Skill4" type="Button" parent="UILayer/SkillButtons"]
 layout_mode = 2
 text = "灼烧之刃 (3费)"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
 
 [node name="EndTurnButton" type="Button" parent="UILayer"]
 visible = false
@@ -225,6 +444,60 @@ offset_top = 450.0
 offset_right = 200.0
 offset_bottom = 480.0
 text = "结束回合 (Space)"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[ext_resource type="Script" path="res://scenes/ui/skill_tooltip.gd" id="3"]
+
+[node name="SkillTooltip" type="PanelContainer" parent="UILayer"]
+visible = false
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -180.0
+offset_top = -280.0
+offset_right = 180.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("3")
+
+[node name="VBox" type="VBoxContainer" parent="UILayer/SkillTooltip"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="UILayer/SkillTooltip/VBox"]
+layout_mode = 2
+text = "技能名称"
+horizontal_alignment = 1
+
+[node name="TypeLabel" type="Label" parent="UILayer/SkillTooltip/VBox"]
+layout_mode = 2
+text = "类型: 攻击"
+
+[node name="CostLabel" type="Label" parent="UILayer/SkillTooltip/VBox"]
+layout_mode = 2
+text = "能量消耗: 1"
+
+[node name="CooldownLabel" type="Label" parent="UILayer/SkillTooltip/VBox"]
+layout_mode = 2
+text = "冷却: 0秒"
+
+[node name="DamageLabel" type="Label" parent="UILayer/SkillTooltip/VBox"]
+layout_mode = 2
+text = "伤害: 10"
+
+[node name="ElementLabel" type="Label" parent="UILayer/SkillTooltip/VBox"]
+layout_mode = 2
+text = "元素: 物理"
+
+[node name="DescriptionLabel" type="Label" parent="UILayer/SkillTooltip/VBox"]
+layout_mode = 2
+text = "技能描述"
+autowrap_mode = 1
 
 [node name="EnemyInfo" type="Label" parent="UILayer"]
 visible = false

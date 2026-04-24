@@ -116,7 +116,7 @@ static func _create_shield_template() -> EquipmentDefinition:
 	var template = EquipmentDefinition.new()
 	template.id = &"tpl_shield"
 	template.name = "Shield"
-	template.slot = Enums.EquipmentSlot.WEAPON
+	template.slot = Enums.EquipmentSlot.ARMOR
 	template.rarity = Enums.Rarity.WHITE
 	template.route = Enums.Route.NEUTRAL
 	template.base_attack = 0

@@ -1,0 +1,336 @@
+[gd_scene load_steps=6 format=3 uid="uid://pause_panel"]
+
+[ext_resource type="Script" path="res://scenes/ui/pause_panel.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
+bg_color = Color(0.1, 0.12, 0.25, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.25, 0.4, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+bg_color = Color(0.18, 0.22, 0.4, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.5, 0.8, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
+bg_color = Color(0.22, 0.28, 0.5, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.6, 0.9, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_disabled"]
+bg_color = Color(0.06, 0.06, 0.12, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.1, 0.1, 0.15, 0.4)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[node name="PausePanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+# Dark starry background with slight transparency
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.02, 0.06, 0.85)
+
+# Decorative stars
+[node name="Stars" type="Node2D" parent="."]
+
+[node name="s1" type="Label" parent="Stars"]
+offset_left = 100.0
+offset_top = 40.0
+offset_right = 110.0
+offset_bottom = 65.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.5)
+theme_override_font_sizes/font_size = 20
+
+[node name="s2" type="Label" parent="Stars"]
+offset_left = 350.0
+offset_top = 80.0
+offset_right = 360.0
+offset_bottom = 105.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 16
+
+[node name="s3" type="Label" parent="Stars"]
+offset_left = 700.0
+offset_top = 30.0
+offset_right = 710.0
+offset_bottom = 55.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.45)
+theme_override_font_sizes/font_size = 18
+
+[node name="s4" type="Label" parent="Stars"]
+offset_left = 1050.0
+offset_top = 120.0
+offset_right = 1060.0
+offset_bottom = 145.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+theme_override_font_sizes/font_size = 14
+
+[node name="s5" type="Label" parent="Stars"]
+offset_left = 1400.0
+offset_top = 60.0
+offset_right = 1410.0
+offset_bottom = 85.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 16
+
+[node name="s6" type="Label" parent="Stars"]
+offset_left = 250.0
+offset_top = 280.0
+offset_right = 260.0
+offset_bottom = 305.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+theme_override_font_sizes/font_size = 14
+
+[node name="s7" type="Label" parent="Stars"]
+offset_left = 850.0
+offset_top = 320.0
+offset_right = 860.0
+offset_bottom = 345.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 18
+
+[node name="s8" type="Label" parent="Stars"]
+offset_left = 1200.0
+offset_top = 380.0
+offset_right = 1210.0
+offset_bottom = 405.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 16
+
+[node name="s9" type="Label" parent="Stars"]
+offset_left = 550.0
+offset_top = 480.0
+offset_right = 560.0
+offset_bottom = 505.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+theme_override_font_sizes/font_size = 14
+
+[node name="s10" type="Label" parent="Stars"]
+offset_left = 1600.0
+offset_top = 280.0
+offset_right = 1610.0
+offset_bottom = 305.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.45)
+theme_override_font_sizes/font_size = 20
+
+[node name="s11" type="Label" parent="Stars"]
+offset_left = 1800.0
+offset_top = 450.0
+offset_right = 1810.0
+offset_bottom = 475.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 16
+
+[node name="s12" type="Label" parent="Stars"]
+offset_left = 450.0
+offset_top = 600.0
+offset_right = 460.0
+offset_bottom = 625.0
+text = "·"
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 14
+
+# Main panel container - centered
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -300.0
+offset_right = 220.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelBG" type="ColorRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.15, 0.9)
+
+# Border effects
+[node name="BorderLeft" type="ColorRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_right = 3.0
+color = Color(0.4, 0.4, 0.6, 0.5)
+
+[node name="BorderRight" type="ColorRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -3.0
+color = Color(0.4, 0.4, 0.6, 0.5)
+
+[node name="BorderTop" type="ColorRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_bottom = 3.0
+color = Color(0.4, 0.4, 0.6, 0.5)
+
+[node name="BorderBottom" type="ColorRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -3.0
+color = Color(0.4, 0.4, 0.6, 0.5)
+
+# Title
+[node name="TitleContainer" type="HBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 70.0
+grow_horizontal = 2
+alignment = 1
+
+[node name="PauseIcon" type="Label" parent="Panel/TitleContainer"]
+layout_mode = 2
+text = "⏸"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.7, 0.7, 0.9, 1)
+
+[node name="Title" type="Label" parent="Panel/TitleContainer"]
+layout_mode = 2
+text = "暂 停"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.9, 0.85, 1.0, 1)
+theme_override_font_sizes/font_size = 32
+
+[node name="TitleSep" type="HSeparator" parent="Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 30.0
+offset_top = 80.0
+offset_right = -30.0
+color = Color(0.3, 0.3, 0.5, 0.6)
+
+# Button VBox
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -80.0
+offset_right = 120.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+theme_constant_separation = 20
+
+[node name="ResumeButton" type="Button" parent="Panel/VBox"]
+layout_mode = 2
+text = "继 续 游 戏"
+custom_minimum_size = Vector2(200, 50)
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="MainMenuButton" type="Button" parent="Panel/VBox"]
+layout_mode = 2
+text = "返 回 主 菜 单"
+custom_minimum_size = Vector2(200, 50)
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+
+[node name="QuitButton" type="Button" parent="Panel/VBox"]
+layout_mode = 2
+text = "退 出 游 戏"
+custom_minimum_size = Vector2(200, 50)
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")

@@ -94,9 +94,8 @@ static func _refresh_player_stats(player: Player):
 		# 直接更新最大生命值和能量
 		var old_max_hp = player.max_hp
 		player.max_hp = player.get_max_hp()
-		if player.current_hp > player.max_hp:
-			player.current_hp = player.max_hp
-		# 保持HP比例
+		# 使用mini保持HP比例（不超出新的max_hp）
+		player.current_hp = mini(player.current_hp, player.max_hp)
 		player.hp_changed.emit(player.current_hp, player.max_hp)
 
 static func get_triggered_affix_condition(affix: AffixDefinition) -> String:
@@ -110,6 +109,12 @@ static func get_triggered_affix_condition(affix: AffixDefinition) -> String:
 		"以牙还牙": return "retaliate"
 		"暴击回能": return "crit_energy"
 		"护盾反弹": return "shield_reflect"
+		"连击狂暴": return "combo_crit"
+		"斩杀回复": return "kill_heal"
+		"护盾涌动": return "shield_gain_atb"
+		"暴击叠加": return "crit_stack"
+		"闪避充能": return "dodge_energy"
+		"绝境护盾": return "low_hp_shield"
 	return ""
 
 static func apply_triggered_affix(player: Player, condition: String, value: float) -> Dictionary:
@@ -125,8 +130,25 @@ static func apply_triggered_affix(player: Player, condition: String, value: floa
 				return {"damage_multiplier": 1.0 + value / 100.0}
 		"crit_energy":
 			return {"energy_restore": value}
+		"retaliate":
+			return {"reflect_damage": value / 100.0}
 		"shield_reflect":
 			return {"reflect_damage": value / 100.0}
+		"combo_crit":
+			return {"damage_multiplier": 1.0 + value / 100.0}
+		"kill_heal":
+			return {"heal_percent": value / 100.0}
+		"shield_gain_atb":
+			if player.atb_component:
+				var atb_increase = player.atb_component.atb_max * value / 100.0
+				player.atb_component.atb_value = min(player.atb_component.atb_value + atb_increase, player.atb_component.atb_max)
+			return {"atb_increase": value}
+		"crit_stack":
+			return {"crit_stack_bonus": value, "max_stacks": 5}
+		"dodge_energy":
+			return {"energy_restore": value}
+		"low_hp_shield":
+			return {"shield_percent": value / 100.0}
 	return {}
 
 static func apply_form_change(skill_instance: SkillInstance, affix: AffixDefinition) -> void:
@@ -262,5 +284,24 @@ static func check_triggered_affix(
 				return {"activated": true}
 		"shield_break":
 			return {"activated": true}
+		"combo_crit":
+			var combo = params.get("combo_count", 0)
+			if combo >= 3:
+				return {"activated": true}
+		"kill_heal":
+			if params.get("killed", false):
+				return {"activated": true}
+		"shield_gain_atb":
+			if params.get("shield_gained", false):
+				return {"activated": true}
+		"crit_stack":
+			if params.get("is_crit", false):
+				return {"activated": true, "stack": true}
+		"dodge_energy":
+			if params.get("perfect_dodged", false):
+				return {"activated": true}
+		"low_hp_shield":
+			if float(player.current_hp) / float(player.max_hp) < 0.3:
+				return {"activated": true}
 
 	return {"activated": false}

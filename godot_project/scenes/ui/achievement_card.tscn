@@ -1,0 +1,149 @@
+[gd_scene load_steps=6 format=3 uid="uid://achievement_card"]
+
+[ext_resource type="Script" path="res://scenes/ui/achievement_card.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_locked"]
+bg_color = Color(0.06, 0.06, 0.12, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.2, 0.3, 0.5)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
+content_margin_left = 10
+content_margin_top = 8
+content_margin_right = 10
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_unlocked"]
+bg_color = Color(0.1, 0.08, 0.12, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1.0, 0.85, 0.3, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
+content_margin_left = 10
+content_margin_top = 8
+content_margin_right = 10
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_perfect"]
+bg_color = Color(0.08, 0.06, 0.1, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1.0, 0.5, 0.2, 1.0)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
+content_margin_left = 10
+content_margin_top = 8
+content_margin_right = 10
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress_bg"]
+bg_color = Color(0.1, 0.1, 0.15, 0.8)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.15, 0.15, 0.25, 0.5)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_left = 3
+corner_radius_bottom_right = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress_fill"]
+bg_color = Color(0.4, 0.8, 1.0, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.9, 1.0, 0.8)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_left = 3
+corner_radius_bottom_right = 3
+
+[node name="AchievementCard" type="Panel"]
+custom_minimum_size = Vector2(220, 140)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_locked")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = -10.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HeaderRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="CategoryIcon" type="Label" parent="VBox/HeaderRow"]
+layout_mode = 2
+text = "🏆"
+horizontal_alignment = 1
+
+[node name="AchievementName" type="Label" parent="VBox/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "成就名称"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="StatusIcon" type="Label" parent="VBox/HeaderRow"]
+layout_mode = 2
+text = "🔒"
+horizontal_alignment = 1
+
+[node name="Description" type="Label" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "成就描述文字"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="VBox"]
+layout_mode = 2
+max_value = 100.0
+show_percentage = false
+theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
+
+[node name="RewardRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="RewardIcon" type="Label" parent="VBox/RewardRow"]
+layout_mode = 2
+text = "⭐"
+
+[node name="RewardAmount" type="Label" parent="VBox/RewardRow"]
+layout_mode = 2
+text = "x10"
+
+[node name="RewardLabel" type="Label" parent="VBox/RewardRow"]
+layout_mode = 2
+text = "星尘"
+horizontal_alignment = 1
+size_flags_horizontal = 3
