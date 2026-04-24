@@ -11,6 +11,7 @@ var base_speed: float = Consts.BASE_PLAYER_SPEED
 # 局外成长（星尘）
 var stardust: int = 0
 var max_stardust_bonus: float = Consts.STARDUST_MAX_BONUS
+var _stardust_manager: Node = null  # 星尘管理器引用
 
 # 永久强化系统
 var permanent_inventory: PermanentInventory
@@ -19,6 +20,9 @@ var current_character_id: String = "default"
 
 # 势力专属装备追踪 (已兑换的唯一装备ID列表)
 var owned_unique_equipment: Array[String] = []
+
+# 战斗中的玩家HP（通过EventBus同步，消除对tree的依赖）
+var current_battle_hp: int = 0
 
 # 境界系统
 var current_realm: RealmDefinition.RealmType = RealmDefinition.RealmType.MORTAL
@@ -29,8 +33,10 @@ var total_xp: int = 0
 var current_zone: ZoneDefinition.ZoneType = ZoneDefinition.ZoneType.DESERT
 var current_map_nodes: Array = []
 
-# 装备持久化：武器字典由 EquipmentInstance.to_save_dict 生成；背包为同类字典数组
+# 装备持久化：武器/护甲/饰品字典由 EquipmentInstance.to_save_dict 生成；背包为同类字典数组
 var equipped_weapon_save: Dictionary = {}
+var equipped_armor_save: Dictionary = {}
+var equipped_accessory_save: Dictionary = {}
 var equipment_inventory_saves: Array[Dictionary] = []
 
 # 材料背包：material_id -> quantity
@@ -98,9 +104,18 @@ func _ready():
 	rng = RandomNumberGenerator.new()
 	rng.seed = Time.get_unix_time_from_system()
 	permanent_inventory = PermanentInventory.new()
+	_stardust_manager = get_node("/root/StardustManager") if has_node("/root/StardustManager") else null
 
 	# 连接存档相关事件
 	EventBus.system.breakthrough_succeeded.connect(_on_breakthrough_succeeded)
+	# 连接战斗事件（用于同步玩家HP，消除对tree的依赖）
+	EventBus.combat.player_hp_changed.connect(_on_player_hp_changed)
+
+func _get_stardust_manager() -> Node:
+	"""获取星尘管理器（懒加载）"""
+	if not _stardust_manager:
+		_stardust_manager = get_node("/root/StardustManager") if has_node("/root/StardustManager") else null
+	return _stardust_manager
 
 # 获取带星尘加成的属性
 func get_attack_with_bonus() -> int:
@@ -234,10 +249,24 @@ func start_new_run():
 	current_zone = ZoneDefinition.ZoneType.DESERT
 	current_map_nodes = []
 	equipped_weapon_save = {}
+	equipped_armor_save = {}
+	equipped_accessory_save = {}
 	equipment_inventory_saves = []
-	material_inventory = {}
 	owned_unique_equipment = []
-	_初始化任务进度()
+	skill_hotkey_config = {0: "", 1: "", 2: "", 3: ""}
+
+	# 重置各管理器
+	_reset_managers()
+
+func _reset_managers() -> void:
+	"""重置所有管理器（新局开始时调用）"""
+	if QuestManager:
+		QuestManager.reset()
+	if MaterialManager:
+		MaterialManager.reset()
+	if StardustManager:
+		StardustManager.reset()
+	# 装备和成就保留（局外成长）
 
 
 func mark_resume_from_save() -> void:
@@ -291,8 +320,10 @@ func is_boss_unlocked() -> bool:
 	return MapGenerator.is_boss_unlocked(current_map_nodes)
 
 func set_zone(zone_type: ZoneDefinition.ZoneType) -> void:
+	var old_zone = current_zone
 	current_zone = zone_type
 	generate_zone_map()
+	EventBus.zone.zone_changed.emit(old_zone, zone_type)
 
 func advance_zone() -> bool:
 	# Move to next zone if available
@@ -353,6 +384,9 @@ func add_stardust(amount: int):
 	var old_stardust = stardust
 	stardust += amount
 	EventBus.inventory.stardust_changed.emit(old_stardust, stardust)
+	# 同步到StardustManager
+	if _get_stardust_manager():
+		_stardust_manager.set_value(stardust)
 
 func spend_memory_fragments(amount: int) -> bool:
 	"""消耗记忆碎片"""
@@ -382,8 +416,9 @@ func get_save_data() -> Dictionary:
 	return {
 		"memory_fragments": memory_fragments,
 		"permanent_inventory": permanent_inventory.get_save_data() if permanent_inventory else {},
-		"material_inventory": material_inventory.duplicate(true),
-		"achievements": get_achievement_save_data()
+		"material_inventory": MaterialManager.get_save_data() if MaterialManager else {},
+		"achievements": get_achievement_save_data(),
+		"quest_progress": quest_progress.duplicate(true)  # 任务进度存档
 	}
 
 
@@ -411,6 +446,8 @@ func add_equipment_to_inventory(data: Dictionary) -> void:
 func get_equipment_save_payload() -> Dictionary:
 	return {
 		"weapon": equipped_weapon_save.duplicate(true),
+		"armor": equipped_armor_save.duplicate(true),
+		"accessory": equipped_accessory_save.duplicate(true),
 		"inventory": equipment_inventory_saves.duplicate(true)
 	}
 
@@ -418,6 +455,10 @@ func get_equipment_save_payload() -> Dictionary:
 func load_equipment_save_payload(payload: Dictionary) -> void:
 	var w = payload.get("weapon", {})
 	equipped_weapon_save = w.duplicate(true) if w is Dictionary else {}
+	var a = payload.get("armor", {})
+	equipped_armor_save = a.duplicate(true) if a is Dictionary else {}
+	var ac = payload.get("accessory", {})
+	equipped_accessory_save = ac.duplicate(true) if ac is Dictionary else {}
 	equipment_inventory_saves.clear()
 	var inv = payload.get("inventory", [])
 	if inv is Array:
@@ -441,6 +482,8 @@ func clear_run_equipment_on_defeat() -> void:
 		EventBus.inventory.stardust_changed.emit(old_stardust, stardust)
 
 	equipped_weapon_save = {}
+	equipped_armor_save = {}
+	equipped_accessory_save = {}
 	equipment_inventory_saves.clear()
 
 func _get_keep_stardust_rate() -> float:
@@ -448,44 +491,73 @@ func _get_keep_stardust_rate() -> float:
 	var bonuses = get_unique_equipment_bonuses()
 	return bonuses.get("keep_stardust_rate", 0.0)
 
-# ==================== 材料背包管理 ====================
+# ==================== 材料背包管理（委托给MaterialManager） ====================
 
 func add_material(material_id: StringName, quantity: int = 1) -> void:
 	"""添加材料到背包"""
-	if quantity <= 0:
-		return
-	var current = material_inventory.get(String(material_id), 0)
-	material_inventory[String(material_id)] = current + quantity
-	EventBus.collection.material_added.emit(material_id, quantity)
-
-	# 更新材料收集任务进度
-	update_quest_progress("material_collect")
+	if MaterialManager:
+		MaterialManager.add_material(material_id, quantity)
+		# 更新材料收集任务进度
+		update_quest_progress("material_collect")
 
 func spend_material(material_id: StringName, quantity: int = 1) -> bool:
 	"""消耗材料，成功返回true"""
-	if quantity <= 0:
-		return true
-	var current = material_inventory.get(String(material_id), 0)
-	if current < quantity:
-		return false
-	material_inventory[String(material_id)] = current - quantity
-	if material_inventory[String(material_id)] <= 0:
-		material_inventory.erase(String(material_id))
-	return true
+	if MaterialManager:
+		return MaterialManager.spend_material(material_id, quantity)
+	return false
 
 func get_material_count(material_id: StringName) -> int:
 	"""获取材料数量"""
-	return material_inventory.get(String(material_id), 0)
+	if MaterialManager:
+		return MaterialManager.get_material_count(material_id)
+	return 0
 
 func has_material(material_id: StringName, quantity: int = 1) -> bool:
 	"""检查是否有足够的材料"""
-	return get_material_count(material_id) >= quantity
+	if MaterialManager:
+		return MaterialManager.has_material(material_id, quantity)
+	return false
 
 func get_all_materials() -> Dictionary:
 	"""获取所有材料背包数据"""
-	return material_inventory.duplicate(true)
+	if MaterialManager:
+		return MaterialManager.get_all_materials()
+	return {}
+
+# ==================== 星尘系统（委托给StardustManager） ====================
+
+func get_stardust() -> int:
+	"""获取当前星尘值（代理到StardustManager）"""
+	if StardustManager:
+		return StardustManager.get_stardust()
+	return 0
+
+func add_stardust(amount: int) -> void:
+	"""添加星尘"""
+	if StardustManager:
+		StardustManager.add(amount)
+
+func spend_stardust(amount: int) -> bool:
+	"""消耗星尘，返回是否成功"""
+	if StardustManager:
+		return StardustManager.spend(amount)
+	return false
+
+func can_spend_stardust(amount: int) -> bool:
+	"""检查是否能消耗星尘"""
+	if StardustManager:
+		return StardustManager.can_spend(amount)
+	return false
 
 # ==================== 消耗品系统 ====================
+
+# 技能热键配置: 槽位索引 -> 技能ID
+var skill_hotkey_config: Dictionary = {
+	0: "",  # 技能槽1 (Key 1)
+	1: "",  # 技能槽2 (Key 2)
+	2: "",  # 技能槽3 (Key 3)
+	3: ""   # 技能槽4 (Key 4)
+}
 
 # 消耗品效果定义
 const CONSUMABLE_EFFECTS: Dictionary = {
@@ -551,120 +623,42 @@ func get_consumables() -> Dictionary:
 
 	return consumables
 
-# ==================== 任务系统 ====================
-
-func _初始化任务进度() -> void:
-	"""初始化任务进度"""
-	quest_progress.clear()
-	for quest_def in QUEST_DEFINITIONS:
-		var quest_id = quest_def.get("id", "")
-		if quest_id != "":
-			quest_progress[quest_id] = {
-				"progress": 0,
-				"completed": false,
-				"claimed": false
-			}
+# ==================== 任务系统（委托给QuestManager） ====================
 
 func get_quest_progress(quest_id: String) -> Dictionary:
 	"""获取任务进度"""
-	return quest_progress.get(quest_id, {"progress": 0, "completed": false, "claimed": false})
+	if QuestManager:
+		return QuestManager.get_quest_progress(quest_id)
+	return {"progress": 0, "completed": false, "claimed": false}
 
 func get_quest_definition(quest_id: String) -> Dictionary:
 	"""获取任务定义"""
-	for quest_def in QUEST_DEFINITIONS:
-		if quest_def.get("id", "") == quest_id:
-			return quest_def
+	if QuestManager:
+		return QuestManager.get_quest_definition(quest_id)
 	return {}
 
 func get_all_quests() -> Array:
 	"""获取所有任务状态"""
-	var result: Array = []
-	for quest_def in QUEST_DEFINITIONS:
-		var quest_id = quest_def.get("id", "")
-		var progress = get_quest_progress(quest_id)
-		var quest_with_progress = quest_def.duplicate()
-		quest_with_progress["progress"] = progress.get("progress", 0)
-		quest_with_progress["completed"] = progress.get("completed", false)
-		quest_with_progress["claimed"] = progress.get("claimed", false)
-		result.append(quest_with_progress)
-	return result
+	if QuestManager:
+		return QuestManager.get_all_quests()
+	return []
 
 func update_quest_progress(target_type: String, value: Variant = null) -> void:
-	"""更新任务进度"""
-	var updated_quest_id = ""
-	for quest_def in QUEST_DEFINITIONS:
-		var quest_id = quest_def.get("id", "")
-		if quest_id == "":
-			continue
-		var progress_info = quest_progress.get(quest_id, {"progress": 0, "completed": false, "claimed": false})
-		if progress_info.get("completed", false) or progress_info.get("claimed", false):
-			continue
-
-		if quest_def.get("target_type", "") != target_type:
-			continue
-
-		# 检查条件是否满足
-		var should_update = false
-		match target_type:
-			"battle_win":
-				# 检查区域是否匹配
-				var target_zone = quest_def.get("target_zone", ZoneDefinition.ZoneType.DESERT)
-				if value == null or value == current_zone:
-					should_update = true
-			"material_collect":
-				should_update = true
-			"elite_kill":
-				should_update = true
-			"realm_reach":
-				var target_realm = quest_def.get("target_realm", RealmDefinition.RealmType.MORTAL)
-				if current_realm >= target_realm:
-					should_update = true
-
-		if should_update:
-			var target = quest_def.get("target", 1)
-			var current = progress_info.get("progress", 0)
-			progress_info["progress"] = current + 1
-			if progress_info["progress"] >= target:
-				progress_info["completed"] = true
-				updated_quest_id = quest_id
-			quest_progress[quest_id] = progress_info
-
-	# 如果有任务完成，发送事件
-	if updated_quest_id != "":
-		EventBus.quest.quest_completed.emit(updated_quest_id)
+	"""更新任务进度（委托给QuestManager）"""
+	if QuestManager:
+		QuestManager.update_quest_progress(target_type, value)
 
 func claim_quest_reward(quest_id: String) -> bool:
-	"""领取任务奖励"""
-	var progress_info = quest_progress.get(quest_id, {"progress": 0, "completed": false, "claimed": false})
-	if not progress_info.get("completed", false) or progress_info.get("claimed", false):
-		return false
-
-	var quest_def = get_quest_definition(quest_id)
-	if quest_def.is_empty():
-		return false
-
-	var reward_type = quest_def.get("reward_type", "")
-	var reward_amount = quest_def.get("reward_amount", 0)
-
-	match reward_type:
-		"stardust":
-			var old_stardust = stardust
-			stardust += reward_amount
-			EventBus.inventory.stardust_changed.emit(old_stardust, stardust)
-		"memory_fragment":
-			add_memory_fragments(reward_amount)
-
-	progress_info["claimed"] = true
-	quest_progress[quest_id] = progress_info
-	EventBus.quest.quest_reward_claimed.emit(quest_id)
-	return true
+	"""领取任务奖励（委托给QuestManager）"""
+	if QuestManager:
+		return QuestManager.claim_reward(quest_id, self, self)
+	return false
 
 func get_total_materials_collected() -> int:
 	"""获取已收集的材料总数"""
-	var total = 0
-	for qty in material_inventory.values():
-		total += qty
-	return total
+	if MaterialManager:
+		return MaterialManager.get_total_material_count()
+	return 0
 
 func load_save_data(data: Dictionary):
 	"""加载存档数据"""
@@ -673,11 +667,16 @@ func load_save_data(data: Dictionary):
 	if permanent_inventory:
 		permanent_inventory.load_save_data(data.get("permanent_inventory", {}))
 	if data.has("material_inventory"):
+		# 同步到MaterialManager（委托管理模式）
+		if MaterialManager:
+			MaterialManager.load_from_dict(data["material_inventory"])
 		material_inventory = data["material_inventory"].duplicate(true) if data["material_inventory"] is Dictionary else {}
 	if data.has("achievements"):
 		var ach_data = data["achievements"]
 		achievement_unlocked = ach_data.get("unlocked", []).duplicate()
 		achievement_progress = ach_data.get("progress", {}).duplicate(true)
+	if data.has("quest_progress"):
+		quest_progress = data["quest_progress"].duplicate(true)
 
 # ==================== 成就系统 ====================
 
@@ -696,15 +695,11 @@ func get_achievement_save_data() -> Dictionary:
 		"progress": achievement_progress.duplicate(true)
 	}
 
+func _on_player_hp_changed(current_hp: int, max_hp: int) -> void:
+	"""监听玩家HP变化，同步到current_battle_hp（消除对tree的依赖）"""
+	current_battle_hp = current_hp
+
 func _get_battle_player_hp() -> int:
 	"""获取战斗中的玩家当前HP"""
-	# 通过Game场景获取当前战斗场景
-	var game = Engine.get_main_loop().root.get_node_or_null("Game")
-	if game and game.has("current_scene"):
-		var battle_scene = game.current_scene
-		if battle_scene and battle_scene.has_method("get_player"):
-			var player = battle_scene.get_player()
-			if player and "current_hp" in player:
-				return player.current_hp
-	return max_hp  # 默认返回max_hp（满血）
+	return current_battle_hp if current_battle_hp > 0 else max_hp
 
