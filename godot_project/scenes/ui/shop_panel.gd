@@ -413,7 +413,7 @@ func _add_faction_item_row(faction_name: String, item_data: Dictionary, item_lev
 
 func _is_unique_equipment_purchased(item_id: String) -> bool:
 	# 检查玩家是否已购买该唯一装备（通过RunState检查是否已拥有）
-	return RunState.has_unique_equipment(item_id)
+	return EquipmentManager.has_unique_equipment(item_id)
 
 func _on_faction_buy_pressed(faction_name: String, item_data: Dictionary):
 	var fs = FactionSystem.get_instance()
@@ -450,8 +450,8 @@ func _on_faction_buy_pressed(faction_name: String, item_data: Dictionary):
 			# 唯一装备
 			var equip_data = FactionUniqueEquipment.create_equipment_instance(value)
 			if not equip_data.is_empty():
-				RunState.add_equipment_to_inventory(equip_data)
-				RunState.add_unique_equipment(value)
+				EquipmentManager.add_equipment_to_inventory(equip_data)
+				EquipmentManager.add_unique_equipment(value)
 				_show_message("获得唯一装备: %s!" % value)
 			else:
 				_show_message("装备创建失败!")

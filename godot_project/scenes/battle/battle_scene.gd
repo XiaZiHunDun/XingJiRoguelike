@@ -737,7 +737,7 @@ func _on_boss_special_skill_used(boss: Enemy, skill_name: String):
 
 func _on_equipment_dropped(equipment: EquipmentInstance, _position: Vector2) -> void:
 	if equipment:
-		RunState.add_equipment_to_inventory(equipment.to_save_dict())
+		EquipmentManager.add_equipment_to_inventory(equipment.to_save_dict())
 
 func _on_damage_dealt(source, target, amount: float, is_critical: bool):
 	"""处理伤害结算事件，用于应用生命汲取等效果"""
@@ -832,7 +832,7 @@ func _on_battle_ended(victory: bool):
 
 	if victory:
 		if is_instance_valid(player):
-			RunState.capture_weapon_from_player(player)
+			EquipmentManager.save_equipped_weapon(player)
 		GameLogger.info("战斗胜利")
 		# Calculate rewards based on node configuration
 		var enemy_level: int = battle_node_config.get("level", 1)

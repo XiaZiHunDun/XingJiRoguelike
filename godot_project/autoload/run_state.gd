@@ -17,9 +17,6 @@ var permanent_inventory: PermanentInventory
 var memory_fragments: int = 0  # 记忆碎片 currency
 var current_character_id: String = "default"
 
-# 势力专属装备追踪 (已兑换的唯一装备ID列表)
-var owned_unique_equipment: Array[String] = []
-
 # 战斗中的玩家HP（通过EventBus同步，消除对tree的依赖）
 var current_battle_hp: int = 0
 
@@ -31,12 +28,6 @@ var total_xp: int = 0
 # 区域系统 (Task 8)
 var current_zone: ZoneDefinition.ZoneType = ZoneDefinition.ZoneType.DESERT
 var current_map_nodes: Array = []
-
-# 装备持久化：武器/护甲/饰品字典由 EquipmentInstance.to_save_dict 生成；背包为同类字典数组
-var equipped_weapon_save: Dictionary = {}
-var equipped_armor_save: Dictionary = {}
-var equipped_accessory_save: Dictionary = {}
-var equipment_inventory_saves: Array[Dictionary] = []
 
 # 任务系统
 # 任务定义
@@ -108,6 +99,8 @@ func _ready():
 	# 连接StardustManager信号到EventBus（信号链修复）
 	if StardustManager:
 		StardustManager.stardust_changed.connect(_on_stardust_manager_changed)
+	# 连接势力星尘奖励事件
+	EventBus.faction.faction_stardust_reward.connect(_on_faction_stardust_reward)
 
 # 获取带星尘加成的属性
 func get_attack_with_bonus() -> int:
@@ -116,60 +109,7 @@ func get_attack_with_bonus() -> int:
 func get_speed_with_bonus() -> float:
 	return base_speed * (1.0 + get_stardust() * 0.005 * max_stardust_bonus)
 
-# ==================== 势力专属装备加成 ====================
-
-func add_unique_equipment(item_name: String) -> void:
-	"""添加唯一装备到背包（触发效果）"""
-	if not owned_unique_equipment.has(item_name):
-		owned_unique_equipment.append(item_name)
-
-func has_unique_equipment(item_name: String) -> bool:
-	"""检查是否拥有指定唯一装备"""
-	return owned_unique_equipment.has(item_name)
-
-func get_unique_equipment_bonuses() -> Dictionary:
-	"""获取所有唯一装备的加成汇总"""
-	var bonuses: Dictionary = {
-		"atb_speed_mult": 1.0,      # ATB速度倍率
-		"defense_mult": 1.0,         # 防御倍率
-		"all_stats_mult": 1.0,      # 全属性倍率
-		"lifesteal": 0.0,            # 生命汲取比例
-		"void_damage_bonus": 0.0,    # 虚空伤害加成
-		"keep_stardust_rate": 0.0,  # 死亡保留星尘比例
-		"on_damaged_fire": 0.0,     # 受伤触发火焰伤害
-		"on_crit_meteor": 0.0,      # 暴击触发陨石伤害
-		"attack_slow": 0.0           # 攻击减速
-	}
-
-	for item_name in owned_unique_equipment:
-		var data = FactionUniqueEquipment.get_unique_equipment(item_name)
-		if data.is_empty():
-			continue
-
-		var effect = data.get("special_effect", "")
-		var value = data.get("effect_value", 0.0)
-
-		match effect:
-			"atb_speed_boost":
-				bonuses["atb_speed_mult"] += value - 1.0  # value is 1.5, so add 0.5
-			"defense_boost":
-				bonuses["defense_mult"] += value  # value is 0.30, so add 30%
-			"all_stats_boost":
-				bonuses["all_stats_mult"] += value  # value is 0.20, so add 20%
-			"lifesteal":
-				bonuses["lifesteal"] += value
-			"void_damage":
-				bonuses["void_damage_bonus"] += value
-			"keep_stardust":
-				bonuses["keep_stardust_rate"] += value
-			"on_damaged_fire":
-				bonuses["on_damaged_fire"] += value
-			"on_crit_meteor":
-				bonuses["on_crit_meteor"] += value
-			"attack_slow":
-				bonuses["attack_slow"] += value
-
-	return bonuses
+# ==================== 势力专属装备加成（委托给EquipmentManager） ====================
 
 # 重置局内状态
 func reset_combat():
@@ -242,11 +182,10 @@ func start_new_run():
 	in_combat = false
 	current_zone = ZoneDefinition.ZoneType.DESERT
 	current_map_nodes = []
-	equipped_weapon_save = {}
-	equipped_armor_save = {}
-	equipped_accessory_save = {}
-	equipment_inventory_saves = []
-	owned_unique_equipment = []
+	# 重置装备数据（委托给EquipmentManager）
+	if EquipmentManager:
+		EquipmentManager.reset()
+	# owned_unique_equipment 是永久属性，不在此重置
 	skill_hotkey_config = {0: "", 1: "", 2: "", 3: ""}
 
 	# 重置各管理器
@@ -405,49 +344,7 @@ func get_save_data() -> Dictionary:
 	}
 
 
-func has_saved_weapon() -> bool:
-	return not equipped_weapon_save.is_empty()
-
-
-func get_saved_weapon_dict() -> Dictionary:
-	return equipped_weapon_save.duplicate(true)
-
-
-func capture_weapon_from_player(player: Player) -> void:
-	if player and player.equipped_weapon:
-		equipped_weapon_save = player.equipped_weapon.to_save_dict()
-	else:
-		equipped_weapon_save = {}
-
-
-func add_equipment_to_inventory(data: Dictionary) -> void:
-	if data.is_empty():
-		return
-	equipment_inventory_saves.append(data.duplicate(true))
-
-
-func get_equipment_save_payload() -> Dictionary:
-	return {
-		"weapon": equipped_weapon_save.duplicate(true),
-		"armor": equipped_armor_save.duplicate(true),
-		"accessory": equipped_accessory_save.duplicate(true),
-		"inventory": equipment_inventory_saves.duplicate(true)
-	}
-
-
-func load_equipment_save_payload(payload: Dictionary) -> void:
-	var w = payload.get("weapon", {})
-	equipped_weapon_save = w.duplicate(true) if w is Dictionary else {}
-	var a = payload.get("armor", {})
-	equipped_armor_save = a.duplicate(true) if a is Dictionary else {}
-	var ac = payload.get("accessory", {})
-	equipped_accessory_save = ac.duplicate(true) if ac is Dictionary else {}
-	equipment_inventory_saves.clear()
-	var inv = payload.get("inventory", [])
-	if inv is Array:
-		for item in inv:
-			if item is Dictionary:
-				equipment_inventory_saves.append((item as Dictionary).duplicate(true))
+# ==================== 装备管理（委托给EquipmentManager） ====================
 
 
 func clear_run_equipment_on_defeat() -> void:
@@ -461,10 +358,8 @@ func clear_run_equipment_on_defeat() -> void:
 	else:
 		StardustManager.set_value(0)
 
-	equipped_weapon_save = {}
-	equipped_armor_save = {}
-	equipped_accessory_save = {}
-	equipment_inventory_saves.clear()
+	# 清空装备数据（委托给EquipmentManager）
+	EquipmentManager.clear_run_equipment_on_defeat()
 
 	# 发出战斗结束和局结束信号
 	EventBus.combat.combat_ended.emit(false)
@@ -472,7 +367,7 @@ func clear_run_equipment_on_defeat() -> void:
 
 func _get_keep_stardust_rate() -> float:
 	"""获取死亡保留星尘比例（来自唯一装备加成）"""
-	var bonuses = get_unique_equipment_bonuses()
+	var bonuses = EquipmentManager.get_unique_equipment_bonuses() if EquipmentManager else {}
 	return bonuses.get("keep_stardust_rate", 0.0)
 
 # ==================== 材料背包管理（委托给MaterialManager） ====================
@@ -681,6 +576,10 @@ func get_achievement_save_data() -> Dictionary:
 func _on_stardust_manager_changed(old_value: int, new_value: int) -> void:
 	"""监听StardustManager星尘变化，转发到EventBus（信号链修复）"""
 	EventBus.inventory.stardust_changed.emit(old_value, new_value)
+
+func _on_faction_stardust_reward(amount: int) -> void:
+	"""监听势力星尘奖励事件，转发给StardustManager"""
+	add_stardust(amount)
 
 func _on_player_hp_changed(current_hp: int, max_hp: int) -> void:
 	"""监听玩家HP变化，同步到current_battle_hp（消除对tree的依赖）"""

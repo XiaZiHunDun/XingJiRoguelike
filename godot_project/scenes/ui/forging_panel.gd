@@ -68,7 +68,7 @@ func _refresh_display():
 	selected_equipment_data = {}
 
 func _show_equipped_weapon():
-	var weapon_save = RunState.equipped_weapon_save
+	var weapon_save = EquipmentManager.equipped_weapon_save
 	if weapon_save.is_empty():
 		var empty = Label.new()
 		empty.text = "(无已装备武器)"
@@ -81,7 +81,7 @@ func _show_equipped_weapon():
 	equipment_list.add_child(btn)
 
 func _show_inventory_equipment():
-	var inventory = RunState.equipment_inventory_saves
+	var inventory = EquipmentManager.equipment_inventory_saves
 	if inventory.is_empty():
 		var empty = Label.new()
 		empty.text = "(背包无装备)"
@@ -248,9 +248,9 @@ func _on_forge_pressed():
 		# 更新RunState中的装备数据
 		if selected_is_equipped:
 			# 是已装备的武器
-			RunState.equipped_weapon_save = selected_equipment_data
+			EquipmentManager.equipped_weapon_save = selected_equipment_data
 		else:
-			RunState.equipment_inventory_saves[selected_equipment_index] = selected_equipment_data
+			EquipmentManager.equipment_inventory_saves[selected_equipment_index] = selected_equipment_data
 	else:
 		_show_message(result.message)
 

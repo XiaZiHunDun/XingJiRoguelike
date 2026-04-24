@@ -32,7 +32,7 @@ func _exit_tree():
 
 
 func _refresh_display():
-	var weapon_save = RunState.equipped_weapon_save
+	var weapon_save = EquipmentManager.equipped_weapon_save
 
 	if weapon_save.is_empty():
 		weapon_info_label.text = "(无武器)"
@@ -62,7 +62,7 @@ func _refresh_display():
 		unequip_button.disabled = false
 
 	# 护甲槽
-	var armor_save = RunState.equipped_armor_save
+	var armor_save = EquipmentManager.equipped_armor_save
 	if armor_save.is_empty():
 		armor_info_label.text = "(无护甲)"
 		armor_unequip_button.disabled = true
@@ -91,7 +91,7 @@ func _refresh_display():
 		armor_unequip_button.disabled = false
 
 	# 饰品槽
-	var accessory_save = RunState.equipped_accessory_save
+	var accessory_save = EquipmentManager.equipped_accessory_save
 	if accessory_save.is_empty():
 		accessory_info_label.text = "(无饰品)"
 		accessory_unequip_button.disabled = true
@@ -139,7 +139,7 @@ func _refresh_display():
 	header.add_child(action_h)
 	inventory_container.add_child(header)
 
-	var inventory = RunState.equipment_inventory_saves
+	var inventory = EquipmentManager.equipment_inventory_saves
 	if inventory.is_empty():
 		var empty_label = Label.new()
 		empty_label.text = "(背包空)"
@@ -220,34 +220,34 @@ func _add_inventory_row(item_data: Dictionary, index: int):
 
 func _on_equip_pressed(index: int, item_data: Dictionary, slot: int = 0):
 	var slot_name = "武器"
-	var current_equipped = RunState.equipped_weapon_save
+	var current_equipped = EquipmentManager.equipped_weapon_save
 
 	match slot:
 		0:  # WEAPON
-			if not RunState.equipped_weapon_save.is_empty():
-				RunState.add_equipment_to_inventory(RunState.equipped_weapon_save)
-			RunState.equipped_weapon_save = item_data.duplicate(true)
+			if not EquipmentManager.equipped_weapon_save.is_empty():
+				EquipmentManager.add_equipment_to_inventory(EquipmentManager.equipped_weapon_save)
+			EquipmentManager.equipped_weapon_save = item_data.duplicate(true)
 			slot_name = "武器"
 		1:  # ARMOR
-			if not RunState.equipped_armor_save.is_empty():
-				RunState.add_equipment_to_inventory(RunState.equipped_armor_save)
-			RunState.equipped_armor_save = item_data.duplicate(true)
+			if not EquipmentManager.equipped_armor_save.is_empty():
+				EquipmentManager.add_equipment_to_inventory(EquipmentManager.equipped_armor_save)
+			EquipmentManager.equipped_armor_save = item_data.duplicate(true)
 			slot_name = "护甲"
 		2, 3:  # ACCESSORY_1, ACCESSORY_2
-			if not RunState.equipped_accessory_save.is_empty():
-				RunState.add_equipment_to_inventory(RunState.equipped_accessory_save)
-			RunState.equipped_accessory_save = item_data.duplicate(true)
+			if not EquipmentManager.equipped_accessory_save.is_empty():
+				EquipmentManager.add_equipment_to_inventory(EquipmentManager.equipped_accessory_save)
+			EquipmentManager.equipped_accessory_save = item_data.duplicate(true)
 			slot_name = "饰品"
 		_:
 			slot_name = "武器"
 
-	RunState.equipment_inventory_saves.remove_at(index)
+	EquipmentManager.equipment_inventory_saves.remove_at(index)
 
 	_show_message("已装备 %s 到%s槽" % [item_data.get("definition_id", "装备"), slot_name])
 	_refresh_display()
 
 func _on_detail_pressed(item_data: Dictionary):
-	var equipped = RunState.equipped_weapon_save
+	var equipped = EquipmentManager.equipped_weapon_save
 	var text = _get_item_comparison_text(item_data, equipped)
 	weapon_info_label.text = text
 	unequip_button.disabled = true
@@ -334,31 +334,31 @@ func _get_item_comparison_text(new_item: Dictionary, equipped_item: Dictionary) 
 	return text
 
 func _on_unequip_pressed():
-	if RunState.equipped_weapon_save.is_empty():
+	if EquipmentManager.equipped_weapon_save.is_empty():
 		return
 
-	RunState.add_equipment_to_inventory(RunState.equipped_weapon_save)
-	RunState.equipped_weapon_save = {}
+	EquipmentManager.add_equipment_to_inventory(EquipmentManager.equipped_weapon_save)
+	EquipmentManager.equipped_weapon_save = {}
 
 	_show_message("已卸下武器")
 	_refresh_display()
 
 func _on_armor_unequip_pressed():
-	if RunState.equipped_armor_save.is_empty():
+	if EquipmentManager.equipped_armor_save.is_empty():
 		return
 
-	RunState.add_equipment_to_inventory(RunState.equipped_armor_save)
-	RunState.equipped_armor_save = {}
+	EquipmentManager.add_equipment_to_inventory(EquipmentManager.equipped_armor_save)
+	EquipmentManager.equipped_armor_save = {}
 
 	_show_message("已卸下护甲")
 	_refresh_display()
 
 func _on_accessory_unequip_pressed():
-	if RunState.equipped_accessory_save.is_empty():
+	if EquipmentManager.equipped_accessory_save.is_empty():
 		return
 
-	RunState.add_equipment_to_inventory(RunState.equipped_accessory_save)
-	RunState.equipped_accessory_save = {}
+	EquipmentManager.add_equipment_to_inventory(EquipmentManager.equipped_accessory_save)
+	EquipmentManager.equipped_accessory_save = {}
 
 	_show_message("已卸下饰品")
 	_refresh_display()

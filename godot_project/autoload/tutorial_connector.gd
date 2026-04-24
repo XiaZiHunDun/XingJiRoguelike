@@ -17,9 +17,6 @@ func _ready():
 	EventBus.combat.enemy_killed.connect(_on_enemy_killed)
 	EventBus.combat.combat_ended.connect(_on_battle_ended)
 
-	# 连接技能事件
-	EventBus.skill.skill_executed.connect(_on_skill_executed)
-
 func _on_battle_started(player, enemies):
 	"""战斗开始"""
 	_battle_started = true
@@ -40,8 +37,3 @@ func _on_battle_ended(victory: bool):
 	"""战斗结束"""
 	_battle_started = false
 
-func _on_skill_executed(skill, caster, targets):
-	"""技能执行"""
-	if not _first_skill_done and TutorialManager:
-		_first_skill_done = true
-		TutorialManager.on_first_skill_used()

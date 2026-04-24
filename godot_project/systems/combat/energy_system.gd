@@ -8,8 +8,8 @@ var current_energy: int = 0
 var max_energy: int = Consts.ENERGY_MAX
 var kinetic_energy: float = 0.0  # 动能（独立于ATBComponent）
 
-signal energy_changed(current: int, max_value: int)
-signal kinetic_changed(amount: float)
+# signal energy_changed(current: int, max_value: int)  # 使用 EventBus.skill.energy_changed
+# signal kinetic_changed(amount: float)  # 使用 EventBus.skill.kinetic_energy_changed
 
 func _ready():
 	restore_full()
@@ -30,23 +30,23 @@ func _on_atb_full(entity):
 		if speed > Consts.SPEED_SOFT_CAP:
 			var excess = speed - Consts.SPEED_SOFT_CAP
 			kinetic_energy = minf(kinetic_energy + excess * Consts.SPEED_BONUS_TO_KINETIC, Consts.KINETIC_ENERGY_CAP)
-			kinetic_changed.emit(kinetic_energy)
+			EventBus.skill.kinetic_energy_changed.emit(kinetic_energy)
 
 # 恢复能量
 func restore_energy(amount: int):
 	current_energy = mini(current_energy + amount, max_energy)
-	energy_changed.emit(current_energy, max_energy)
+	EventBus.skill.energy_changed.emit(current_energy, max_energy)
 
 # 完全恢复
 func restore_full():
 	current_energy = max_energy
-	energy_changed.emit(current_energy, max_energy)
+	EventBus.skill.energy_changed.emit(current_energy, max_energy)
 
 # 尝试消耗能量
 func try_consume(amount: int) -> bool:
 	if current_energy >= amount:
 		current_energy -= amount
-		energy_changed.emit(current_energy, max_energy)
+		EventBus.skill.energy_changed.emit(current_energy, max_energy)
 		return true
 	return false
 
@@ -54,7 +54,7 @@ func try_consume(amount: int) -> bool:
 func try_consume_kinetic(amount: float) -> bool:
 	if kinetic_energy >= amount:
 		kinetic_energy -= amount
-		kinetic_changed.emit(kinetic_energy)
+		EventBus.skill.kinetic_energy_changed.emit(kinetic_energy)
 		return true
 	return false
 
@@ -66,4 +66,4 @@ func get_kinetic_bonus() -> float:
 func reset():
 	restore_full()
 	kinetic_energy = 0.0
-	kinetic_changed.emit(kinetic_energy)
+	EventBus.skill.kinetic_energy_changed.emit(kinetic_energy)

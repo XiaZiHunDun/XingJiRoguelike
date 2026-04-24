@@ -6,10 +6,7 @@ extends Node
 # ==================== 战斗域（高频） ====================
 class CombatEvents extends RefCounted:
 	signal atb_full(entity)  # ATB满了
-	signal atb_frozen(entity)  # ATB冻结（溢出）
-	signal atb_drained(entity, amount: float)  # ATB倒退
 	signal damage_dealt(source, target, amount: float, is_critical: bool)  # 伤害结算
-	signal skill_executed(skill, source, target)  # 技能执行
 	signal skill_chain_triggered(skill1, skill2)  # 技能连携触发
 	signal combat_ended(victory: bool)  # 战斗结束
 	signal battle_paused()  # 战斗暂停（菜单打开）
@@ -27,7 +24,6 @@ class SkillEvents extends RefCounted:
 # ==================== 装备域（中频） ====================
 class EquipmentEvents extends RefCounted:
 	signal equipment_equipped(equipment, slot: int)  # 装备穿上
-	signal equipment_unequipped(equipment, slot: int)  # 装备卸下
 	signal equipment_dropped(equipment, position: Vector2)  # 装备掉落
 	signal equipment_forged(equipment)  # 装备锻造
 	signal equipment_forge_failed(equipment, reason: String)  # 装备锻造失败
@@ -38,10 +34,8 @@ class EquipmentEvents extends RefCounted:
 
 # ==================== 元素域（中频） ====================
 class ElementEvents extends RefCounted:
-	signal element_attached(entity, element: int, stacks: int)  # 元素附着
 	signal element_removed(entity, element: int)  # 元素移除
 	signal reaction_triggered(reaction_type: int, elements: Array, target)  # 反应触发
-	signal element_synergy_triggered()  # 元素共鸣触发
 
 # ==================== 地图域（低频） ====================
 class MapEvents extends RefCounted:
@@ -72,7 +66,6 @@ class CraftingEvents extends RefCounted:
 # ==================== 永久强化域（低频） ====================
 class PermanentEvents extends RefCounted:
 	signal enhancement_used(character_id: String, enhancement_id: String)  # 强化道具使用
-	signal memory_fragments_changed(amount: int)  # 记忆碎片变化
 
 # ==================== 区域域（低频） ====================
 class ZoneEvents extends RefCounted:
@@ -88,6 +81,7 @@ class FactionEvents extends RefCounted:
 	signal faction_reward_earned(faction_name: String, item_name: String, quantity: int)  # 势力奖励获得
 	signal faction_item_used(item_name: String)  # 势力物品使用
 	signal narrative_triggered(narrative: Dictionary)  # 叙事事件触发
+	signal faction_stardust_reward(amount: int)  # 势力星尘奖励（通过EventBus转发）
 
 # ==================== 任务域 ====================
 class QuestEvents extends RefCounted:

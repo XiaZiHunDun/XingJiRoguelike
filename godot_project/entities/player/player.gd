@@ -66,8 +66,8 @@ func _ready():
 	element_status = ElementStatusComponent.new()
 	add_child(element_status)
 
-	if RunState.has_saved_weapon():
-		var inst := EquipmentInstance.from_save_dict(RunState.get_saved_weapon_dict())
+	if EquipmentManager.has_saved_weapon():
+		var inst := EquipmentInstance.from_save_dict(EquipmentManager.get_saved_weapon_dict())
 		if inst:
 			equipped_weapon = inst
 			_refresh_skills()
@@ -77,7 +77,7 @@ func _ready():
 		equip_default_weapon()
 	apply_affixes()
 	if equipped_weapon:
-		RunState.capture_weapon_from_player(self)
+		EquipmentManager.save_equipped_weapon(self)
 
 func _load_character_data():
 	"""加载角色定义数据"""
@@ -103,7 +103,7 @@ func equip(instance: EquipmentInstance) -> void:
 		equipped_weapon = instance
 		_refresh_skills()
 		apply_affixes()
-		RunState.capture_weapon_from_player(self)
+		EquipmentManager.save_equipped_weapon(self)
 		EventBus.equipment.equipment_equipped.emit(instance, instance.get_slot())
 
 
@@ -183,7 +183,7 @@ func get_defense() -> int:
 	if equipped_weapon:
 		total_defense += equipped_weapon.get_defense()
 	total_defense += armor_bonus
-	var unique_bonuses = RunState.get_unique_equipment_bonuses() if RunState else {}
+	var unique_bonuses = EquipmentManager.get_unique_equipment_bonuses() if EquipmentManager else {}
 	total_defense = int(total_defense * unique_bonuses.get("defense_mult", 1.0))
 	return total_defense
 
@@ -256,7 +256,7 @@ func get_effective_attribute(attr_name: String) -> float:
 	# 应用境界特权属性乘数
 	var effective = (base + bonus) * multiplier * realm_attribute_multiplier
 	# 应用唯一装备全属性加成
-	var unique_bonuses = RunState.get_unique_equipment_bonuses() if RunState else {}
+	var unique_bonuses = EquipmentManager.get_unique_equipment_bonuses() if EquipmentManager else {}
 	effective *= unique_bonuses.get("all_stats_mult", 1.0)
 	return effective
 
@@ -272,7 +272,7 @@ func get_atb_speed() -> float:
 	# 应用境界特权ATB速度加成
 	var speed = base_speed * (1.0 + realm_atb_speed_bonus)
 	# 应用唯一装备ATB速度加成
-	var unique_bonuses = RunState.get_unique_equipment_bonuses() if RunState else {}
+	var unique_bonuses = EquipmentManager.get_unique_equipment_bonuses() if EquipmentManager else {}
 	speed *= unique_bonuses.get("atb_speed_mult", 1.0)
 	return speed
 
@@ -438,7 +438,7 @@ func apply_unique_equipment_bonuses() -> void:
 	"""应用唯一装备的加成效果"""
 	if not RunState:
 		return
-	var bonuses = RunState.get_unique_equipment_bonuses()
+	var bonuses = EquipmentManager.get_unique_equipment_bonuses()
 	unique_lifesteal = bonuses.get("lifesteal", 0.0)
 	unique_void_damage = bonuses.get("void_damage_bonus", 0.0)
 	unique_keep_stardust = bonuses.get("keep_stardust_rate", 0.0)

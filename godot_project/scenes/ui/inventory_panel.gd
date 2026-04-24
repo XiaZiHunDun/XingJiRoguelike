@@ -169,7 +169,7 @@ func _on_search_text_changed(text: String):
 	_refresh_display()
 
 func _get_sorted_and_filtered_items() -> Array:
-	var items = RunState.equipment_inventory_saves.duplicate(true)
+	var items = EquipmentManager.equipment_inventory_saves.duplicate(true)
 
 	# 筛选
 	if current_filter != "ALL":
@@ -767,11 +767,11 @@ func _get_equipped_for_slot(slot: int) -> Dictionary:
 	# 0=WEAPON, 1=ARMOR, 2=ACCESSORY_1, 3=ACCESSORY_2
 	match slot:
 		0:  # WEAPON
-			return RunState.equipped_weapon_save
+			return EquipmentManager.equipped_weapon_save
 		1:  # ARMOR
-			return RunState.equipped_armor_save
+			return EquipmentManager.equipped_armor_save
 		2, 3:  # ACCESSORY_1, ACCESSORY_2
-			return RunState.equipped_accessory_save
+			return EquipmentManager.equipped_accessory_save
 		_:
 			return {}
 
@@ -794,7 +794,7 @@ func _on_equip_from_compare(new_item: Dictionary) -> void:
 	var slot = def.slot if def else 0
 
 	# 查找该装备在背包中的索引
-	var inventory = RunState.equipment_inventory_saves
+	var inventory = EquipmentManager.equipment_inventory_saves
 	var item_index = -1
 	for i in range(inventory.size()):
 		if inventory[i].get("definition_id", "") == def_id:
@@ -812,21 +812,21 @@ func _on_equip_from_compare(new_item: Dictionary) -> void:
 
 	# 如果有已装备的物品，将其放回背包
 	if not equipped_item.is_empty():
-		RunState.add_equipment_to_inventory(equipped_item.duplicate(true))
+		EquipmentManager.add_equipment_to_inventory(equipped_item.duplicate(true))
 
 	# 装备新物品
 	match slot:
 		0:  # WEAPON
-			RunState.equipped_weapon_save = new_item.duplicate(true)
-			RunState.equipment_inventory_saves.remove_at(item_index)
+			EquipmentManager.equipped_weapon_save = new_item.duplicate(true)
+			EquipmentManager.equipment_inventory_saves.remove_at(item_index)
 			_show_message("已装备 %s" % new_item.get("definition_id", "装备"))
 		1:  # ARMOR
-			RunState.equipped_armor_save = new_item.duplicate(true)
-			RunState.equipment_inventory_saves.remove_at(item_index)
+			EquipmentManager.equipped_armor_save = new_item.duplicate(true)
+			EquipmentManager.equipment_inventory_saves.remove_at(item_index)
 			_show_message("已装备 %s" % new_item.get("definition_id", "装备"))
 		2, 3:  # ACCESSORY
-			RunState.equipped_accessory_save = new_item.duplicate(true)
-			RunState.equipment_inventory_saves.remove_at(item_index)
+			EquipmentManager.equipped_accessory_save = new_item.duplicate(true)
+			EquipmentManager.equipment_inventory_saves.remove_at(item_index)
 			_show_message("已装备 %s" % new_item.get("definition_id", "装备"))
 		_:
 			_show_message("该槽位暂未开放")

@@ -146,7 +146,7 @@ func _create_player_save_data() -> PlayerSaveData:
 		if n is MapNode:
 			save_data.map_nodes.append((n as MapNode).duplicate(true))
 
-	var eq_payload := RunState.get_equipment_save_payload()
+	var eq_payload := EquipmentManager.get_equipment_save_payload()
 	save_data.equipment_weapon_save = eq_payload.get("weapon", {})
 	var inv: Array = eq_payload.get("inventory", [])
 	save_data.equipment_inventory_save.clear()
@@ -155,7 +155,7 @@ func _create_player_save_data() -> PlayerSaveData:
 			save_data.equipment_inventory_save.append((row as Dictionary).duplicate(true))
 
 	# 唯一装备和势力数据
-	save_data.owned_unique_equipment = RunState.owned_unique_equipment.duplicate()
+	save_data.owned_unique_equipment = EquipmentManager.owned_unique_equipment.duplicate()
 	var fs = FactionSystem.get_instance()
 	if fs:
 		save_data.faction_data = fs.get_save_data()
@@ -205,14 +205,14 @@ func _load_game_data(save_data: PlayerSaveData) -> void:
 
 	RunState.initialize_stats_for_current_progress()
 	RunState.in_combat = false
-	RunState.load_equipment_save_payload({
+	EquipmentManager.load_equipment_save_payload({
 		"weapon": save_data.equipment_weapon_save,
 		"inventory": save_data.equipment_inventory_save
 	})
 
 	# 加载唯一装备和势力数据
 	if not save_data.owned_unique_equipment.is_empty():
-		RunState.owned_unique_equipment = save_data.owned_unique_equipment.duplicate()
+		EquipmentManager.owned_unique_equipment = save_data.owned_unique_equipment.duplicate()
 	var fs = FactionSystem.get_instance()
 	if fs and save_data.get("faction_data", {}).size() > 0:
 		fs.load_save_data(save_data.faction_data)

@@ -348,9 +348,9 @@ func _on_exchange(exchange_key: String, item_info: Dictionary):
 		var equip_data = FactionUniqueEquipment.create_equipment_instance(item_name)
 		if not equip_data.is_empty():
 			# 添加到背包
-			RunState.add_equipment_to_inventory(equip_data)
+			EquipmentManager.add_equipment_to_inventory(equip_data)
 			# 注册唯一装备效果
-			RunState.add_unique_equipment(item_name)
+			EquipmentManager.add_unique_equipment(item_name)
 			status_label.text = "兑换成功: %s! (已加入背包)" % item_name
 		else:
 			status_label.text = "兑换成功: %s!" % item_name

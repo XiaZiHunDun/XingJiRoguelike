@@ -280,7 +280,7 @@ func claim_quest_reward(quest_id: String) -> Dictionary:
 			if faction_name != "":
 				add_faction_item(faction_name + "徽记", reward_amount)
 		"stardust":
-			RunState.add_stardust(reward_amount)
+			EventBus.faction.faction_stardust_reward.emit(reward_amount)
 
 	# 增加声望
 	var rep_gain = quest.get("reputation_gain", 0)
